@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
-import { auth, db } from "@/firebase/config";
+import { auth } from "@/firebase/config";
+import { apiRequest } from "@/lib/api";
 
 // Icons for the UI
 import { Zap, Mail, Lock, ShieldCheck } from "lucide-react";
@@ -52,18 +52,26 @@ export function LoginForm() {
         password
       );
 
-      const userRef = doc(db, "users", credential.user.uid);
-      const userSnap = await getDoc(userRef);
+      console.log("Firebase login successful:", credential.user.uid);
 
-      if (!userSnap.exists() || userSnap.data().isAdmin !== true) {
-        await auth.signOut();
-        setError("You are not authorized to access this application.");
-        return;
-      }
+      // Calls your Express API.
+      // Express validates the Firebase token and checks users.firebase_uid in MariaDB.
+      await apiRequest("/auth/login", {
+        method: "POST",
+      });
 
       router.push("/dashboard");
     } catch (err: any) {
-      setError(getFriendlyError(err.code, err.message));
+      console.error("Login error:", err);
+
+      await auth.signOut();
+
+      setError(
+        getFriendlyError(
+          err.code,
+          err.message || "Unable to sign in. Please try again."
+        )
+      );
     } finally {
       setLoading(false);
     }
@@ -76,7 +84,7 @@ export function LoginForm() {
 
       {/* Main Login Card */}
       <div className="w-full max-w-[420px] bg-[#1a1a1c] border border-zinc-800/80 rounded-[20px] shadow-2xl p-8 md:p-10 z-10">
-        
+
         {/* Header */}
         <div className="flex flex-col items-center mb-8">
           <div className="bg-[#FFCC00] p-3.5 rounded-2xl mb-5 shadow-lg shadow-yellow-500/10">
@@ -92,7 +100,7 @@ export function LoginForm() {
 
         {/* Form */}
         <form onSubmit={handleLogin} className="space-y-5">
-          
+
           {/* Email Field */}
           <div className="space-y-2">
             <label htmlFor="email" className="text-[13px] font-medium text-zinc-300">
@@ -144,8 +152,8 @@ export function LoginForm() {
           )}
 
           {/* Submit Button */}
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             disabled={loading}
             className="w-full bg-[#FFCC00] hover:bg-[#e6b800] text-black font-semibold text-[15px] rounded-xl py-3 mt-2 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
           >

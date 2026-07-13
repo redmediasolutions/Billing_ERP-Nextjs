@@ -2,39 +2,46 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
+import { DashboardSidebar } from "./dashboard-sidebar";
 import { useAuth } from "@/hooks/use-auth";
 
-// Wraps every page inside app/(dashboard)/. This is the single place that
-// decides "is this person allowed to see any dashboard page at all" -
-// individual pages don't need to repeat this check themselves.
-export function DashboardLayout({ children }: { children: React.ReactNode }) {
+export function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const router = useRouter();
-  const { user, isAdmin, loading } = useAuth();
+  const { user, loading } = useAuth();
 
   useEffect(() => {
-    // Wait until useAuth has actually finished checking before deciding to
-    // redirect - otherwise we'd redirect everyone for a split second on
-    // every page load, even people who ARE logged in.
-    if (loading) return;
-
-    if (!user || !isAdmin) {
+    if (!loading && !user) {
       router.replace("/login");
     }
-  }, [user, isAdmin, loading, router]);
+  }, [loading, user, router]);
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center text-sm text-muted-foreground">
-        Checking your session...
+      <div className="flex min-h-screen items-center justify-center bg-[#111113] text-white">
+        <div className="text-center">
+          <Loader2 className="mx-auto mb-3 h-7 w-7 animate-spin text-[#FFCC00]" />
+          <p className="text-sm text-zinc-400">Loading dashboard...</p>
+        </div>
       </div>
     );
   }
 
-  if (!user || !isAdmin) {
-    // Redirect above is already in flight - render nothing while it happens
-    // so we don't flash real dashboard content to an unauthorized visitor.
+  if (!user) {
     return null;
   }
 
-  return <>{children}</>;
+  return (
+    <div className="min-h-screen bg-[#111113]">
+      <DashboardSidebar />
+
+      <main className="min-h-screen lg:ml-[290px]">
+        {children}
+      </main>
+    </div>
+  );
 }

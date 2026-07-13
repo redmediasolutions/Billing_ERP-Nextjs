@@ -1,4 +1,4 @@
-// File: /Users/sujaykumar/Downloads/km-admin-auth/src/app/(auth)/login/page.tsx
+// File: /Users/sujaykumar/Documents/GitHub/108medz/Billing_ERP-Nextjs/src/app/(auth)/login/page.tsx
 import * as entry from '../../../../../src/app/(auth)/login/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
