@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { QueryProvider } from "@/components/providers/query-provider";
 // @ts-ignore
 import "./globals.css";
 
@@ -12,8 +13,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body>{children}</body>
-    </html>
+<body>
+  <QueryProvider>{children}</QueryProvider>
+</body>
   );
 }
