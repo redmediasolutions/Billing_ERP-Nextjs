@@ -15,6 +15,8 @@ import {
   useEstimates,
 } from "../hooks/use-estimates";
 
+import { useRouter } from "next/navigation";
+
 const money = new Intl.NumberFormat("en-IN", {
   style: "currency",
   currency: "INR",
@@ -25,6 +27,7 @@ export function EstimatesDashboard() {
   const { data: estimates = [], isLoading, error } =
     useEstimates();
 
+  const router = useRouter();
   const deleteEstimate = useDeleteEstimate();
 
   const drafts = estimates.filter(
@@ -131,25 +134,31 @@ export function EstimatesDashboard() {
                   estimates.map((estimate) => (
                     <tr
                       key={estimate.id}
-                      className="border-b border-zinc-800/70 hover:bg-zinc-800/30"
+                      onClick={() =>
+                        router.push(`/dashboard/estimates/${estimate.id}`)
+                      }
+                      className="cursor-pointer border-b border-zinc-800/70 transition hover:bg-zinc-800/30"
                     >
                       <td className="px-6 py-5 font-bold text-[#FFCC00]">
                         {estimate.estimate_number}
                       </td>
 
-                      <td className="px-6 py-5 font-semibold">
+                      {/* ADDED text-white HERE */}
+                      <td className="px-6 py-5 font-semibold text-white">
                         {estimate.customer_name || "Unknown customer"}
                       </td>
 
-                      <td className="px-6 py-5 text-zinc-400">
+                      {/* CHANGED to text-zinc-300 for better visibility */}
+                      <td className="px-6 py-5 text-zinc-300">
                         {estimate.estimate_date
                           ? new Date(
-                              estimate.estimate_date
-                            ).toLocaleDateString("en-IN")
+                            estimate.estimate_date
+                          ).toLocaleDateString("en-IN")
                           : "—"}
                       </td>
-
-                      <td className="px-6 py-5 font-bold">
+                      
+                      {/* ADDED text-white HERE */}
+                      <td className="px-6 py-5 font-bold text-white">
                         {money.format(estimate.rounded_total)}
                       </td>
 
@@ -170,9 +179,10 @@ export function EstimatesDashboard() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() =>
-                              void handleDelete(estimate.id)
-                            }
+                            onClick={(event) => {
+                                event.stopPropagation();
+                                void handleDelete(estimate.id);
+                            }}
                             className="text-zinc-500 hover:bg-red-950/40 hover:text-red-400"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -208,9 +218,8 @@ function Kpi({
           {label}
         </p>
         <p
-          className={`mt-2 text-3xl font-bold ${
-            danger ? "text-red-300" : "text-white"
-          }`}
+          className={`mt-2 text-3xl font-bold ${danger ? "text-red-300" : "text-white"
+            }`}
         >
           {value}
         </p>

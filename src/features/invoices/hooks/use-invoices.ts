@@ -21,6 +21,14 @@ export function useInvoices() {
   });
 }
 
+export function useInvoice(id: number) {
+  return useQuery({
+    queryKey: invoiceKeys.detail(id),
+    queryFn: () => invoicesService.getById(id),
+    enabled: Number.isFinite(id) && id > 0,
+  });
+}
+
 export function useCreateInvoice() {
   const queryClient = useQueryClient();
 

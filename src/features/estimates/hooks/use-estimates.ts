@@ -23,6 +23,14 @@ export function useEstimates() {
   });
 }
 
+export function useEstimate(id: number) {
+  return useQuery({
+    queryKey: estimateKeys.detail(id),
+    queryFn: () => estimatesService.getById(id),
+    enabled: Number.isFinite(id) && id > 0,
+  });
+}
+
 export function useCustomers() {
   return useQuery({
     queryKey: estimateKeys.customers(),

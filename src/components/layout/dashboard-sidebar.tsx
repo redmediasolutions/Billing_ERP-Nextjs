@@ -18,6 +18,9 @@ import {
 import { useState } from "react";
 import { auth } from "@/firebase/config";
 
+import { useTenant } from "@/features/tenant/hooks/use-tenant";
+import { BusinessLogo } from "@/features/tenant/components/business-logo";
+
 const navigation = [
   {
     label: "Dashboard",
@@ -66,6 +69,7 @@ export function DashboardSidebar() {
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+  const { data: tenant } = useTenant();
 
   async function handleLogout() {
     try {
@@ -118,16 +122,17 @@ export function DashboardSidebar() {
           <Link
             href="/dashboard"
             onClick={() => setMobileOpen(false)}
-            className="flex items-center gap-3"
+            className="flex min-w-0 items-center gap-3"
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#FFCC00] text-lg font-black text-black">
-              BE
-            </div>
+            <BusinessLogo tenant={tenant} size="md" />
 
-            <div>
-              <p className="text-base font-bold text-white">Billing ERP</p>
+            <div className="min-w-0">
+              <p className="truncate text-base font-bold text-white">
+                {tenant?.business_name || "Billing ERP"}
+              </p>
+
               <p className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">
-                Enterprise Suite
+                {tenant?.subscription_plan || "Enterprise Suite"}
               </p>
             </div>
           </Link>
@@ -153,17 +158,15 @@ export function DashboardSidebar() {
                 onClick={() => setMobileOpen(false)}
                 className={`
                   flex items-center gap-4 rounded-lg px-4 py-3 text-sm font-semibold transition
-                  ${
-                    active
-                      ? "border-l-4 border-[#FFCC00] bg-[#27272f] pl-3 text-white"
-                      : "border-l-4 border-transparent text-zinc-400 hover:bg-zinc-800/70 hover:text-white"
+                  ${active
+                    ? "border-l-4 border-[#FFCC00] bg-[#27272f] pl-3 text-white"
+                    : "border-l-4 border-transparent text-zinc-400 hover:bg-zinc-800/70 hover:text-white"
                   }
                 `}
               >
                 <Icon
-                  className={`h-5 w-5 ${
-                    active ? "text-[#FFCC00]" : "text-zinc-500"
-                  }`}
+                  className={`h-5 w-5 ${active ? "text-[#FFCC00]" : "text-zinc-500"
+                    }`}
                 />
                 {item.label}
               </Link>

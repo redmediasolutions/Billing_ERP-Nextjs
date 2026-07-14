@@ -36,25 +36,20 @@
       "static/chunks/main-app.js",
       "static/chunks/app/(dashboard)/dashboard/estimates/page.js"
     ],
-    "/(dashboard)/dashboard/estimates/new/page": [
+    "/(dashboard)/dashboard/estimates/[id]/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/(dashboard)/dashboard/estimates/new/page.js"
+      "static/chunks/app/(dashboard)/dashboard/estimates/[id]/page.js"
     ],
     "/(dashboard)/dashboard/invoices/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/(dashboard)/dashboard/invoices/page.js"
     ],
-    "/(dashboard)/dashboard/invoices/new/page": [
+    "/(dashboard)/dashboard/invoices/[id]/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/(dashboard)/dashboard/invoices/new/page.js"
-    ],
-    "/(dashboard)/dashboard/customers/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(dashboard)/dashboard/customers/page.js"
+      "static/chunks/app/(dashboard)/dashboard/invoices/[id]/page.js"
     ]
   }
 }
