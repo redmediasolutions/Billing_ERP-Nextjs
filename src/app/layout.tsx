@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import { QueryProvider } from "@/components/providers/query-provider";
-// @ts-ignore
 import "./globals.css";
+import { QueryProvider } from "@/components/providers/query-provider";
 
 export const metadata: Metadata = {
   title: {
@@ -11,10 +10,16 @@ export const metadata: Metadata = {
   description: "Enterprise Billing ERP",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
-<body>
-  <QueryProvider>{children}</QueryProvider>
-</body>
+    <html lang="en">
+      <body>
+        <QueryProvider>{children}</QueryProvider>
+      </body>
+    </html>
   );
 }
