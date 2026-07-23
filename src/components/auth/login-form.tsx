@@ -7,7 +7,7 @@ import { auth } from "@/firebase/config";
 import { apiRequest } from "@/lib/api";
 
 // Icons for the UI
-import { Zap, Mail, Lock, ShieldCheck } from "lucide-react";
+import { Zap, Mail, Lock, ShieldCheck, Eye, EyeOff } from "lucide-react";
 
 function getFriendlyError(code: string, fallback: string) {
   switch (code) {
@@ -31,6 +31,7 @@ export function LoginForm() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -83,9 +84,10 @@ export function LoginForm() {
 
         {/* Header */}
         <div className="login-header">
-          <div className="login-mark">
-            <Zap fill="currentColor" strokeWidth={1} />
-          </div>
+          {/* <div className="login-mark">
+            <Zap className="h-6 w-6" />
+          </div> */}
+
           <h1 className="login-title">Welcome Back</h1>
           <p className="login-subtitle">Sign in to continue to your dashboard</p>
         </div>
@@ -118,21 +120,29 @@ export function LoginForm() {
               <label htmlFor="password" className="login-label">
                 Password
               </label>
-              <a href="#" className="login-link">
+              {/* <a href="#" className="login-link">
                 Forgot?
-              </a>
+              </a> */}
             </div>
-            <div className="login-input-wrap">
+            <div className="login-input-wrap login-input-wrap--has-toggle">
               <Lock className="login-input-icon" />
               <input
                 id="password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 placeholder="••••••••"
                 autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="login-input"
               />
+              <button
+                type="button"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                onClick={() => setShowPassword((s) => !s)}
+                className="login-input-icon-btn"
+              >
+                {showPassword ? <EyeOff /> : <Eye />}
+              </button>
             </div>
           </div>
 
@@ -153,25 +163,25 @@ export function LoginForm() {
           </button>
 
           {/* Create Account Link */}
-          <div>
+          {/* <div>
             <p className="login-signup">
               Don't have an account?{" "}
               <a href="#" className="login-link">
                 Create one
               </a>
             </p>
-          </div>
+          </div> */}
         </form>
 
         {/* Footer Security Badge */}
         <div className="login-security">
           <ShieldCheck size={14} />
-          Enterprise Encrypted Environment
+          Designed and Developed by Red Media Solutions
         </div>
       </div>
 
       {/* Page Footer (Outside Card) */}
-      <div className="login-footer">
+      {/* <div className="login-footer">
         <div>
           <strong>BILLING ERP</strong> © {new Date().getFullYear()} Enterprise Billing ERP. All rights reserved.
         </div>
@@ -180,7 +190,7 @@ export function LoginForm() {
           <a href="#">Terms of Service</a>
           <a href="#">Help Center</a>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }

@@ -110,8 +110,8 @@ export function EstimatePreview({
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#111113] text-zinc-400">
-        <Loader2 className="mr-3 h-5 w-5 animate-spin text-[#FFCC00]" />
+      <div className="document-preview__state">
+        <Loader2 className="h-5 w-5 animate-spin" />
         Loading estimate...
       </div>
     );
@@ -119,10 +119,8 @@ export function EstimatePreview({
 
   if (error || !estimate) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-[#111113] text-white">
-        <p className="text-red-300">
-          Unable to load this estimate.
-        </p>
+      <div className="document-preview__state document-preview__state--error">
+        <p>Unable to load this estimate.</p>
 
         <Button asChild>
           <Link href="/dashboard/estimates">
@@ -134,32 +132,24 @@ export function EstimatePreview({
   }
 
   return (
-    <section className="min-h-screen bg-[#0d1111] p-4 text-white md:p-8">
-      <div className="no-print mx-auto mb-8 flex max-w-[1080px] flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div className="flex items-center gap-4">
-          <Button
-            asChild
-            variant="ghost"
-            className="text-zinc-300 hover:text-white"
-          >
+    <section className="document-preview">
+      <div className="no-print document-preview__toolbar">
+        <div className="document-preview__crumb">
+          <Button asChild variant="ghost">
             <Link href="/dashboard/estimates">
               <ArrowLeft className="mr-2 h-5 w-5" />
               Back to List
             </Link>
           </Button>
 
-          <span className="hidden text-zinc-600 md:block">/</span>
+          <span className="document-preview__separator">/</span>
 
-          <span className="font-bold text-[#FFCC00]">
+          <span className="document-preview__number">
             {estimate.estimate_number}
           </span>
         </div>
 
-        <Button
-          onClick={() => void downloadPdf()}
-          disabled={downloading}
-          className="bg-[#FFCC00] font-bold text-black hover:bg-yellow-400"
-        >
+        <Button onClick={() => void downloadPdf()} disabled={downloading}>
           {downloading ? (
             <Loader2 className="mr-2 h-5 w-5 animate-spin" />
           ) : (
@@ -170,45 +160,36 @@ export function EstimatePreview({
         </Button>
       </div>
 
-      <div
-        ref={documentRef}
-        className="mx-auto max-w-[1080px] bg-white px-8 py-10 text-slate-700 shadow-2xl md:px-11 md:py-12"
-      >
-        <header className="flex flex-col justify-between gap-8 border-b border-slate-200 pb-8 md:flex-row">
+      <div ref={documentRef} className="document-sheet">
+        <header className="document-sheet__header">
           <TenantDocumentBrand />
 
-          <div className="text-left md:text-right">
-            <p className="text-4xl font-black tracking-tight text-[#f5ca28]">
-              ESTIMATE
-            </p>
+          <div className="document-sheet__title-block">
+            <p className="document-sheet__title">ESTIMATE</p>
 
-            <p className="mt-3 text-xs font-bold uppercase tracking-wider text-slate-500">
-              Estimate No.
-            </p>
+            <p className="document-sheet__title-label">Estimate No.</p>
 
-            <p className="mt-1 text-2xl font-black text-black">
+            <p className="document-sheet__title-value">
               {estimate.estimate_number}
             </p>
           </div>
         </header>
 
-        <section className="grid gap-8 py-9 md:grid-cols-2">
+        <section className="document-sheet__grid">
           <div>
-            <p className="text-sm font-bold uppercase tracking-wider text-slate-500">
-              Billing To
-            </p>
+            <p className="document-sheet__label">Billing To</p>
 
-            <h2 className="mt-3 text-2xl font-black text-[#f5ca28]">
+            <h2 className="document-sheet__customer-name">
               {estimate.customer_name || "Customer"}
             </h2>
 
-            <p className="mt-3 whitespace-pre-wrap text-sm font-medium leading-6 text-slate-600">
+            <p className="document-sheet__address">
               {estimate.custom_billing_address ||
                 "No billing address saved."}
             </p>
           </div>
 
-          <div className="rounded border border-slate-200 bg-slate-50 p-6">
+          <div className="document-sheet__box">
             <DetailRow
               label="Estimate Date"
               value={formatDate(estimate.estimate_date)}
@@ -219,62 +200,49 @@ export function EstimatePreview({
               value={formatDate(estimate.valid_until)}
             />
 
-            <DetailRow
-              label="Currency"
-              value="INR (₹)"
-            />
+            <DetailRow label="Currency" value="INR (₹)" />
 
             {estimate.reference_number && (
               <DetailRow
                 label="Reference No."
                 value={estimate.reference_number}
-                highlight
               />
             )}
           </div>
         </section>
 
-        <section className="overflow-hidden border border-slate-200">
-          <table className="w-full text-left">
-            <thead className="bg-slate-50 text-xs font-bold uppercase tracking-wider text-slate-500">
+        <section className="document-sheet__table-wrap">
+          <table className="document-sheet__table">
+            <thead>
               <tr>
-                <th className="px-5 py-4">Item Description</th>
-                <th className="px-3 py-4 text-right">Qty</th>
-                <th className="px-3 py-4 text-right">Rate</th>
-                <th className="px-3 py-4 text-right">Tax</th>
-                <th className="px-5 py-4 text-right">Amount</th>
+                <th>Item Description</th>
+                <th>Qty</th>
+                <th>Rate</th>
+                <th>Tax</th>
+                <th>Amount</th>
               </tr>
             </thead>
 
             <tbody>
               {estimate.line_items?.map((line) => (
-                <tr
-                  key={line.id}
-                  className="border-t border-slate-200"
-                >
-                  <td className="px-5 py-5">
-                    <p className="font-bold text-black">
+                <tr key={line.id}>
+                  <td>
+                    <p className="document-sheet__item-name">
                       {line.item_name}
                     </p>
 
-                    <p className="mt-1 text-xs text-slate-500">
+                    <p className="document-sheet__item-desc">
                       {line.description || "No description"}
                     </p>
                   </td>
 
-                  <td className="px-3 py-5 text-right font-semibold text-black">
-                    {Number(line.quantity).toFixed(2)}
-                  </td>
+                  <td>{Number(line.quantity).toFixed(2)}</td>
 
-                  <td className="px-3 py-5 text-right font-semibold text-black">
-                    {money(line.unit_price)}
-                  </td>
+                  <td>{money(line.unit_price)}</td>
 
-                  <td className="px-3 py-5 text-right font-semibold text-black">
-                    {Number(line.tax_rate)}%
-                  </td>
+                  <td>{Number(line.tax_rate)}%</td>
 
-                  <td className="px-5 py-5 text-right text-lg font-black text-[#e7bd16]">
+                  <td className="document-sheet__amount">
                     {money(line.line_total)}
                   </td>
                 </tr>
@@ -283,63 +251,42 @@ export function EstimatePreview({
           </table>
         </section>
 
-        <section className="mt-20 grid gap-8 md:grid-cols-[1.25fr_0.75fr]">
-          <div className="rounded border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-bold uppercase tracking-wider text-slate-500">
-              Notes & Terms
-            </p>
+        <section className="document-sheet__footer-grid">
+          <div className="document-sheet__box">
+            <p className="document-sheet__label">Notes & Terms</p>
 
-            <div className="mt-3 whitespace-pre-wrap text-sm font-medium leading-6 text-slate-600">
+            <div className="document-sheet__notes">
               {estimate.notes || "No additional notes."}
             </div>
 
             {estimate.payment_terms && (
-              <p className="mt-3 border-t border-slate-200 pt-3 text-sm font-semibold text-slate-600">
+              <p className="document-sheet__notes-terms">
                 Payment Terms: {estimate.payment_terms}
               </p>
             )}
           </div>
 
-          <div className="space-y-4">
-            <TotalRow
-              label="Subtotal"
-              value={money(estimate.subtotal)}
-            />
+          <div className="summary-panel" style={{ display: "grid", gap: 16 }}>
+            <TotalRow label="Subtotal" value={money(estimate.subtotal)} />
 
-            <TotalRow
-              label="Discount"
-              value={money(estimate.total_discount)}
-            />
+            <TotalRow label="Discount" value={money(estimate.total_discount)} />
 
-            <TotalRow
-              label="Tax Total"
-              value={money(estimate.total_tax)}
-            />
+            <TotalRow label="Tax Total" value={money(estimate.total_tax)} />
 
-            <div className="border-t border-slate-200 pt-5">
-              <div className="flex items-end justify-between gap-4">
-                <span className="text-xl font-black text-slate-700">
-                  GRAND TOTAL
-                </span>
+            <div className="summary-panel__total">
+              <span className="summary-panel__total-label">GRAND TOTAL</span>
 
-                <span className="text-2xl font-black text-[#f5ca28]">
-                  {money(estimate.rounded_total)}
-                </span>
-              </div>
+              <span className="summary-panel__total-value">
+                {money(estimate.rounded_total)}
+              </span>
             </div>
           </div>
         </section>
 
-        <section className="mt-20 grid gap-10 md:grid-cols-2">
-          <Signature
-            label="Authorized Signature"
-            value=""
-          />
+        <section className="document-sheet__signature-grid">
+          <Signature label="Authorized Signature" value="" />
 
-          <Signature
-            label="Customer Acceptance (Sign Here)"
-            value=""
-          />
+          <Signature label="Customer Acceptance (Sign Here)" value="" />
         </section>
       </div>
 
@@ -361,25 +308,14 @@ export function EstimatePreview({
 function DetailRow({
   label,
   value,
-  highlight = false,
 }: {
   label: string;
   value: string;
-  highlight?: boolean;
 }) {
   return (
-    <div className="flex justify-between gap-4 border-b border-slate-200 py-3 last:border-0">
-      <span className="text-sm font-bold text-slate-500">
-        {label}:
-      </span>
-
-      <span
-        className={`text-right font-black ${
-          highlight ? "text-[#e7bd16]" : "text-black"
-        }`}
-      >
-        {value}
-      </span>
+    <div className="document-sheet__detail-row">
+      <span className="document-sheet__detail-label">{label}:</span>
+      <span className="document-sheet__detail-value">{value}</span>
     </div>
   );
 }
@@ -392,9 +328,9 @@ function TotalRow({
   value: string;
 }) {
   return (
-    <div className="flex justify-between gap-4 text-sm">
-      <span className="font-bold text-slate-500">{label}:</span>
-      <span className="font-black text-black">{value}</span>
+    <div className="summary-panel__row">
+      <span className="summary-panel__label">{label}:</span>
+      <span className="summary-panel__value">{value}</span>
     </div>
   );
 }
@@ -407,18 +343,16 @@ function Signature({
   value: string;
 }) {
   return (
-    <div className="border-t border-slate-300 pt-4">
-      <p className="text-sm font-bold text-slate-500">{label}</p>
+    <div className="document-sheet__signature">
+      <p className="document-sheet__signature-label">{label}</p>
 
-      <div className="mt-10 min-h-8">
+      <div className="document-sheet__signature-space">
         {value && (
-          <p className="font-serif text-2xl italic text-slate-700">
-            {value}
-          </p>
+          <p className="document-sheet__signature-value">{value}</p>
         )}
       </div>
 
-      <div className="mt-8 border-b border-dashed border-slate-300" />
+      <div className="document-sheet__signature-line" />
     </div>
   );
 }

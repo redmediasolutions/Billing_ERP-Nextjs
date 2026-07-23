@@ -69,13 +69,16 @@ const navigation = [
 export function DashboardSidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  
+
   // States to handle layout and interactions
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const [isPinned, setIsPinned] = useState(false);
+  // Pinned open by default so the sidebar reads as a normal, fully
+  // labeled navigation panel rather than a collapsed icon rail that
+  // only expands on hover.
+  const [isPinned, setIsPinned] = useState(true);
   const [loggingOut, setLoggingOut] = useState(false);
-  
+
   const { data: tenant } = useTenant();
 
   // Combine logic to determine if sidebar should show full content
@@ -131,21 +134,15 @@ export function DashboardSidebar() {
         className={`sidebar ${isSidebarExpanded ? "sidebar--open" : ""}`}
       >
         {/* Header / Logo Area */}
-        <div
-          className="sidebar__header"
-        >
+        <div className="sidebar__header">
           <Link
             href="/dashboard"
             onClick={() => setMobileOpen(false)}
             className="sidebar__brand"
           >
-            <div>
-              <BusinessLogo tenant={tenant} size="md" />
-            </div>
+            <BusinessLogo tenant={tenant} size="md" />
 
-            <div
-              className="sidebar__brand-copy"
-            >
+            <div className="sidebar__brand-copy">
               <p className="sidebar__brand-name">
                 {tenant?.business_name || "Billing ERP"}
               </p>
@@ -155,18 +152,30 @@ export function DashboardSidebar() {
             </div>
           </Link>
 
-          {/* Close button for Mobile */}
+          {/* Close button — mobile only */}
           <button
             onClick={() => setMobileOpen(false)}
-            className="sidebar__icon-button"
+            className="sidebar__icon-button sidebar__mobile-close"
             aria-label="Close sidebar"
           >
             <X className="h-5 w-5" />
           </button>
 
-          {/* Pin/Unpin button for Desktop */}
+          {/* Pin/Unpin button — desktop only, shown once expanded */}
           <button
-            onClick={() => setIsPinned(!isPinned)}
+            onClick={() =>
+              setIsPinned((prev) => {
+                const next = !prev;
+                // If we're unpinning while the cursor is still resting on
+                // the sidebar, drop the hover state too — otherwise the
+                // rail stays visually expanded (hover-driven) even though
+                // the layout spacer has already shrunk, until the mouse
+                // physically leaves. That desync is what causes the
+                // content to jump while the sidebar lags a beat behind.
+                if (!next) setIsHovered(false);
+                return next;
+              })
+            }
             className="sidebar__icon-button sidebar__desktop-control"
             title={isPinned ? "Unpin sidebar" : "Pin sidebar"}
           >
@@ -191,20 +200,9 @@ export function DashboardSidebar() {
                 onClick={() => setMobileOpen(false)}
                 className={`sidebar__link ${active ? "sidebar__link--active" : ""}`}
               >
-                {/* Active Indicator Line */}
-                {active && (
-                  <div className="sidebar__active-line" />
-                )}
+                <Icon className="h-5 w-5 shrink-0" />
 
-                <Icon
-                  className="h-5 w-5 shrink-0"
-                />
-                
-                <span
-                  className="sidebar__label"
-                >
-                  {item.label}
-                </span>
+                <span className="sidebar__label">{item.label}</span>
               </Link>
             );
           })}
@@ -218,10 +216,8 @@ export function DashboardSidebar() {
             className="sidebar__logout"
           >
             <LogOut className="h-5 w-5" />
-            
-            <span
-              className="sidebar__label"
-            >
+
+            <span className="sidebar__label">
               {loggingOut ? "Logging out..." : "Logout"}
             </span>
           </button>

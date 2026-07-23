@@ -110,8 +110,8 @@ export function InvoicePreview({
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#0d1111] text-zinc-400">
-        <Loader2 className="mr-3 h-5 w-5 animate-spin text-[#FFCC00]" />
+      <div className="document-preview__state">
+        <Loader2 className="h-5 w-5 animate-spin" />
         Loading invoice...
       </div>
     );
@@ -119,10 +119,8 @@ export function InvoicePreview({
 
   if (error || !invoice) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-[#0d1111] text-white">
-        <p className="text-red-300">
-          Unable to load this invoice.
-        </p>
+      <div className="document-preview__state document-preview__state--error">
+        <p>Unable to load this invoice.</p>
 
         <Button asChild>
           <Link href="/dashboard/invoices">
@@ -134,136 +132,105 @@ export function InvoicePreview({
   }
 
   return (
-    <section className="min-h-screen bg-[#0d1111] p-4 text-white md:p-8">
-      <div className="no-print mx-auto mb-7 flex max-w-[1120px] flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div className="flex items-center gap-3">
-          <Button
-            asChild
-            variant="ghost"
-            className="text-zinc-300 hover:text-white"
-          >
+    <section className="document-preview">
+      <div className="no-print document-preview__toolbar">
+        <div className="document-preview__crumb">
+          <Button asChild variant="ghost">
             <Link href="/dashboard/invoices">
               <ArrowLeft className="mr-2 h-5 w-5" />
               Invoices
             </Link>
           </Button>
 
-          <span className="text-zinc-600">›</span>
+          <span className="document-preview__separator">›</span>
 
-          <span className="font-bold text-white">
+          <span className="document-preview__number">
             {invoice.invoice_number}
           </span>
         </div>
 
-        <div
-          className={`rounded-full px-4 py-2 text-sm font-bold ${
-            invoice.is_draft
-              ? "bg-zinc-700 text-zinc-200"
-              : "bg-emerald-500/15 text-emerald-400"
+        <span
+          className={`document-preview__status${
+            invoice.is_draft ? "" : " status-pill--finalized"
           }`}
         >
           {invoice.is_draft ? "DRAFT" : "FINALIZED"}
-        </div>
+        </span>
       </div>
 
-      <div
-        ref={invoiceRef}
-        className="mx-auto max-w-[1120px] border-t-[6px] border-[#FFCC00] bg-white px-9 py-10 text-slate-800 shadow-2xl md:px-12 md:py-12"
-      >
-        <header className="flex flex-col justify-between gap-8 border-b border-slate-300 pb-10 md:flex-row">
+      <div ref={invoiceRef} className="document-sheet document-sheet--accent">
+        <header className="document-sheet__header">
           <TenantDocumentBrand />
 
-          <div className="text-left md:text-right">
-            <h2 className="text-5xl font-black tracking-[0.08em] text-[#e6be00]">
-              INVOICE
-            </h2>
+          <div className="document-sheet__title-block">
+            <h2 className="document-sheet__title">INVOICE</h2>
 
-            <p className="mt-5 text-lg text-slate-600">
-              No:{" "}
-              <span className="font-black text-black">
-                {invoice.invoice_number}
-              </span>
+            <p className="document-sheet__meta-line">
+              No: <strong>{invoice.invoice_number}</strong>
             </p>
 
-            <p className="mt-2 text-lg text-slate-600">
-              Date:{" "}
-              <span className="font-semibold text-black">
-                {formatDate(invoice.invoice_date)}
-              </span>
+            <p className="document-sheet__meta-line">
+              Date: <strong>{formatDate(invoice.invoice_date)}</strong>
             </p>
 
-            <p className="mt-2 text-lg text-slate-600">
-              Due Date:{" "}
-              <span className="font-semibold text-black">
-                {formatDate(invoice.due_date)}
-              </span>
+            <p className="document-sheet__meta-line">
+              Due Date: <strong>{formatDate(invoice.due_date)}</strong>
             </p>
           </div>
         </header>
 
-        <section className="grid gap-8 py-10 md:grid-cols-2">
+        <section className="document-sheet__grid">
           <div>
-            <p className="text-sm font-bold uppercase tracking-wider text-slate-600">
-              Billed To
-            </p>
+            <p className="document-sheet__label">Billed To</p>
 
-            <h3 className="mt-5 text-3xl font-black text-black">
+            <h3 className="document-sheet__customer-name">
               {invoice.customer_name || "Customer"}
             </h3>
 
-            <p className="mt-3 whitespace-pre-wrap text-base font-medium leading-7 text-slate-700">
+            <p className="document-sheet__address">
               {invoice.custom_billing_address ||
                 "No billing address saved."}
             </p>
           </div>
 
-          <div className="text-left md:text-right">
-            <p className="text-sm font-bold uppercase tracking-wider text-slate-600">
-              Payment Terms
-            </p>
+          <div className="document-sheet__title-block">
+            <p className="document-sheet__label">Payment Terms</p>
 
-            <p className="mt-5 whitespace-pre-wrap text-lg font-medium leading-7 text-black">
+            <p className="document-sheet__address">
               {invoice.payment_terms || "Payment due on receipt"}
             </p>
           </div>
         </section>
 
-        <section className="overflow-hidden border-y border-slate-300">
-          <table className="w-full text-left">
-            <thead className="border-b border-slate-200 text-xs font-bold uppercase tracking-wider text-slate-600">
+        <section className="document-sheet__table-wrap">
+          <table className="document-sheet__table">
+            <thead>
               <tr>
-                <th className="px-5 py-5">Service Description</th>
-                <th className="px-3 py-5 text-right">Qty</th>
-                <th className="px-3 py-5 text-right">Rate</th>
-                <th className="px-5 py-5 text-right">Total</th>
+                <th>Service Description</th>
+                <th>Qty</th>
+                <th>Rate</th>
+                <th>Total</th>
               </tr>
             </thead>
 
             <tbody>
               {invoice.line_items?.map((line) => (
-                <tr
-                  key={line.id}
-                  className="border-b border-slate-200 last:border-0"
-                >
-                  <td className="px-5 py-6">
-                    <p className="text-lg font-black text-black">
+                <tr key={line.id}>
+                  <td>
+                    <p className="document-sheet__item-name">
                       {line.item_name}
                     </p>
 
-                    <p className="mt-1 text-sm text-slate-600">
+                    <p className="document-sheet__item-desc">
                       {line.description || "No description"}
                     </p>
                   </td>
 
-                  <td className="px-3 py-6 text-right text-lg font-semibold text-black">
-                    {Number(line.quantity).toFixed(2)}
-                  </td>
+                  <td>{Number(line.quantity).toFixed(2)}</td>
 
-                  <td className="px-3 py-6 text-right text-lg font-semibold text-black">
-                    {money(line.unit_price)}
-                  </td>
+                  <td>{money(line.unit_price)}</td>
 
-                  <td className="px-5 py-6 text-right text-lg font-black text-black">
+                  <td className="document-sheet__amount">
                     {money(line.line_total)}
                   </td>
                 </tr>
@@ -272,66 +239,41 @@ export function InvoicePreview({
           </table>
         </section>
 
-        <section className="mt-14 grid gap-8 md:grid-cols-[1.25fr_0.75fr]">
+        <section className="document-sheet__footer-grid">
           <div>
-            <p className="text-sm font-bold uppercase tracking-wider text-slate-600">
-              Notes
-            </p>
+            <p className="document-sheet__label">Notes</p>
 
-            <p className="mt-4 whitespace-pre-wrap text-sm font-medium leading-6 text-slate-600">
+            <p className="document-sheet__notes">
               {invoice.notes || "Thank you for your business."}
             </p>
           </div>
 
-          <div className="space-y-4">
-            <TotalRow
-              label="Subtotal"
-              value={money(invoice.subtotal)}
-            />
+          <div className="summary-panel" style={{ display: "grid", gap: 16 }}>
+            <TotalRow label="Subtotal" value={money(invoice.subtotal)} />
 
-            <TotalRow
-              label="Discount"
-              value={money(invoice.discount_amount)}
-            />
+            <TotalRow label="Discount" value={money(invoice.discount_amount)} />
 
-            <TotalRow
-              label="Tax Total"
-              value={money(invoice.tax_amount)}
-            />
+            <TotalRow label="Tax Total" value={money(invoice.tax_amount)} />
 
-            <div className="border-t border-slate-300 pt-5">
-              <div className="flex items-end justify-between gap-4">
-                <span className="text-xl font-black text-black">
-                  GRAND TOTAL
-                </span>
+            <div className="summary-panel__total">
+              <span className="summary-panel__total-label">GRAND TOTAL</span>
 
-                <span className="text-3xl font-black text-[#e6be00]">
-                  {money(invoice.rounded_total)}
-                </span>
-              </div>
+              <span className="summary-panel__total-value">
+                {money(invoice.rounded_total)}
+              </span>
             </div>
           </div>
         </section>
 
-        <section className="mt-20 grid gap-10 md:grid-cols-2">
-          <Signature
-            label="Authorized Signature"
-            value=""
-          />
+        <section className="document-sheet__signature-grid">
+          <Signature label="Authorized Signature" value="" />
 
-          <Signature
-            label="Customer Acceptance (Sign Here)"
-            value=""
-          />
+          <Signature label="Customer Acceptance (Sign Here)" value="" />
         </section>
       </div>
 
-      <div className="no-print mx-auto mt-7 flex max-w-[1120px] justify-end">
-        <Button
-          onClick={() => void downloadPdf()}
-          disabled={downloading}
-          className="bg-[#FFCC00] font-bold text-black hover:bg-yellow-400"
-        >
+      <div className="no-print document-preview__footer">
+        <Button onClick={() => void downloadPdf()} disabled={downloading}>
           {downloading ? (
             <Loader2 className="mr-2 h-5 w-5 animate-spin" />
           ) : (
@@ -365,9 +307,9 @@ function TotalRow({
   value: string;
 }) {
   return (
-    <div className="flex justify-between text-sm">
-      <span className="font-bold text-slate-600">{label}:</span>
-      <span className="font-black text-black">{value}</span>
+    <div className="summary-panel__row">
+      <span className="summary-panel__label">{label}:</span>
+      <span className="summary-panel__value">{value}</span>
     </div>
   );
 }
@@ -380,18 +322,16 @@ function Signature({
   value: string;
 }) {
   return (
-    <div className="border-t border-slate-300 pt-4">
-      <p className="text-sm font-bold text-slate-500">{label}</p>
+    <div className="document-sheet__signature">
+      <p className="document-sheet__signature-label">{label}</p>
 
-      <div className="mt-10 min-h-8">
+      <div className="document-sheet__signature-space">
         {value && (
-          <p className="font-serif text-2xl italic text-slate-700">
-            {value}
-          </p>
+          <p className="document-sheet__signature-value">{value}</p>
         )}
       </div>
 
-      <div className="mt-8 border-b border-dashed border-slate-300" />
+      <div className="document-sheet__signature-line" />
     </div>
   );
 }
