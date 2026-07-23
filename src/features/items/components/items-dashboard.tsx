@@ -94,16 +94,16 @@ export function ItemsDashboard() {
   }
 
   return (
-    <section className="min-h-full space-y-7 bg-[#111113] p-5 text-white md:p-8">
-      <div className="flex flex-col gap-4 border-b border-zinc-800 pb-6 md:flex-row md:items-center md:justify-between">
-        <div className="relative w-full max-w-md">
-          <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+    <section className="items-dashboard">
+      <div className="items-dashboard__toolbar">
+        <div className="items-dashboard__search">
+          <Search className="items-dashboard__search-icon" />
 
           <input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Search items, codes, or descriptions..."
-            className="w-full rounded-xl border border-zinc-800 bg-[#151517] py-3 pl-10 pr-4 text-sm text-white outline-none transition focus:border-[#FFCC00]"
+            className="items-dashboard__search-input"
           />
         </div>
 
@@ -112,35 +112,35 @@ export function ItemsDashboard() {
             setEditingItem(null);
             setFormOpen(true);
           }}
-          className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#FFCC00] px-5 py-3 text-sm font-bold text-black transition hover:bg-yellow-400"
+          className="items-dashboard__primary-action"
         >
-          <Plus className="h-4 w-4" />
+          <Plus size={16} />
           Add Item
         </button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="items-dashboard__kpis">
         <Kpi label="Total Items" value={String(items.length)} />
         <Kpi label="Inventory Tracked" value={String(trackedCount)} />
         <Kpi label="Batch Tracked" value={String(batchCount)} />
         <Kpi label="Total Stock Units" value={String(totalStock)} />
       </div>
 
-      <div className="rounded-2xl border border-zinc-800 bg-[#1e1e24] p-5">
-        <p className="text-sm font-bold uppercase text-[#FFCC00]">
+      <div className="items-dashboard__summary">
+        <p className="items-dashboard__summary-label">
           Inventory & Catalogue
         </p>
 
-        <p className="mt-2 text-sm text-zinc-400">
+        <p className="items-dashboard__summary-copy">
           Manage standard items, services, and batch-tracked inventory.
         </p>
       </div>
 
       <div>
-        <div className="mb-4 flex items-center justify-between">
+        <div className="items-dashboard__directory-heading">
           <div>
-            <h1 className="text-2xl font-bold">Item & Services Directory</h1>
-            <p className="mt-1 text-sm text-zinc-500">
+            <h1 className="items-dashboard__title">Item & Services Directory</h1>
+            <p className="items-dashboard__count">
               Listing {filteredItems.length} item
               {filteredItems.length === 1 ? "" : "s"}
             </p>
@@ -148,29 +148,25 @@ export function ItemsDashboard() {
 
           <button
             onClick={() => void refresh()}
-            className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-zinc-400 hover:bg-zinc-800 hover:text-white"
+            className="items-dashboard__refresh"
           >
-            <RefreshCw className="h-4 w-4" />
+            <RefreshCw size={16} />
             Refresh
           </button>
         </div>
 
         {actionError && (
-          <p className="mb-4 rounded-xl border border-red-900/60 bg-red-950/40 p-3 text-sm text-red-300">
+          <p className="items-dashboard__error">
             {actionError}
           </p>
         )}
 
-        <div className="overflow-hidden rounded-2xl border border-zinc-800 bg-[#1e1e24]">
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[900px] text-left text-sm">
-              <thead className="border-b border-zinc-800 text-xs uppercase text-zinc-400">
+        <div className="items-dashboard__table-card">
+          <div className="items-dashboard__table-scroll">
+            <table className="items-dashboard__table">
+              <thead>
                 <tr>
-                  <th className="px-6 py-5">Item Name & Code</th>
-                  <th className="px-6 py-5">Price / Unit</th>
-                  <th className="px-6 py-5">Stock</th>
-                  <th className="px-6 py-5">Description</th>
-                  <th className="px-6 py-5 text-right">Actions</th>
+                  <th>Item Name & Code</th><th>Price / Unit</th><th>Stock</th><th>Description</th><th>Actions</th>
                 </tr>
               </thead>
 
@@ -179,9 +175,9 @@ export function ItemsDashboard() {
                   <tr>
                     <td
                       colSpan={5}
-                      className="px-6 py-16 text-center text-zinc-400"
+                      className="items-dashboard__state"
                     >
-                      <Loader2 className="mx-auto mb-3 h-6 w-6 animate-spin" />
+                      <Loader2 className="items-dashboard__spinner" />
                       Loading items...
                     </td>
                   </tr>
@@ -189,7 +185,7 @@ export function ItemsDashboard() {
                   <tr>
                     <td
                       colSpan={5}
-                      className="px-6 py-16 text-center text-red-300"
+                      className="items-dashboard__state items-dashboard__state--error"
                     >
                       {error}
                     </td>
@@ -198,7 +194,7 @@ export function ItemsDashboard() {
                   <tr>
                     <td
                       colSpan={5}
-                      className="px-6 py-16 text-center text-zinc-500"
+                      className="items-dashboard__state"
                     >
                       No items found. Click “Add Item” to create one.
                     </td>
@@ -207,20 +203,18 @@ export function ItemsDashboard() {
                   filteredItems.map((item) => (
                     <tr
                       key={item.id}
-                      className="border-b border-zinc-800/70 transition hover:bg-zinc-800/30"
+                      className="items-dashboard__row"
                     >
-                      <td className="px-6 py-5">
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-zinc-800 text-[#FFCC00]">
-                            <Package className="h-5 w-5" />
+                      <td><div className="items-dashboard__item">
+                          <div className="items-dashboard__item-icon"><Package size={20} />
                           </div>
 
                           <div>
-                            <p className="font-semibold text-white">
+                            <p className="items-dashboard__item-name">
                               {item.item_name}
                             </p>
 
-                            <p className="mt-1 text-xs text-zinc-500">
+                            <p className="items-dashboard__item-code">
                               {item.item_code}
                               {item.hsn_code
                                 ? ` · HSN: ${item.hsn_code}`
@@ -230,56 +224,54 @@ export function ItemsDashboard() {
                         </div>
                       </td>
 
-                      <td className="px-6 py-5 font-semibold text-white">
+                      <td className="items-dashboard__price">
                         {money.format(item.item_cost)}
-                        <span className="ml-1 text-zinc-400">
+                        <span className="items-dashboard__unit">
                           / {item.unit || "PCS"}
                         </span>
                       </td>
 
-                      <td className="px-6 py-5">
+                      <td>
                         {item.track_inventory ? (
                           <div>
-                            <p className="font-semibold text-white">
+                            <p className="items-dashboard__stock">
                               {item.total_stock}
                             </p>
 
-                            <p className="mt-1 text-xs text-emerald-400">
+                            <p className="items-dashboard__stock-label">
                               {item.is_batch_tracked
                                 ? "Batch tracked"
                                 : "Inventory tracked"}
                             </p>
                           </div>
                         ) : (
-                          <span className="text-zinc-500">—</span>
+                          <span className="items-dashboard__empty">—</span>
                         )}
                       </td>
 
-                      <td className="max-w-[250px] px-6 py-5">
-                        <p className="truncate text-zinc-400">
+                      <td className="items-dashboard__description"><p>
                           {item.item_description || "No description"}
                         </p>
                       </td>
 
-                      <td className="px-6 py-5">
-                        <div className="flex justify-end gap-2">
+                      <td><div className="items-dashboard__actions">
                           <button
                             onClick={() => {
                               setEditingItem(item);
                               setFormOpen(true);
                             }}
-                            className="rounded-lg p-2 text-zinc-400 transition hover:bg-zinc-800 hover:text-[#FFCC00]"
+                            className="items-dashboard__icon-action"
                             title="Edit item"
                           >
-                            <Edit3 className="h-4 w-4" />
+                            <Edit3 size={16} />
                           </button>
 
                           <button
                             onClick={() => void deleteItem(item)}
-                            className="rounded-lg p-2 text-zinc-400 transition hover:bg-red-950/50 hover:text-red-400"
+                            className="items-dashboard__icon-action"
                             title="Archive item"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 size={16} />
                           </button>
                         </div>
                       </td>
@@ -314,10 +306,10 @@ function Kpi({
   value: string;
 }) {
   return (
-    <div className="rounded-2xl border border-zinc-800 bg-[#1e1e24] p-5">
-      <Package className="mb-4 h-5 w-5 text-[#FFCC00]" />
-      <p className="text-xs font-bold uppercase text-zinc-400">{label}</p>
-      <p className="mt-2 text-3xl font-bold text-white">{value}</p>
+    <div className="items-kpi">
+      <Package size={20} className="items-kpi__icon" />
+      <p className="items-kpi__label">{label}</p>
+      <p className="items-kpi__value">{value}</p>
     </div>
   );
 }

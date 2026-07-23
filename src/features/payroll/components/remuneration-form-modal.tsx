@@ -117,10 +117,10 @@ export function RemunerationFormModal({
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto border-zinc-800 bg-[#1e1e24] text-white">
-        <DialogHeader className="flex flex-row items-center justify-between">
-          <DialogTitle className="flex items-center gap-3 text-2xl">
-            <WalletCards className="h-6 w-6 text-[#ffcc00]" />
+      <DialogContent className="form-dialog">
+        <DialogHeader>
+          <DialogTitle>
+            <WalletCards className="h-6 w-6" />
             Set Monthly Salary
           </DialogTitle>
 
@@ -129,31 +129,30 @@ export function RemunerationFormModal({
             variant="ghost"
             size="icon"
             onClick={onClose}
-            className="text-zinc-400 hover:text-white"
           >
             <X className="h-5 w-5" />
           </Button>
         </DialogHeader>
 
-        <div className="rounded-xl border border-zinc-800 bg-[#151517] p-4">
-          <p className="font-bold text-white">{employee.full_name}</p>
-          <p className="mt-1 text-sm text-zinc-400">
+        <div className="remuneration-form__employee">
+          <p className="remuneration-form__employee-name">{employee.full_name}</p>
+          <p className="remuneration-form__employee-id">
             Employee ID: {employee.empId || "Not assigned"}
           </p>
         </div>
 
         {isLoading ? (
-          <div className="flex justify-center py-12">
-            <Loader2 className="h-6 w-6 animate-spin text-[#ffcc00]" />
+          <div className="remuneration-form__loading">
+            <Loader2 className="h-6 w-6 animate-spin" />
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="remuneration-form">
             <section>
-              <h3 className="mb-4 font-bold text-[#ffcc00]">
+              <h3 className="remuneration-form__section-title">
                 Earnings
               </h3>
 
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="remuneration-form__grid">
                 <SalaryInput
                   label="Basic Pay *"
                   value={form.basic_pay}
@@ -178,11 +177,11 @@ export function RemunerationFormModal({
             </section>
 
             <section>
-              <h3 className="mb-4 font-bold text-red-300">
+              <h3 className="remuneration-form__section-title">
                 Monthly Deductions
               </h3>
 
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="remuneration-form__grid">
                 <SalaryInput
                   label="PF Deduction"
                   value={form.pf_deduction}
@@ -215,7 +214,7 @@ export function RemunerationFormModal({
               </div>
             </section>
 
-            <div className="grid gap-3 rounded-xl border border-zinc-800 bg-[#151517] p-5 md:grid-cols-3">
+            <div className="remuneration-form__totals">
               <Total label="Gross Salary" value={money(totals.gross)} />
               <Total
                 label="Total Deductions"
@@ -228,19 +227,14 @@ export function RemunerationFormModal({
               />
             </div>
 
-            {error ? (
-              <p className="rounded-lg border border-red-900/60 bg-red-950/40 p-3 text-sm text-red-300">
-                {error}
-              </p>
-            ) : null}
+            {error ? <p className="form-error">{error}</p> : null}
 
-            <div className="flex justify-end gap-3 border-t border-zinc-800 pt-5">
+            <div className="form-actions">
               <Button
                 type="button"
                 variant="outline"
                 disabled={saveRemuneration.isPending}
                 onClick={onClose}
-                className="border-zinc-600 bg-transparent"
               >
                 Cancel
               </Button>
@@ -249,7 +243,6 @@ export function RemunerationFormModal({
                 type="button"
                 disabled={saveRemuneration.isPending}
                 onClick={handleSave}
-                className="bg-[#ffcc00] font-bold text-black hover:bg-yellow-400"
               >
                 {saveRemuneration.isPending ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -274,10 +267,8 @@ function SalaryInput({
   onChange: (value: string) => void;
 }) {
   return (
-    <div>
-      <Label className="mb-2 block text-xs font-bold uppercase text-zinc-400">
-        {label} (₹)
-      </Label>
+    <div className="form-field">
+      <Label className="form-field__label">{label} (₹)</Label>
 
       <Input
         type="number"
@@ -285,7 +276,6 @@ function SalaryInput({
         step="0.01"
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="border-zinc-700 bg-[#151517]"
       />
     </div>
   );
@@ -302,10 +292,10 @@ function Total({
 }) {
   return (
     <div>
-      <p className="text-xs font-bold uppercase text-zinc-500">{label}</p>
+      <p className="remuneration-form__total-label">{label}</p>
       <p
-        className={`mt-2 text-lg font-black ${
-          highlight ? "text-[#ffcc00]" : "text-white"
+        className={`remuneration-form__total-value${
+          highlight ? " remuneration-form__total-value--highlight" : ""
         }`}
       >
         {value}

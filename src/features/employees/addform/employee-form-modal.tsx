@@ -114,9 +114,9 @@ export function EmployeeFormModal({
 
     return (
         <Dialog open onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto border-zinc-800 bg-[#1e1e24] text-white">
-                <DialogHeader className="flex flex-row items-center justify-between">
-                    <DialogTitle className="text-2xl">
+            <DialogContent className="form-dialog">
+                <DialogHeader className="employee-form__dialog-header">
+                    <DialogTitle>
                         {employee ? "Edit Employee" : "Add New Employee"}
                     </DialogTitle>
 
@@ -125,14 +125,13 @@ export function EmployeeFormModal({
                         variant="ghost"
                         size="icon"
                         onClick={onClose}
-                        className="text-zinc-400 hover:text-white"
                     >
                         <X className="h-5 w-5" />
                     </Button>
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit} className="space-y-6 pt-4">
-                    <div className="grid gap-5 md:grid-cols-2">
+                <form onSubmit={handleSubmit} className="employee-form">
+                    <div className="employee-form__grid">
                         <Field label="Full Name *">
                             <Input
                                 value={form.full_name}
@@ -140,7 +139,6 @@ export function EmployeeFormModal({
                                     setValue("full_name", event.target.value)
                                 }
                                 placeholder="e.g. Rahul Sharma"
-                                className="border-zinc-700 bg-[#151517]"
                             />
                         </Field>
 
@@ -151,7 +149,6 @@ export function EmployeeFormModal({
                                     setValue("empId", event.target.value)
                                 }
                                 placeholder="e.g. EMP-001"
-                                className="border-zinc-700 bg-[#151517]"
                             />
                         </Field>
 
@@ -163,7 +160,6 @@ export function EmployeeFormModal({
                                     setValue("email", event.target.value)
                                 }
                                 placeholder="employee@company.com"
-                                className="border-zinc-700 bg-[#151517]"
                             />
                         </Field>
 
@@ -174,7 +170,6 @@ export function EmployeeFormModal({
                                     setValue("phone", event.target.value)
                                 }
                                 placeholder="e.g. 9876543210"
-                                className="border-zinc-700 bg-[#151517]"
                             />
                         </Field>
 
@@ -184,7 +179,7 @@ export function EmployeeFormModal({
                                 onChange={(event) =>
                                     setValue("gender", event.target.value)
                                 }
-                                className="w-full rounded-md border border-zinc-700 bg-[#151517] px-3 py-2 text-sm text-white outline-none focus:border-[#FFCC00]"
+                                className="employee-form__select"
                             >
                                 <option value="">Select gender</option>
                                 <option value="Male">Male</option>
@@ -200,7 +195,6 @@ export function EmployeeFormModal({
                                     setValue("nationality", event.target.value)
                                 }
                                 placeholder="e.g. Indian"
-                                className="border-zinc-700 bg-[#151517]"
                             />
                         </Field>
 
@@ -214,7 +208,6 @@ export function EmployeeFormModal({
                                         event.target.value
                                     )
                                 }
-                                className="border-zinc-700 bg-[#151517]"
                             />
                         </Field>
 
@@ -224,7 +217,7 @@ export function EmployeeFormModal({
                                 onChange={(event) =>
                                     setValue("department", Number(event.target.value))
                                 }
-                                className="w-full rounded-md border border-zinc-700 bg-[#151517] px-3 py-2 text-sm text-white outline-none focus:border-[#FFCC00]"
+                                className="employee-form__select"
                             >
                                 <option value="">
                                     {loadingDepartments
@@ -241,27 +234,18 @@ export function EmployeeFormModal({
                         </Field>
                     </div>
 
-                    {error && (
-                        <p className="rounded-lg border border-red-900/60 bg-red-950/40 p-3 text-sm text-red-300">
-                            {error}
-                        </p>
-                    )}
+                    {error && <p className="form-error">{error}</p>}
 
-                    <div className="flex justify-end gap-3 border-t border-zinc-800 pt-5">
+                    <div className="form-actions">
                         <Button
                             type="button"
                             variant="outline"
                             onClick={onClose}
-                            className="border-zinc-600 bg-transparent"
                         >
                             Cancel
                         </Button>
 
-                        <Button
-                            type="submit"
-                            disabled={saving}
-                            className="bg-[#FFCC00] font-bold text-black hover:bg-yellow-400"
-                        >
+                        <Button type="submit" disabled={saving}>
                             {saving && (
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                             )}
@@ -283,11 +267,8 @@ function Field({
     children: React.ReactNode;
 }) {
     return (
-        <div>
-            <Label className="mb-2 block text-xs font-bold uppercase text-zinc-400">
-                {label}
-            </Label>
-
+        <div className="form-field">
+            <Label className="form-field__label">{label}</Label>
             {children}
         </div>
     );

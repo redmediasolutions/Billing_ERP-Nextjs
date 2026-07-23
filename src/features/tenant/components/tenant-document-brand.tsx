@@ -11,21 +11,19 @@ export function TenantDocumentBrand() {
 
   return (
     <div>
-      <div className="flex items-center gap-3">
+      <div className="tenant-brand__row">
         {tenant ? (
           <BusinessLogo tenant={tenant} size="lg" />
         ) : (
-          <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-[#FFCC00] text-black">
+          <div className="tenant-brand__placeholder">
             <Building2 className="h-7 w-7" />
           </div>
         )}
 
-        <h1 className="text-3xl font-black tracking-tight text-black">
-          {businessName}
-        </h1>
+        <h1 className="tenant-brand__name">{businessName}</h1>
       </div>
 
-      <div className="mt-5 whitespace-pre-wrap text-sm font-medium leading-7 text-slate-600">
+      <div className="tenant-brand__details">
         {tenant?.business_address && (
           <p>{tenant.business_address}</p>
         )}

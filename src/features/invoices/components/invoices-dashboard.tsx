@@ -53,32 +53,32 @@ export function InvoicesDashboard() {
     }
 
     return (
-        <section className="min-h-screen bg-[#111113] p-5 pt-20 text-white lg:p-8 lg:pt-8">
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <section className="invoices-dashboard">
+            <div className="invoices-dashboard__header">
                 <div>
-                    <p className="text-sm font-bold uppercase tracking-[0.16em] text-[#FFCC00]">
+                    <p className="invoices-dashboard__eyebrow">
                         Sales
                     </p>
 
-                    <h1 className="mt-1 text-3xl font-bold">Invoices</h1>
+                    <h1 className="invoices-dashboard__title">Invoices</h1>
 
-                    <p className="mt-2 text-sm text-zinc-400">
+                    <p className="invoices-dashboard__intro">
                         Create invoices and manage billing records.
                     </p>
                 </div>
 
                 <Button
                     asChild
-                    className="bg-[#FFCC00] font-bold text-black hover:bg-yellow-400"
+                    className="invoices-dashboard__primary-action"
                 >
                     <Link href="/dashboard/invoices/new">
-                        <Plus className="mr-2 h-4 w-4" />
+                        <Plus size={16} />
                         New Invoice
                     </Link>
                 </Button>
             </div>
 
-            <div className="mt-7 grid gap-4 md:grid-cols-3">
+            <div className="invoices-dashboard__kpis">
                 <Kpi label="Total Invoices" value={invoices.length} />
 
                 <Kpi label="Draft Invoices" value={draftCount} />
@@ -89,22 +89,13 @@ export function InvoicesDashboard() {
                 />
             </div>
 
-            <Card className="mt-7 border-zinc-800 bg-[#1e1e24] text-white">
-                <CardContent className="p-0">
-                    <div className="border-b border-zinc-800 p-5">
-                        <h2 className="text-xl font-bold">Invoice Directory</h2>
+            <Card className="invoices-dashboard__directory"><CardContent className="invoices-dashboard__directory-content">
+                    <div className="invoices-dashboard__directory-head"><h2 className="invoices-dashboard__directory-title">Invoice Directory</h2>
                     </div>
 
-                    <div className="overflow-x-auto">
-                        <table className="w-full min-w-[750px] text-left text-sm">
-                            <thead className="border-b border-zinc-800 text-xs uppercase text-zinc-400">
+                    <div className="invoices-dashboard__table-scroll"><table className="invoices-dashboard__table"><thead>
                                 <tr>
-                                    <th className="px-6 py-4">Invoice #</th>
-                                    <th className="px-6 py-4">Customer</th>
-                                    <th className="px-6 py-4">Date</th>
-                                    <th className="px-6 py-4">Amount</th>
-                                    <th className="px-6 py-4">Status</th>
-                                    <th className="px-6 py-4 text-right">Actions</th>
+                                    <th>Invoice #</th><th>Customer</th><th>Date</th><th>Amount</th><th>Status</th><th>Actions</th>
                                 </tr>
                             </thead>
 
@@ -113,9 +104,9 @@ export function InvoicesDashboard() {
                                     <tr>
                                         <td
                                             colSpan={6}
-                                            className="p-14 text-center text-zinc-400"
+                                            className="invoices-dashboard__state"
                                         >
-                                            <Loader2 className="mx-auto mb-3 h-5 w-5 animate-spin" />
+                                            <Loader2 className="invoices-dashboard__spinner" />
                                             Loading invoices...
                                         </td>
                                     </tr>
@@ -123,7 +114,7 @@ export function InvoicesDashboard() {
                                     <tr>
                                         <td
                                             colSpan={6}
-                                            className="p-14 text-center text-red-300"
+                                            className="invoices-dashboard__state invoices-dashboard__state--error"
                                         >
                                             Unable to load invoices.
                                         </td>
@@ -132,7 +123,7 @@ export function InvoicesDashboard() {
                                     <tr>
                                         <td
                                             colSpan={6}
-                                            className="p-14 text-center text-zinc-500"
+                                            className="invoices-dashboard__state"
                                         >
                                             No invoices created yet.
                                         </td>
@@ -144,19 +135,19 @@ export function InvoicesDashboard() {
                                             onClick={() =>
                                                 router.push(`/dashboard/invoices/${invoice.id}`)
                                             }
-                                            className="cursor-pointer border-b border-zinc-800/70 transition hover:bg-zinc-800/30"
+                                            className="invoices-dashboard__row"
                                         >
-                                            <td className="px-6 py-5 font-bold text-[#FFCC00]">
+                                            <td className="invoices-dashboard__number">
                                                 {invoice.invoice_number}
                                             </td>
 
                                             {/* ADDED text-white HERE */}
-                                            <td className="px-6 py-5 font-semibold text-white">
+                                            <td className="invoices-dashboard__customer">
                                                 {invoice.customer_name || "Unknown customer"}
                                             </td>
 
                                             {/* CHANGED to text-zinc-300 for better visibility */}
-                                            <td className="px-6 py-5 text-zinc-300">
+                                            <td className="invoices-dashboard__date">
                                                 {invoice.invoice_date
                                                     ? new Date(
                                                         invoice.invoice_date
@@ -165,16 +156,16 @@ export function InvoicesDashboard() {
                                             </td>
 
                                             {/* ADDED text-white HERE */}
-                                            <td className="px-6 py-5 font-bold text-white">
+                                            <td className="invoices-dashboard__amount">
                                                 {money.format(invoice.rounded_total)}
                                             </td>
 
-                                            <td className="px-6 py-5">
+                                            <td>
                                                 <Badge
                                                     className={
                                                         invoice.is_draft
-                                                            ? "bg-zinc-700 text-zinc-200 hover:bg-zinc-700"
-                                                            : "bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/15"
+                                                            ? "invoices-dashboard__status"
+                                                            : "invoices-dashboard__status"
                                                     }
                                                 >
                                                     {invoice.is_draft
@@ -183,8 +174,7 @@ export function InvoicesDashboard() {
                                                 </Badge>
                                             </td>
 
-                                            <td className="px-6 py-5">
-                                                <div className="flex justify-end">
+                                            <td><div className="invoices-dashboard__actions">
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
@@ -193,9 +183,9 @@ export function InvoicesDashboard() {
                                                             event.stopPropagation();
                                                             void removeInvoice(invoice.id);
                                                         }}
-                                                        className="text-zinc-500 hover:bg-red-950/40 hover:text-red-400"
+                                                        className="invoices-dashboard__delete"
                                                     >
-                                                        <Trash2 className="h-4 w-4" />
+                                                        <Trash2 size={16} />
                                                     </Button>
                                                 </div>
                                             </td>
@@ -219,15 +209,13 @@ function Kpi({
     value: string | number;
 }) {
     return (
-        <Card className="border-zinc-800 bg-[#1e1e24] text-white">
-            <CardContent className="p-5">
-                <FileText className="mb-4 h-5 w-5 text-[#FFCC00]" />
+        <Card className="invoices-kpi"><CardContent className="invoices-kpi__content"><FileText size={20} className="invoices-kpi__icon" />
 
-                <p className="text-xs font-bold uppercase tracking-wide text-zinc-400">
+                <p className="invoices-kpi__label">
                     {label}
                 </p>
 
-                <p className="mt-2 text-3xl font-bold">{value}</p>
+                <p className="invoices-kpi__value">{value}</p>
             </CardContent>
         </Card>
     );

@@ -22,10 +22,10 @@ export function DashboardLayout({
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#111113] text-white">
-        <div className="text-center">
-          <Loader2 className="mx-auto mb-3 h-7 w-7 animate-spin text-[#FFCC00]" />
-          <p className="text-sm text-zinc-400">Loading dashboard...</p>
+      <div className="dashboard-loading">
+        <div className="dashboard-loading__content">
+          <Loader2 className="dashboard-loading__icon" />
+          <p className="dashboard-loading__text">Loading dashboard...</p>
         </div>
       </div>
     );
@@ -36,10 +36,10 @@ export function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-[#111113]">
+    <div className="app-shell">
       <DashboardSidebar />
 
-      <main className="min-h-screen lg:ml-[290px]">
+      <main className="app-main">
         {children}
       </main>
     </div>

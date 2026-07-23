@@ -221,26 +221,26 @@ export function EstimateForm() {
   }
 
   return (
-    <section className="min-h-screen bg-[#111113] p-5 text-white md:p-8">
-      <div className="mb-7 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div className="flex items-center gap-4">
+    <section className="estimate-form">
+      <div className="estimate-form__header">
+        <div className="estimate-form__title-group">
           <Button
             variant="ghost"
             onClick={() => router.push("/dashboard/estimates")}
-            className="text-zinc-400 hover:text-white"
+            className="estimate-form__back"
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
 
-          <h1 className="text-3xl font-bold">Create Estimate</h1>
+          <h1 className="estimate-form__title">Create Estimate</h1>
         </div>
 
-        <div className="flex gap-3">
+        <div className="estimate-form__actions">
           <Button
             variant="outline"
             onClick={() => void saveEstimate(true)}
             disabled={createEstimate.isPending}
-            className="border-zinc-700 bg-[#1e1e24]"
+            className="estimate-form__secondary-action"
           >
             Save Draft
           </Button>
@@ -248,7 +248,7 @@ export function EstimateForm() {
           <Button
             onClick={() => void saveEstimate(false)}
             disabled={createEstimate.isPending}
-            className="bg-[#FFCC00] font-bold text-black hover:bg-yellow-400"
+            className="estimate-form__primary-action"
           >
             {createEstimate.isPending && (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -258,38 +258,38 @@ export function EstimateForm() {
         </div>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-2">
-        <Card className="border-zinc-800 bg-[#1e1e24] text-white">
-          <CardContent className="p-6">
-            <h2 className="mb-6 flex items-center gap-3 text-2xl font-bold">
-              <UserRound className="text-[#FFCC00]" />
+      <div className="estimate-form__grid">
+        <Card className="estimate-form__section">
+          <CardContent>
+            <h2 className="estimate-form__section-title">
+              <UserRound />
               Customer Info
             </h2>
 
-            <Label>Select Customer *</Label>
-
-            <select
-              value={customerId}
-              onChange={(event) => setCustomerId(event.target.value)}
-              className="mt-2 w-full rounded-lg border border-zinc-700 bg-[#151517] px-3 py-3 text-white outline-none focus:border-[#FFCC00]"
-            >
-              <option value="">
-                {loadingCustomers
-                  ? "Loading customers..."
-                  : "Select a customer"}
-              </option>
-
-              {customers.map((customer: Customer) => (
-                <option key={customer.id} value={customer.id}>
-                  {customer.customer_name}
-                  {customer.customer_phone
-                    ? ` · ${customer.customer_phone}`
-                    : ""}
+            <Field label="Select Customer *">
+              <select
+                value={customerId}
+                onChange={(event) => setCustomerId(event.target.value)}
+                className="employee-form__select"
+              >
+                <option value="">
+                  {loadingCustomers
+                    ? "Loading customers..."
+                    : "Select a customer"}
                 </option>
-              ))}
-            </select>
 
-            <div className="mt-5 grid gap-4 md:grid-cols-2">
+                {customers.map((customer: Customer) => (
+                  <option key={customer.id} value={customer.id}>
+                    {customer.customer_name}
+                    {customer.customer_phone
+                      ? ` · ${customer.customer_phone}`
+                      : ""}
+                  </option>
+                ))}
+              </select>
+            </Field>
+
+            <div className="form-grid form-grid--2col" style={{ marginTop: 20 }}>
               <AddressCard
                 title="Billing Address"
                 value={selectedCustomer?.customer_billing_address}
@@ -297,27 +297,26 @@ export function EstimateForm() {
 
               <AddressCard
                 title="Delivery Address"
-               value={selectedCustomer?.customer_shipping_address}
+                value={selectedCustomer?.customer_shipping_address}
               />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-zinc-800 bg-[#1e1e24] text-white">
-          <CardContent className="p-6">
-            <h2 className="mb-6 flex items-center gap-3 text-2xl font-bold">
-              <FileText className="text-[#FFCC00]" />
+        <Card className="estimate-form__section">
+          <CardContent>
+            <h2 className="estimate-form__section-title">
+              <FileText />
               Estimate Details
             </h2>
 
-            <div className="grid gap-5 md:grid-cols-2">
+            <div className="form-grid form-grid--2col">
               <Field label="Estimate Number *">
                 <Input
                   value={estimateNumber}
                   onChange={(event) =>
                     setEstimateNumber(event.target.value)
                   }
-                  className="border-zinc-700 bg-[#151517]"
                 />
               </Field>
 
@@ -328,7 +327,6 @@ export function EstimateForm() {
                     setReferenceNumber(event.target.value)
                   }
                   placeholder="Enter reference number"
-                  className="border-zinc-700 bg-[#151517]"
                 />
               </Field>
 
@@ -339,7 +337,6 @@ export function EstimateForm() {
                   onChange={(event) =>
                     setEstimateDate(event.target.value)
                   }
-                  className="border-zinc-700 bg-[#151517]"
                 />
               </Field>
 
@@ -350,156 +347,148 @@ export function EstimateForm() {
                   onChange={(event) =>
                     setValidUntil(event.target.value)
                   }
-                  className="border-zinc-700 bg-[#151517]"
                 />
               </Field>
             </div>
 
-            <Field label="Project Notes" className="mt-5">
-              <Textarea
-                value={notes}
-                onChange={(event) => setNotes(event.target.value)}
-                placeholder="Internal notes or project brief..."
-                className="min-h-24 border-zinc-700 bg-[#151517]"
-              />
-            </Field>
+            <div style={{ marginTop: 20 }}>
+              <Field label="Project Notes">
+                <Textarea
+                  value={notes}
+                  onChange={(event) => setNotes(event.target.value)}
+                  placeholder="Internal notes or project brief..."
+                />
+              </Field>
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      <Card className="mt-6 border-zinc-800 bg-[#1e1e24] text-white">
-        <CardContent className="p-0">
-          <div className="flex flex-col gap-4 border-b border-zinc-800 p-6 md:flex-row md:items-center md:justify-between">
-            <h2 className="text-2xl font-bold">Line Items</h2>
+      <div className="line-items">
+        <div className="line-items__header">
+          <h2 className="line-items__title">Line Items</h2>
 
-            <ItemPickerDialog onSelect={addCatalogItem} />
-          </div>
+          <ItemPickerDialog onSelect={addCatalogItem} />
+        </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[900px] text-sm">
-              <thead className="border-b border-zinc-800 text-left text-xs uppercase text-zinc-400">
+        <div className="line-items__table-scroll">
+          <table className="line-items__table">
+            <thead>
+              <tr>
+                <th>Item Details</th>
+                <th>Quantity</th>
+                <th>Rate</th>
+                <th>Tax</th>
+                <th>Discount</th>
+                <th>Amount</th>
+                <th />
+              </tr>
+            </thead>
+
+            <tbody>
+              {lineItems.length === 0 ? (
                 <tr>
-                  <th className="px-6 py-4">Item Details</th>
-                  <th className="px-4 py-4">Quantity</th>
-                  <th className="px-4 py-4">Rate</th>
-                  <th className="px-4 py-4">Tax</th>
-                  <th className="px-4 py-4">Discount</th>
-                  <th className="px-4 py-4 text-right">Amount</th>
-                  <th className="px-4 py-4" />
+                  <td colSpan={7} className="line-items__empty">
+                    Click &ldquo;Add Items&rdquo; to select an item from your catalogue.
+                  </td>
                 </tr>
-              </thead>
+              ) : (
+                lineItems.map((line) => (
+                  <tr key={line.id} className="line-items__row">
+                    <td>
+                      <p className="line-items__name">{line.item_name}</p>
+                      <p className="line-items__meta">
+                        {line.unit} · HSN: {line.hsn_code || "—"}
+                      </p>
+                    </td>
 
-              <tbody>
-                {lineItems.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={7}
-                      className="p-12 text-center text-zinc-500"
-                    >
-                      Click “Add Items” to select an item from your catalogue.
+                    <td>
+                      <Input
+                        type="number"
+                        min="1"
+                        value={line.quantity}
+                        onChange={(event) =>
+                          updateLine(line.id, {
+                            quantity: Math.max(
+                              1,
+                              Number(event.target.value)
+                            ),
+                          })
+                        }
+                        className="line-items__input--qty"
+                      />
+                    </td>
+
+                    <td>
+                      <Input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={line.unit_price}
+                        onChange={(event) =>
+                          updateLine(line.id, {
+                            unit_price: Number(event.target.value),
+                          })
+                        }
+                        className="line-items__input--rate"
+                      />
+                    </td>
+
+                    <td>
+                      <Input
+                        type="number"
+                        min="0"
+                        value={line.tax_rate}
+                        onChange={(event) =>
+                          updateLine(line.id, {
+                            tax_rate: Number(event.target.value),
+                          })
+                        }
+                        className="line-items__input--tax"
+                      />
+                    </td>
+
+                    <td>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={line.line_discount}
+                        onChange={(event) =>
+                          updateLine(line.id, {
+                            line_discount: Number(event.target.value),
+                          })
+                        }
+                        className="line-items__input--discount"
+                      />
+                    </td>
+
+                    <td className="line-items__amount">
+                      ₹{line.line_total.toFixed(2)}
+                    </td>
+
+                    <td>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeLine(line.id)}
+                        className="line-items__delete"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </td>
                   </tr>
-                ) : (
-                  lineItems.map((line) => (
-                    <tr
-                      key={line.id}
-                      className="border-b border-zinc-800/70"
-                    >
-                      <td className="px-6 py-4">
-                        <p className="font-semibold">{line.item_name}</p>
-                        <p className="mt-1 text-xs text-zinc-500">
-                          {line.unit} · HSN: {line.hsn_code || "—"}
-                        </p>
-                      </td>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-                      <td className="px-4 py-4">
-                        <Input
-                          type="number"
-                          min="1"
-                          value={line.quantity}
-                          onChange={(event) =>
-                            updateLine(line.id, {
-                              quantity: Math.max(
-                                1,
-                                Number(event.target.value)
-                              ),
-                            })
-                          }
-                          className="w-20 border-zinc-700 bg-[#151517]"
-                        />
-                      </td>
-
-                      <td className="px-4 py-4">
-                        <Input
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          value={line.unit_price}
-                          onChange={(event) =>
-                            updateLine(line.id, {
-                              unit_price: Number(event.target.value),
-                            })
-                          }
-                          className="w-28 border-zinc-700 bg-[#151517]"
-                        />
-                      </td>
-
-                      <td className="px-4 py-4">
-                        <Input
-                          type="number"
-                          min="0"
-                          value={line.tax_rate}
-                          onChange={(event) =>
-                            updateLine(line.id, {
-                              tax_rate: Number(event.target.value),
-                            })
-                          }
-                          className="w-20 border-zinc-700 bg-[#151517]"
-                        />
-                      </td>
-
-                      <td className="px-4 py-4">
-                        <Input
-                          type="number"
-                          min="0"
-                          max="100"
-                          value={line.line_discount}
-                          onChange={(event) =>
-                            updateLine(line.id, {
-                              line_discount: Number(event.target.value),
-                            })
-                          }
-                          className="w-20 border-zinc-700 bg-[#151517]"
-                        />
-                      </td>
-
-                      <td className="px-4 py-4 text-right font-bold">
-                        ₹{line.line_total.toFixed(2)}
-                      </td>
-
-                      <td className="px-4 py-4">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => removeLine(line.id)}
-                          className="text-zinc-500 hover:bg-red-950/40 hover:text-red-400"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="mt-6 grid gap-6 xl:grid-cols-[1.5fr_0.75fr]">
-        <Card className="border-zinc-800 bg-[#1e1e24] text-white">
-          <CardContent className="p-6">
+      <div className="estimate-form__grid" style={{ marginTop: 24 }}>
+        <Card className="estimate-form__section">
+          <CardContent>
             <Field label="Payment Terms">
               <Textarea
                 value={paymentTerms}
@@ -507,39 +496,41 @@ export function EstimateForm() {
                   setPaymentTerms(event.target.value)
                 }
                 placeholder="e.g. Payment due within 15 days"
-                className="min-h-24 border-zinc-700 bg-[#151517]"
               />
             </Field>
 
-            <Field label="Transfer Information" className="mt-5">
-              <Textarea
-                value={transferInformation}
-                onChange={(event) =>
-                  setTransferInformation(event.target.value)
-                }
-                placeholder="Bank details or transfer instructions..."
-                className="min-h-24 border-zinc-700 bg-[#151517]"
-              />
-            </Field>
+            <div style={{ marginTop: 20 }}>
+              <Field label="Transfer Information">
+                <Textarea
+                  value={transferInformation}
+                  onChange={(event) =>
+                    setTransferInformation(event.target.value)
+                  }
+                  placeholder="Bank details or transfer instructions..."
+                />
+              </Field>
+            </div>
           </CardContent>
         </Card>
 
-        <Card className="border-zinc-800 bg-[#1e1e24] text-white">
-          <CardContent className="space-y-4 p-6">
-            <SummaryRow
-              label="Subtotal"
-              value={totals.subtotal}
-            />
-
-            <SummaryRow
-              label="Total Tax"
-              value={totals.totalTax}
-            />
-
-            <div className="flex items-center justify-between gap-3">
-              <span className="font-semibold text-zinc-300">
-                Discount %
+        <Card className="estimate-form__section">
+          <CardContent style={{ display: "grid", gap: 16 }}>
+            <div className="summary-panel__row">
+              <span className="summary-panel__label">Subtotal</span>
+              <span className="summary-panel__value">
+                ₹{totals.subtotal.toFixed(2)}
               </span>
+            </div>
+
+            <div className="summary-panel__row">
+              <span className="summary-panel__label">Total Tax</span>
+              <span className="summary-panel__value">
+                ₹{totals.totalTax.toFixed(2)}
+              </span>
+            </div>
+
+            <div className="summary-panel__row">
+              <span className="summary-panel__label">Discount %</span>
 
               <Input
                 type="number"
@@ -549,29 +540,29 @@ export function EstimateForm() {
                 onChange={(event) =>
                   setDiscountPercent(Number(event.target.value))
                 }
-                className="w-24 border-zinc-700 bg-[#151517] text-right"
+                className="summary-panel__discount-input"
               />
             </div>
 
-            <SummaryRow
-              label="Total Discount"
-              value={totals.totalDiscount}
-            />
+            <div className="summary-panel__row">
+              <span className="summary-panel__label">Total Discount</span>
+              <span className="summary-panel__value">
+                ₹{totals.totalDiscount.toFixed(2)}
+              </span>
+            </div>
 
-            <div className="border-t border-zinc-800 pt-4">
-              <div className="flex items-center justify-between">
-                <span className="text-xl font-bold">Grand Total</span>
-                <span className="text-3xl font-bold text-[#FFCC00]">
-                  ₹{totals.roundedTotal.toFixed(2)}
-                </span>
-              </div>
+            <div className="summary-panel__total">
+              <span className="summary-panel__total-label">Grand Total</span>
+              <span className="summary-panel__total-value">
+                ₹{totals.roundedTotal.toFixed(2)}
+              </span>
             </div>
           </CardContent>
         </Card>
       </div>
 
       {formError && (
-        <p className="mt-6 rounded-xl border border-red-900/60 bg-red-950/40 p-4 text-sm text-red-300">
+        <p className="form-error" style={{ marginTop: 24 }}>
           {formError}
         </p>
       )}
@@ -582,17 +573,13 @@ export function EstimateForm() {
 function Field({
   label,
   children,
-  className = "",
 }: {
   label: string;
   children: React.ReactNode;
-  className?: string;
 }) {
   return (
-    <div className={className}>
-      <Label className="mb-2 block text-xs font-bold uppercase text-zinc-400">
-        {label}
-      </Label>
+    <div className="form-field">
+      <Label className="form-field__label">{label}</Label>
       {children}
     </div>
   );
@@ -606,28 +593,11 @@ function AddressCard({
   value?: string | null;
 }) {
   return (
-    <div className="min-h-28 rounded-xl border border-zinc-800 bg-[#151517] p-4">
-      <p className="text-xs font-bold uppercase text-zinc-500">
-        {title}
-      </p>
-      <p className="mt-3 whitespace-pre-wrap text-sm text-zinc-300">
+    <div className="address-card">
+      <p className="address-card__title">{title}</p>
+      <p className="address-card__value">
         {value || "Select a customer to populate address"}
       </p>
-    </div>
-  );
-}
-
-function SummaryRow({
-  label,
-  value,
-}: {
-  label: string;
-  value: number;
-}) {
-  return (
-    <div className="flex items-center justify-between text-sm">
-      <span className="font-semibold text-zinc-300">{label}</span>
-      <span className="font-bold">₹{value.toFixed(2)}</span>
     </div>
   );
 }

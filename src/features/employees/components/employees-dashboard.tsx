@@ -131,95 +131,90 @@ export function EmployeesDashboard() {
   }
 
   return (
-    <section className="min-h-screen bg-[#111113] p-5 pt-20 text-white lg:p-8 lg:pt-8">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+    <section className="employees-dashboard">
+      <div className="employees-dashboard__header">
         <div>
-          <p className="text-sm font-bold uppercase tracking-[0.16em] text-[#FFCC00]">
+          <p className="employees-dashboard__eyebrow">
             Workforce
           </p>
 
-          <h1 className="mt-1 text-3xl font-bold">Employees</h1>
+          <h1 className="employees-dashboard__title">Employees</h1>
 
-          <p className="mt-2 text-sm text-zinc-400">
+          <p className="employees-dashboard__intro">
             Manage employee records, departments, and monthly salary details.
           </p>
         </div>
 
         <Button
           onClick={openCreate}
-          className="bg-[#FFCC00] font-bold text-black hover:bg-yellow-400"
+          className="employees-dashboard__primary-action"
         >
-          <Plus className="mr-2 h-4 w-4" />
+          <Plus size={16} />
           Add Employee
         </Button>
       </div>
 
-      <div className="mt-7 grid gap-4 md:grid-cols-3">
+      <div className="employees-dashboard__kpis">
         <KpiCard label="Total Employees" value={employees.length} />
         <KpiCard label="Joined This Month" value={joinedThisMonth} />
         <KpiCard label="Departments" value={departments} />
       </div>
 
-      <Card className="mt-7 border-zinc-800 bg-[#1e1e24] text-white">
-        <CardContent className="p-0">
-          <div className="flex flex-col gap-4 border-b border-zinc-800 p-5 md:flex-row md:items-center md:justify-between">
+      <Card className="employees-dashboard__directory">
+        <CardContent className="employees-dashboard__directory-content">
+          <div className="employees-dashboard__directory-head">
             <div>
-              <h2 className="text-xl font-bold">Employee Directory</h2>
+              <h2 className="employees-dashboard__directory-title">Employee Directory</h2>
 
-              <p className="mt-1 text-sm text-zinc-500">
+              <p className="employees-dashboard__directory-count">
                 {filteredEmployees.length} employee
                 {filteredEmployees.length === 1 ? "" : "s"} shown
               </p>
             </div>
 
-            <div className="relative w-full md:w-[330px]">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+            <div className="employees-dashboard__search">
+              <Search className="employees-dashboard__search-icon" />
 
               <Input
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 placeholder="Search employees..."
-                className="border-zinc-700 bg-[#151517] pl-10"
+                className="employees-dashboard__search-input"
               />
             </div>
           </div>
 
           {actionError ? (
-            <p className="mx-5 mt-5 rounded-xl border border-red-900/60 bg-red-950/40 p-3 text-sm text-red-300">
+            <p className="employees-dashboard__error">
               {actionError}
             </p>
           ) : null}
 
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[1050px] text-left text-sm">
-              <thead className="border-b border-zinc-800 text-xs uppercase text-zinc-400">
+          <div className="employees-dashboard__table-scroll">
+            <table className="employees-dashboard__table">
+              <thead>
                 <tr>
-                  <th className="px-6 py-4">Employee</th>
-                  <th className="px-6 py-4">Contact</th>
-                  <th className="px-6 py-4">Employee ID</th>
-                  <th className="px-6 py-4">Department</th>
-                  <th className="px-6 py-4">Onboarding</th>
-                  <th className="px-6 py-4 text-right">Actions</th>
+                  <th>Employee</th><th>Contact</th><th>Employee ID</th><th>Department</th><th>Onboarding</th><th>Actions</th>
                 </tr>
               </thead>
 
               <tbody>
                 {isLoading ? (
                   <tr>
-                    <td colSpan={6} className="p-14 text-center text-zinc-400">
-                      <Loader2 className="mx-auto mb-3 h-5 w-5 animate-spin" />
+                    <td colSpan={6} className="employees-dashboard__state">
+                      <Loader2 className="employees-dashboard__spinner" />
                       Loading employees...
                     </td>
                   </tr>
                 ) : error ? (
                   <tr>
-                    <td colSpan={6} className="p-14 text-center text-red-300">
+                    <td colSpan={6} className="employees-dashboard__state employees-dashboard__state--error">
                       Unable to load employees.
                     </td>
                   </tr>
                 ) : filteredEmployees.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="p-14 text-center text-zinc-500">
+                    <td colSpan={6} className="employees-dashboard__state">
                       No employees found. Add your first employee.
                     </td>
                   </tr>
@@ -227,20 +222,18 @@ export function EmployeesDashboard() {
                   filteredEmployees.map((employee) => (
                     <tr
                       key={employee.id}
-                      className="border-b border-zinc-800/70 hover:bg-zinc-800/30"
+                      className="employees-dashboard__row"
                     >
-                      <td className="px-6 py-5">
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FFCC00]/15 font-bold text-[#FFCC00]">
+                      <td><div className="employees-dashboard__employee"><div className="employees-dashboard__avatar">
                             {employee.full_name.slice(0, 2).toUpperCase()}
                           </div>
 
                           <div>
-                            <p className="font-bold text-white">
+                            <p className="employees-dashboard__employee-name">
                               {employee.full_name}
                             </p>
 
-                            <p className="mt-1 text-xs text-zinc-500">
+                            <p className="employees-dashboard__employee-meta">
                               {employee.gender || "Employee"} ·{" "}
                               {employee.nationality || "—"}
                             </p>
@@ -248,39 +241,36 @@ export function EmployeesDashboard() {
                         </div>
                       </td>
 
-                      <td className="px-6 py-5">
+                      <td>
                         {employee.email ? (
-                          <p className="flex items-center gap-2 text-zinc-300">
-                            <Mail className="h-3.5 w-3.5 text-zinc-500" />
+                          <p className="employees-dashboard__contact"><Mail size={14} />
                             {employee.email}
                           </p>
                         ) : null}
 
                         {employee.phone ? (
-                          <p className="mt-2 flex items-center gap-2 text-zinc-400">
-                            <Phone className="h-3.5 w-3.5 text-zinc-500" />
+                          <p className="employees-dashboard__contact employees-dashboard__contact--phone"><Phone size={14} />
                             {employee.phone}
                           </p>
                         ) : null}
 
                         {!employee.email && !employee.phone ? (
-                          <span className="text-zinc-500">
+                          <span className="employees-dashboard__empty">
                             No contact details
                           </span>
                         ) : null}
                       </td>
 
-                      <td className="px-6 py-5">
-                        <Badge className="bg-[#FFCC00]/10 font-mono text-[#FFCC00] hover:bg-[#FFCC00]/10">
+                      <td><Badge className="employees-dashboard__id-badge">
                           {employee.empId || "Not assigned"}
                         </Badge>
                       </td>
 
-                      <td className="px-6 py-5 text-zinc-300">
+                      <td className="employees-dashboard__department">
                         {employee.department_name || "No department"}
                       </td>
 
-                      <td className="px-6 py-5 text-zinc-400">
+                      <td className="employees-dashboard__date">
                         {employee.onboarding_date
                           ? new Date(
                               employee.onboarding_date
@@ -288,16 +278,15 @@ export function EmployeesDashboard() {
                           : "—"}
                       </td>
 
-                      <td className="px-6 py-5">
-                        <div className="flex justify-end gap-1">
+                      <td><div className="employees-dashboard__actions">
                           <Button
                             type="button"
                             variant="ghost"
                             size="sm"
                             onClick={() => setSalaryEmployee(employee)}
-                            className="text-zinc-400 hover:bg-[#FFCC00]/10 hover:text-[#FFCC00]"
+                            className="employees-dashboard__salary-action"
                           >
-                            <WalletCards className="mr-2 h-4 w-4" />
+                            <WalletCards size={16} />
                             Salary
                           </Button>
 
@@ -306,10 +295,10 @@ export function EmployeesDashboard() {
                             variant="ghost"
                             size="icon"
                             onClick={() => openEdit(employee)}
-                            className="text-zinc-400 hover:bg-zinc-800 hover:text-[#FFCC00]"
+                            className="employees-dashboard__icon-action"
                             title="Edit employee"
                           >
-                            <Edit3 className="h-4 w-4" />
+                            <Edit3 size={16} />
                           </Button>
 
                           <Button
@@ -317,10 +306,10 @@ export function EmployeesDashboard() {
                             variant="ghost"
                             size="icon"
                             onClick={() => void removeEmployee(employee)}
-                            className="text-zinc-400 hover:bg-red-950/40 hover:text-red-400"
+                            className="employees-dashboard__icon-action"
                             title="Delete employee"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 size={16} />
                           </Button>
                         </div>
                       </td>
@@ -362,15 +351,14 @@ function KpiCard({
   value: number;
 }) {
   return (
-    <Card className="border-zinc-800 bg-[#1e1e24] text-white">
-      <CardContent className="p-5">
-        <Users className="mb-4 h-5 w-5 text-[#FFCC00]" />
+    <Card className="employees-kpi"><CardContent className="employees-kpi__content">
+        <Users size={20} className="employees-kpi__icon" />
 
-        <p className="text-xs font-bold uppercase tracking-wide text-zinc-400">
+        <p className="employees-kpi__label">
           {label}
         </p>
 
-        <p className="mt-2 text-3xl font-bold">{value}</p>
+        <p className="employees-kpi__value">{value}</p>
       </CardContent>
     </Card>
   );

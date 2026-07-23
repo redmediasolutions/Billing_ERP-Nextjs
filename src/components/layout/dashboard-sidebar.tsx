@@ -104,7 +104,7 @@ export function DashboardSidebar() {
       {/* Mobile Menu Trigger */}
       <button
         onClick={() => setMobileOpen(true)}
-        className="fixed left-4 top-4 z-40 rounded-lg border border-zinc-700 bg-[#1e1e24] p-2 text-zinc-200 lg:hidden"
+        className="sidebar-trigger"
         aria-label="Open sidebar"
       >
         <Menu className="h-5 w-5" />
@@ -114,52 +114,42 @@ export function DashboardSidebar() {
       {mobileOpen && (
         <button
           onClick={() => setMobileOpen(false)}
-          className="fixed inset-0 z-40 bg-black/60 lg:hidden"
+          className="sidebar-overlay"
           aria-label="Close sidebar overlay"
         />
       )}
 
       {/* Desktop Layout Spacer: Pushes main content ONLY when pinned */}
       <div
-        className={`hidden shrink-0 transition-all duration-300 ease-in-out lg:block ${
-          isPinned ? "w-[290px]" : "w-[80px]"
-        }`}
+        className={`sidebar-spacer ${isPinned ? "sidebar-spacer--open" : ""}`}
       />
 
       {/* Sidebar Container */}
       <aside
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        className={`
-          fixed inset-y-0 left-0 z-50 flex flex-col border-r border-zinc-800 bg-[#171719] transition-all duration-300 ease-in-out
-          ${mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
-          ${isSidebarExpanded ? "w-[290px]" : "w-[80px]"}
-        `}
+        className={`sidebar ${isSidebarExpanded ? "sidebar--open" : ""}`}
       >
         {/* Header / Logo Area */}
         <div
-          className={`flex items-center border-b border-zinc-800 py-6 transition-all duration-300 ${
-            isSidebarExpanded ? "justify-between px-6" : "justify-center px-0"
-          }`}
+          className="sidebar__header"
         >
           <Link
             href="/dashboard"
             onClick={() => setMobileOpen(false)}
-            className="flex min-w-0 items-center gap-3"
+            className="sidebar__brand"
           >
-            <div className="shrink-0">
+            <div>
               <BusinessLogo tenant={tenant} size="md" />
             </div>
 
             <div
-              className={`flex min-w-0 flex-col justify-center overflow-hidden transition-all duration-300 ${
-                isSidebarExpanded ? "max-w-[200px] opacity-100" : "max-w-0 opacity-0"
-              }`}
+              className="sidebar__brand-copy"
             >
-              <p className="truncate whitespace-nowrap text-base font-bold text-white">
+              <p className="sidebar__brand-name">
                 {tenant?.business_name || "Billing ERP"}
               </p>
-              <p className="whitespace-nowrap text-[11px] font-bold uppercase tracking-wider text-zinc-500">
+              <p className="sidebar__plan">
                 {tenant?.subscription_plan || "Enterprise Suite"}
               </p>
             </div>
@@ -168,7 +158,7 @@ export function DashboardSidebar() {
           {/* Close button for Mobile */}
           <button
             onClick={() => setMobileOpen(false)}
-            className="shrink-0 rounded-lg p-2 text-zinc-400 hover:bg-zinc-800 hover:text-white lg:hidden"
+            className="sidebar__icon-button"
             aria-label="Close sidebar"
           >
             <X className="h-5 w-5" />
@@ -177,9 +167,7 @@ export function DashboardSidebar() {
           {/* Pin/Unpin button for Desktop */}
           <button
             onClick={() => setIsPinned(!isPinned)}
-            className={`hidden shrink-0 rounded-lg p-1.5 text-zinc-400 transition-all duration-300 hover:bg-zinc-800 hover:text-white lg:flex ${
-              isSidebarExpanded ? "block opacity-100" : "hidden opacity-0"
-            }`}
+            className="sidebar__icon-button sidebar__desktop-control"
             title={isPinned ? "Unpin sidebar" : "Pin sidebar"}
           >
             {isPinned ? (
@@ -191,7 +179,7 @@ export function DashboardSidebar() {
         </div>
 
         {/* Navigation Links */}
-        <nav className="flex-1 space-y-2 overflow-y-auto overflow-x-hidden py-6">
+        <nav className="sidebar__nav">
           {navigation.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.href);
@@ -201,31 +189,19 @@ export function DashboardSidebar() {
                 key={item.href}
                 href={item.href}
                 onClick={() => setMobileOpen(false)}
-                className={`
-                  group relative flex items-center gap-4 rounded-lg px-3 py-3 text-sm font-semibold transition-all duration-200
-                  ${
-                    active
-                      ? "bg-[#27272f] text-white"
-                      : "text-zinc-400 hover:bg-zinc-800/70 hover:text-white"
-                  }
-                  ${isSidebarExpanded ? "mx-4" : "mx-3 justify-center"}
-                `}
+                className={`sidebar__link ${active ? "sidebar__link--active" : ""}`}
               >
                 {/* Active Indicator Line */}
                 {active && (
-                  <div className="absolute left-0 top-0 h-full w-1 rounded-r-md bg-[#FFCC00]" />
+                  <div className="sidebar__active-line" />
                 )}
 
                 <Icon
-                  className={`h-5 w-5 shrink-0 ${
-                    active ? "text-[#FFCC00]" : "text-zinc-500"
-                  }`}
+                  className="h-5 w-5 shrink-0"
                 />
                 
                 <span
-                  className={`overflow-hidden whitespace-nowrap transition-all duration-300 ${
-                    isSidebarExpanded ? "max-w-[200px] opacity-100" : "max-w-0 opacity-0"
-                  }`}
+                  className="sidebar__label"
                 >
                   {item.label}
                 </span>
@@ -235,21 +211,16 @@ export function DashboardSidebar() {
         </nav>
 
         {/* Footer / Logout */}
-        <div className="border-t border-zinc-800 p-3">
+        <div className="sidebar__footer">
           <button
             onClick={() => void handleLogout()}
             disabled={loggingOut}
-            className={`
-              flex w-full items-center gap-4 rounded-lg px-3 py-3 text-sm font-semibold text-zinc-400 transition-all duration-200 hover:bg-red-950/30 hover:text-red-400 disabled:opacity-50
-              ${isSidebarExpanded ? "justify-start" : "justify-center"}
-            `}
+            className="sidebar__logout"
           >
-            <LogOut className="h-5 w-5 shrink-0" />
+            <LogOut className="h-5 w-5" />
             
             <span
-              className={`overflow-hidden whitespace-nowrap transition-all duration-300 ${
-                isSidebarExpanded ? "max-w-[200px] opacity-100" : "max-w-0 opacity-0"
-              }`}
+              className="sidebar__label"
             >
               {loggingOut ? "Logging out..." : "Logout"}
             </span>

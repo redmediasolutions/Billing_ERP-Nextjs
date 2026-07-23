@@ -97,9 +97,9 @@ export function TransactionFormModal({
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="border-zinc-800 bg-[#1e1e24] text-white">
-        <DialogHeader className="flex flex-row items-center justify-between">
-          <DialogTitle className="text-2xl">
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>
             {isLoan ? "Add Employee Loan" : "Add Deduction"}
           </DialogTitle>
 
@@ -108,19 +108,18 @@ export function TransactionFormModal({
             variant="ghost"
             size="icon"
             onClick={onClose}
-            className="text-zinc-400 hover:text-white"
           >
             <X className="h-5 w-5" />
           </Button>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-5 pt-4">
+        <form onSubmit={handleSubmit} className="transaction-form">
           <Field label="Employee *">
             <select
               value={employeeId}
               onChange={(event) => setEmployeeId(event.target.value)}
               disabled={employees.length === 0 || saving}
-              className="h-12 w-full rounded-md border border-zinc-700 bg-[#151517] px-3 text-white outline-none focus:border-[#ffcc00] disabled:cursor-not-allowed disabled:opacity-60"
+              className="transaction-form__select"
             >
               <option value="">
                 {employees.length === 0
@@ -137,13 +136,13 @@ export function TransactionFormModal({
             </select>
 
             {employees.length === 0 ? (
-              <p className="mt-2 text-xs text-amber-300">
+              <p className="transaction-form__hint">
                 Add an employee before creating a loan or deduction.
               </p>
             ) : null}
           </Field>
 
-          <div className="grid gap-5 md:grid-cols-2">
+          <div className="transaction-form__grid">
             <Field label="Amount (₹) *">
               <Input
                 type="number"
@@ -152,7 +151,6 @@ export function TransactionFormModal({
                 value={amount}
                 onChange={(event) => setAmount(event.target.value)}
                 disabled={saving}
-                className="border-zinc-700 bg-[#151517]"
               />
             </Field>
 
@@ -162,7 +160,6 @@ export function TransactionFormModal({
                 value={date}
                 onChange={(event) => setDate(event.target.value)}
                 disabled={saving}
-                className="border-zinc-700 bg-[#151517]"
               />
             </Field>
           </div>
@@ -177,7 +174,6 @@ export function TransactionFormModal({
                   ? "e.g. Personal emergency loan"
                   : "e.g. Salary advance recovery"
               }
-              className="border-zinc-700 bg-[#151517]"
             />
           </Field>
 
@@ -188,24 +184,18 @@ export function TransactionFormModal({
                 onChange={(event) => setNotes(event.target.value)}
                 disabled={saving}
                 placeholder="Optional deduction notes..."
-                className="min-h-24 border-zinc-700 bg-[#151517]"
               />
             </Field>
           ) : null}
 
-          {error ? (
-            <p className="rounded-lg border border-red-900/60 bg-red-950/40 p-3 text-sm text-red-300">
-              {error}
-            </p>
-          ) : null}
+          {error ? <p className="form-error">{error}</p> : null}
 
-          <div className="flex justify-end gap-3 border-t border-zinc-800 pt-5">
+          <div className="form-actions">
             <Button
               type="button"
               variant="outline"
               disabled={saving}
               onClick={onClose}
-              className="border-zinc-600 bg-transparent"
             >
               Cancel
             </Button>
@@ -213,7 +203,6 @@ export function TransactionFormModal({
             <Button
               type="submit"
               disabled={saving || employees.length === 0}
-              className="bg-[#ffcc00] font-bold text-black hover:bg-yellow-400"
             >
               {saving ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -236,10 +225,8 @@ function Field({
   children: React.ReactNode;
 }) {
   return (
-    <div>
-      <Label className="mb-2 block text-xs font-bold uppercase text-zinc-400">
-        {label}
-      </Label>
+    <div className="form-field">
+      <Label className="form-field__label">{label}</Label>
       {children}
     </div>
   );

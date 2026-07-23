@@ -102,27 +102,24 @@ export function ItemFormModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/75 backdrop-blur-sm sm:items-center sm:p-6">
-      <form
-        onSubmit={handleSubmit}
-        className="max-h-[100vh] w-full max-w-5xl overflow-y-auto rounded-t-[24px] border border-zinc-800 bg-[#1e1e24] sm:rounded-[24px]"
-      >
-        <div className="flex items-center justify-between border-b border-zinc-800 px-6 py-6">
-          <h2 className="text-2xl font-bold text-white">
+    <div className="item-form-overlay">
+      <form onSubmit={handleSubmit} className="item-form">
+        <div className="item-form__header">
+          <h2 className="item-form__title">
             {item ? "Edit Item" : "Add New Item"}
           </h2>
 
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-2 text-zinc-400 transition hover:bg-zinc-800 hover:text-white"
+            className="item-form__close"
           >
-            <X className="h-7 w-7" />
+            <X className="h-6 w-6" />
           </button>
         </div>
 
-        <div className="grid gap-5 p-6 md:grid-cols-6">
-          <Field label="Item Name *" className="md:col-span-6">
+        <div className="item-form__grid">
+          <Field label="Item Name *" className="item-form__field--full">
             <input
               autoFocus
               value={form.item_name}
@@ -133,15 +130,14 @@ export function ItemFormModal({
             />
           </Field>
 
-          <Field label="Item Code" className="md:col-span-3">
+          <Field label="Item Code" className="item-form__field--half">
             <input
               disabled
               value={item?.item_code || "Auto-generated"}
-              className="cursor-not-allowed opacity-60"
             />
           </Field>
 
-          <Field label="HSN Code" className="md:col-span-3">
+          <Field label="HSN Code" className="item-form__field--half">
             <input
               value={form.hsn_code}
               onChange={(event) =>
@@ -151,7 +147,7 @@ export function ItemFormModal({
             />
           </Field>
 
-          <Field label="Sale Price (₹) *" className="md:col-span-2">
+          <Field label="Sale Price (₹) *" className="item-form__field--third">
             <input
               type="number"
               min="0"
@@ -163,7 +159,7 @@ export function ItemFormModal({
             />
           </Field>
 
-          <Field label="Tax Rate" className="md:col-span-2">
+          <Field label="Tax Rate" className="item-form__field--third">
             <select
               value={form.tax_rate}
               onChange={(event) =>
@@ -178,7 +174,7 @@ export function ItemFormModal({
             </select>
           </Field>
 
-          <Field label="Unit" className="md:col-span-2">
+          <Field label="Unit" className="item-form__field--third">
             <select
               value={form.item_cost_narration}
               onChange={(event) =>
@@ -196,7 +192,7 @@ export function ItemFormModal({
             </select>
           </Field>
 
-          <Field label="Category" className="md:col-span-3">
+          <Field label="Category" className="item-form__field--half">
             <input
               value={form.category}
               onChange={(event) =>
@@ -206,7 +202,7 @@ export function ItemFormModal({
             />
           </Field>
 
-          <Field label="Image URL" className="md:col-span-3">
+          <Field label="Image URL" className="item-form__field--half">
             <input
               value={form.item_image || ""}
               onChange={(event) =>
@@ -216,7 +212,7 @@ export function ItemFormModal({
             />
           </Field>
 
-          <Field label="Item Description" className="md:col-span-6">
+          <Field label="Item Description" className="item-form__field--full">
             <textarea
               rows={3}
               value={form.item_description}
@@ -227,12 +223,12 @@ export function ItemFormModal({
             />
           </Field>
 
-          <label className="md:col-span-6 flex cursor-pointer items-center justify-between rounded-xl border border-zinc-800 bg-[#151517] p-5">
+          <label className="item-form__toggle item-form__field--full">
             <span>
-              <span className="block text-lg font-bold text-white">
+              <span className="item-form__toggle-title">
                 Track Inventory
               </span>
-              <span className="mt-1 block text-sm text-zinc-400">
+              <span className="item-form__toggle-desc">
                 Enable standard stock tracking for this item.
               </span>
             </span>
@@ -247,17 +243,16 @@ export function ItemFormModal({
                   updateField("is_batch_tracked", false);
                 }
               }}
-              className="h-6 w-6 accent-[#FFCC00]"
             />
           </label>
 
           {form.track_inventory && (
-            <label className="md:col-span-6 flex cursor-pointer items-center justify-between rounded-xl border border-zinc-800 bg-[#151517] p-5">
+            <label className="item-form__toggle item-form__field--full">
               <span>
-                <span className="block text-lg font-bold text-white">
+                <span className="item-form__toggle-title">
                   Batch Tracking
                 </span>
-                <span className="mt-1 block text-sm text-zinc-400">
+                <span className="item-form__toggle-desc">
                   Use this for medicines or products tracked by batch.
                 </span>
               </span>
@@ -268,31 +263,25 @@ export function ItemFormModal({
                 onChange={(event) =>
                   updateField("is_batch_tracked", event.target.checked)
                 }
-                className="h-6 w-6 accent-[#FFCC00]"
               />
             </label>
           )}
 
           {error && (
-            <p className="md:col-span-6 rounded-xl border border-red-900/60 bg-red-950/40 p-3 text-sm text-red-300">
-              {error}
-            </p>
+            <p className="form-error item-form__field--full">{error}</p>
           )}
         </div>
 
-        <div className="flex justify-end gap-3 border-t border-zinc-800 px-6 py-5">
+        <div className="item-form__footer">
           <button
             type="button"
             onClick={onClose}
-            className="rounded-xl border border-zinc-500 px-6 py-3 font-semibold text-zinc-200"
+            className="item-form__cancel"
           >
             Cancel
           </button>
 
-          <button
-            disabled={saving}
-            className="rounded-xl bg-[#FFCC00] px-6 py-3 font-bold text-black transition hover:bg-yellow-400 disabled:opacity-60"
-          >
+          <button disabled={saving} className="item-form__submit">
             {saving
               ? "Saving..."
               : item
@@ -315,31 +304,9 @@ function Field({
   className?: string;
 }) {
   return (
-    <label className={`block ${className}`}>
-      <span className="mb-2 block text-sm font-bold uppercase text-zinc-400">
-        {label}
-      </span>
-
-      <div
-        className="
-          [&_input]:w-full [&_input]:rounded-xl [&_input]:border
-          [&_input]:border-zinc-700 [&_input]:bg-[#151517]
-          [&_input]:px-4 [&_input]:py-3 [&_input]:text-white
-          [&_input]:outline-none [&_input]:focus:border-[#FFCC00]
-
-          [&_select]:w-full [&_select]:rounded-xl [&_select]:border
-          [&_select]:border-zinc-700 [&_select]:bg-[#151517]
-          [&_select]:px-4 [&_select]:py-3 [&_select]:text-white
-          [&_select]:outline-none [&_select]:focus:border-[#FFCC00]
-
-          [&_textarea]:w-full [&_textarea]:rounded-xl [&_textarea]:border
-          [&_textarea]:border-zinc-700 [&_textarea]:bg-[#151517]
-          [&_textarea]:px-4 [&_textarea]:py-3 [&_textarea]:text-white
-          [&_textarea]:outline-none [&_textarea]:focus:border-[#FFCC00]
-        "
-      >
-        {children}
-      </div>
+    <label className={`form-field item-form__field ${className}`}>
+      <span className="form-field__label">{label}</span>
+      <div>{children}</div>
     </label>
   );
 }

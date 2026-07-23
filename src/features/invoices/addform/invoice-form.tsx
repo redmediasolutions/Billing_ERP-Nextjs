@@ -226,26 +226,26 @@ export function InvoiceForm() {
   }
 
   return (
-    <section className="min-h-screen bg-[#111113] p-5 text-white md:p-8">
-      <div className="mb-7 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div className="flex items-center gap-3">
+    <section className="invoice-form">
+      <div className="invoice-form__header">
+        <div className="invoice-form__title-group">
           <Button
             variant="ghost"
             onClick={() => router.push("/dashboard/invoices")}
-            className="text-zinc-400 hover:text-white"
+            className="invoice-form__back"
           >
-            <ArrowLeft className="h-5 w-5" />
+            <ArrowLeft size={20} />
           </Button>
 
-          <h1 className="text-3xl font-bold">Create Invoice</h1>
+          <h1 className="invoice-form__title">Create Invoice</h1>
         </div>
 
-        <div className="flex gap-3">
+        <div className="invoice-form__header-actions">
           <Button
             variant="outline"
             disabled={createInvoice.isPending}
             onClick={() => void saveInvoice(true)}
-            className="border-zinc-700 bg-[#1e1e24]"
+            className="invoice-form__secondary-action"
           >
             Save Draft
           </Button>
@@ -253,7 +253,7 @@ export function InvoiceForm() {
           <Button
             disabled={createInvoice.isPending}
             onClick={() => void saveInvoice(false)}
-            className="bg-[#FFCC00] font-bold text-black hover:bg-yellow-400"
+            className="invoice-form__primary-action"
           >
             {createInvoice.isPending && (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -264,11 +264,11 @@ export function InvoiceForm() {
         </div>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-2">
-        <Card className="border-zinc-800 bg-[#1e1e24] text-white">
-          <CardContent className="p-6">
-            <h2 className="mb-6 flex items-center gap-3 text-2xl font-bold">
-              <UserRound className="text-[#FFCC00]" />
+      <div className="invoice-form__details-grid">
+        <Card className="invoice-form__section">
+          <CardContent className="invoice-form__section-content">
+            <h2 className="invoice-form__section-title">
+              <UserRound size={20} />
               Customer Info
             </h2>
 
@@ -278,7 +278,7 @@ export function InvoiceForm() {
                 onChange={(event) =>
                   setCustomerId(event.target.value)
                 }
-                className="w-full rounded-lg border border-zinc-700 bg-[#151517] px-3 py-3 text-white outline-none focus:border-[#FFCC00]"
+                className="employee-form__select"
               >
                 <option value="">
                   {loadingCustomers
@@ -294,7 +294,7 @@ export function InvoiceForm() {
               </select>
             </Field>
 
-            <div className="mt-5 grid gap-4 md:grid-cols-2">
+            <div className="form-grid form-grid--2col" style={{ marginTop: 20 }}>
               <AddressCard
                 title="Billing Address"
                 value={
@@ -312,21 +312,20 @@ export function InvoiceForm() {
           </CardContent>
         </Card>
 
-        <Card className="border-zinc-800 bg-[#1e1e24] text-white">
-          <CardContent className="p-6">
-            <h2 className="mb-6 flex items-center gap-3 text-2xl font-bold">
-              <FileText className="text-[#FFCC00]" />
+        <Card className="invoice-form__section">
+          <CardContent className="invoice-form__section-content">
+            <h2 className="invoice-form__section-title">
+              <FileText size={20} />
               Invoice Details
             </h2>
 
-            <div className="grid gap-5 md:grid-cols-2">
+            <div className="form-grid form-grid--2col">
               <Field label="Invoice Number *">
                 <Input
                   value={invoiceNumber}
                   onChange={(event) =>
                     setInvoiceNumber(event.target.value)
                   }
-                  className="border-zinc-700 bg-[#151517]"
                 />
               </Field>
 
@@ -336,7 +335,7 @@ export function InvoiceForm() {
                   onChange={(event) =>
                     setOrderType(event.target.value)
                   }
-                  className="w-full rounded-lg border border-zinc-700 bg-[#151517] px-3 py-2 text-white"
+                  className="employee-form__select"
                 >
                   <option value="SALE">Sale</option>
                   <option value="SERVICE">Service</option>
@@ -350,7 +349,6 @@ export function InvoiceForm() {
                   onChange={(event) =>
                     setInvoiceDate(event.target.value)
                   }
-                  className="border-zinc-700 bg-[#151517]"
                 />
               </Field>
 
@@ -361,7 +359,6 @@ export function InvoiceForm() {
                   onChange={(event) =>
                     setDueDate(event.target.value)
                   }
-                  className="border-zinc-700 bg-[#151517]"
                 />
               </Field>
 
@@ -372,158 +369,150 @@ export function InvoiceForm() {
                     setTableName(event.target.value)
                   }
                   placeholder="Optional"
-                  className="border-zinc-700 bg-[#151517]"
                 />
               </Field>
             </div>
 
-            <Field label="Notes" className="mt-5">
-              <Textarea
-                value={notes}
-                onChange={(event) => setNotes(event.target.value)}
-                placeholder="Invoice notes..."
-                className="min-h-24 border-zinc-700 bg-[#151517]"
-              />
-            </Field>
+            <div style={{ marginTop: 20 }}>
+              <Field label="Notes">
+                <Textarea
+                  value={notes}
+                  onChange={(event) => setNotes(event.target.value)}
+                  placeholder="Invoice notes..."
+                />
+              </Field>
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      <Card className="mt-6 border-zinc-800 bg-[#1e1e24] text-white">
-        <CardContent className="p-0">
-          <div className="flex flex-col gap-4 border-b border-zinc-800 p-6 md:flex-row md:items-center md:justify-between">
-            <h2 className="text-2xl font-bold">Line Items</h2>
+      <div className="line-items">
+        <div className="line-items__header">
+          <h2 className="line-items__title">Line Items</h2>
 
-            <ItemPickerDialog onSelect={addItem} />
-          </div>
+          <ItemPickerDialog onSelect={addItem} />
+        </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[950px] text-sm">
-              <thead className="border-b border-zinc-800 text-left text-xs uppercase text-zinc-400">
+        <div className="line-items__table-scroll">
+          <table className="line-items__table">
+            <thead>
+              <tr>
+                <th>Item Details</th>
+                <th>Quantity</th>
+                <th>Rate</th>
+                <th>Tax</th>
+                <th>Discount</th>
+                <th>Amount</th>
+                <th />
+              </tr>
+            </thead>
+
+            <tbody>
+              {lineItems.length === 0 ? (
                 <tr>
-                  <th className="px-6 py-4">Item Details</th>
-                  <th className="px-4 py-4">Quantity</th>
-                  <th className="px-4 py-4">Rate</th>
-                  <th className="px-4 py-4">Tax</th>
-                  <th className="px-4 py-4">Discount</th>
-                  <th className="px-4 py-4 text-right">Amount</th>
-                  <th className="px-4 py-4" />
+                  <td colSpan={7} className="line-items__empty">
+                    Click &ldquo;Add Items&rdquo; to choose catalogue items.
+                  </td>
                 </tr>
-              </thead>
+              ) : (
+                lineItems.map((line) => (
+                  <tr key={line.id} className="line-items__row">
+                    <td>
+                      <p className="line-items__name">
+                        {line.item_name}
+                      </p>
 
-              <tbody>
-                {lineItems.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={7}
-                      className="p-12 text-center text-zinc-500"
-                    >
-                      Click “Add Items” to choose catalogue items.
+                      <p className="line-items__meta">
+                        {line.unit} · HSN: {line.hsn_code || "—"}
+                      </p>
+                    </td>
+
+                    <td>
+                      <Input
+                        type="number"
+                        min="1"
+                        value={line.quantity}
+                        onChange={(event) =>
+                          updateLine(line.id, {
+                            quantity: Math.max(
+                              1,
+                              Number(event.target.value)
+                            ),
+                          })
+                        }
+                        className="line-items__input--qty"
+                      />
+                    </td>
+
+                    <td>
+                      <Input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={line.unit_price}
+                        onChange={(event) =>
+                          updateLine(line.id, {
+                            unit_price: Number(event.target.value),
+                          })
+                        }
+                        className="line-items__input--rate"
+                      />
+                    </td>
+
+                    <td>
+                      <Input
+                        type="number"
+                        min="0"
+                        value={line.tax_rate}
+                        onChange={(event) =>
+                          updateLine(line.id, {
+                            tax_rate: Number(event.target.value),
+                          })
+                        }
+                        className="line-items__input--tax"
+                      />
+                    </td>
+
+                    <td>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={line.line_discount}
+                        onChange={(event) =>
+                          updateLine(line.id, {
+                            line_discount: Number(event.target.value),
+                          })
+                        }
+                        className="line-items__input--discount"
+                      />
+                    </td>
+
+                    <td className="line-items__amount">
+                      ₹{line.line_total.toFixed(2)}
+                    </td>
+
+                    <td>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeLine(line.id)}
+                        className="line-items__delete"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </td>
                   </tr>
-                ) : (
-                  lineItems.map((line) => (
-                    <tr
-                      key={line.id}
-                      className="border-b border-zinc-800/70"
-                    >
-                      <td className="px-6 py-4">
-                        <p className="font-semibold">
-                          {line.item_name}
-                        </p>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-                        <p className="mt-1 text-xs text-zinc-500">
-                          {line.unit} · HSN: {line.hsn_code || "—"}
-                        </p>
-                      </td>
-
-                      <td className="px-4 py-4">
-                        <Input
-                          type="number"
-                          min="1"
-                          value={line.quantity}
-                          onChange={(event) =>
-                            updateLine(line.id, {
-                              quantity: Math.max(
-                                1,
-                                Number(event.target.value)
-                              ),
-                            })
-                          }
-                          className="w-20 border-zinc-700 bg-[#151517]"
-                        />
-                      </td>
-
-                      <td className="px-4 py-4">
-                        <Input
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          value={line.unit_price}
-                          onChange={(event) =>
-                            updateLine(line.id, {
-                              unit_price: Number(event.target.value),
-                            })
-                          }
-                          className="w-28 border-zinc-700 bg-[#151517]"
-                        />
-                      </td>
-
-                      <td className="px-4 py-4">
-                        <Input
-                          type="number"
-                          min="0"
-                          value={line.tax_rate}
-                          onChange={(event) =>
-                            updateLine(line.id, {
-                              tax_rate: Number(event.target.value),
-                            })
-                          }
-                          className="w-20 border-zinc-700 bg-[#151517]"
-                        />
-                      </td>
-
-                      <td className="px-4 py-4">
-                        <Input
-                          type="number"
-                          min="0"
-                          max="100"
-                          value={line.line_discount}
-                          onChange={(event) =>
-                            updateLine(line.id, {
-                              line_discount: Number(event.target.value),
-                            })
-                          }
-                          className="w-20 border-zinc-700 bg-[#151517]"
-                        />
-                      </td>
-
-                      <td className="px-4 py-4 text-right font-bold">
-                        ₹{line.line_total.toFixed(2)}
-                      </td>
-
-                      <td className="px-4 py-4">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => removeLine(line.id)}
-                          className="text-zinc-500 hover:bg-red-950/40 hover:text-red-400"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="mt-6 grid gap-6 xl:grid-cols-[1.5fr_0.75fr]">
-        <Card className="border-zinc-800 bg-[#1e1e24] text-white">
-          <CardContent className="p-6">
+      <div className="invoice-form__details-grid" style={{ marginTop: 24 }}>
+        <Card className="invoice-form__section">
+          <CardContent className="invoice-form__section-content">
             <Field label="Payment Terms">
               <Textarea
                 value={paymentTerms}
@@ -531,20 +520,19 @@ export function InvoiceForm() {
                   setPaymentTerms(event.target.value)
                 }
                 placeholder="e.g. Payment due within 15 days"
-                className="min-h-24 border-zinc-700 bg-[#151517]"
               />
             </Field>
           </CardContent>
         </Card>
 
-        <Card className="border-zinc-800 bg-[#1e1e24] text-white">
-          <CardContent className="space-y-4 p-6">
+        <Card className="invoice-form__section">
+          <CardContent className="invoice-form__section-content" style={{ display: "grid", gap: 16 }}>
             <Summary label="Subtotal" value={totals.subtotal} />
 
             <Summary label="Total Tax" value={totals.taxAmount} />
 
-            <div className="flex items-center justify-between gap-3">
-              <span className="font-semibold text-zinc-300">
+            <div className="summary-panel__row">
+              <span className="summary-panel__label">
                 Discount %
               </span>
 
@@ -556,7 +544,7 @@ export function InvoiceForm() {
                 onChange={(event) =>
                   setDiscountPercent(Number(event.target.value))
                 }
-                className="w-24 border-zinc-700 bg-[#151517] text-right"
+                className="summary-panel__discount-input"
               />
             </div>
 
@@ -565,21 +553,19 @@ export function InvoiceForm() {
               value={totals.discountAmount}
             />
 
-            <div className="border-t border-zinc-800 pt-4">
-              <div className="flex items-center justify-between">
-                <span className="text-xl font-bold">Grand Total</span>
+            <div className="summary-panel__total">
+              <span className="summary-panel__total-label">Grand Total</span>
 
-                <span className="text-3xl font-bold text-[#FFCC00]">
-                  ₹{totals.roundedTotal.toFixed(2)}
-                </span>
-              </div>
+              <span className="summary-panel__total-value">
+                ₹{totals.roundedTotal.toFixed(2)}
+              </span>
             </div>
           </CardContent>
         </Card>
       </div>
 
       {formError && (
-        <p className="mt-6 rounded-xl border border-red-900/60 bg-red-950/40 p-4 text-sm text-red-300">
+        <p className="form-error" style={{ marginTop: 24 }}>
           {formError}
         </p>
       )}
@@ -590,15 +576,13 @@ export function InvoiceForm() {
 function Field({
   label,
   children,
-  className = "",
 }: {
   label: string;
   children: React.ReactNode;
-  className?: string;
 }) {
   return (
-    <div className={className}>
-      <Label className="mb-2 block text-xs font-bold uppercase text-zinc-400">
+    <div className="form-field">
+      <Label className="form-field__label">
         {label}
       </Label>
 
@@ -615,12 +599,12 @@ function AddressCard({
   value?: string | null;
 }) {
   return (
-    <div className="min-h-28 rounded-xl border border-zinc-800 bg-[#151517] p-4">
-      <p className="text-xs font-bold uppercase text-zinc-500">
+    <div className="address-card">
+      <p className="address-card__title">
         {title}
       </p>
 
-      <p className="mt-3 whitespace-pre-wrap text-sm text-zinc-300">
+      <p className="address-card__value">
         {value || "Select a customer to populate address"}
       </p>
     </div>
@@ -635,9 +619,9 @@ function Summary({
   value: number;
 }) {
   return (
-    <div className="flex items-center justify-between">
-      <span className="font-semibold text-zinc-300">{label}</span>
-      <span className="font-bold">₹{value.toFixed(2)}</span>
+    <div className="summary-panel__row">
+      <span className="summary-panel__label">{label}</span>
+      <span className="summary-panel__value">₹{value.toFixed(2)}</span>
     </div>
   );
 }

@@ -53,80 +53,66 @@ export function EstimatesDashboard() {
   }
 
   return (
-    <section className="min-h-screen bg-[#111113] p-5 pt-20 text-white lg:p-8 lg:pt-8">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+    <section className="estimates-dashboard">
+      <div className="estimates-dashboard__header">
         <div>
-          <p className="text-sm font-bold uppercase tracking-[0.16em] text-[#FFCC00]">
+          <p className="estimates-dashboard__eyebrow">
             Sales
           </p>
-          <h1 className="mt-1 text-3xl font-bold">Estimates</h1>
-          <p className="mt-2 text-sm text-zinc-400">
+          <h1 className="estimates-dashboard__title">Estimates</h1>
+          <p className="estimates-dashboard__intro">
             View and manage your recent quotes.
           </p>
         </div>
 
         <Button
           asChild
-          className="bg-[#FFCC00] font-bold text-black hover:bg-yellow-400"
+          className="estimates-dashboard__primary-action"
         >
           <Link href="/dashboard/estimates/new">
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus size={16} />
             New Estimate
           </Link>
         </Button>
       </div>
 
-      <div className="mt-7 grid gap-4 md:grid-cols-3">
+      <div className="estimates-dashboard__kpis">
         <Kpi label="Total Estimates" value={estimates.length} />
         <Kpi label="Draft Estimates" value={drafts} />
         <Kpi label="Expiring Soon" value={expiringSoon} danger />
       </div>
 
-      <Card className="mt-7 border-zinc-800 bg-[#1e1e24] text-white">
-        <CardContent className="p-0">
-          <div className="border-b border-zinc-800 p-5">
-            <h2 className="text-xl font-bold">Estimate Directory</h2>
+      <Card className="estimates-dashboard__directory">
+        <CardContent className="estimates-dashboard__directory-content">
+          <div className="estimates-dashboard__directory-head">
+            <h2 className="estimates-dashboard__directory-title">Estimate Directory</h2>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[750px] text-left text-sm">
-              <thead className="border-b border-zinc-800 text-xs uppercase text-zinc-400">
+          <div className="estimates-dashboard__table-scroll">
+            <table className="estimates-dashboard__table">
+              <thead>
                 <tr>
-                  <th className="px-6 py-4">Estimate #</th>
-                  <th className="px-6 py-4">Customer</th>
-                  <th className="px-6 py-4">Date</th>
-                  <th className="px-6 py-4">Amount</th>
-                  <th className="px-6 py-4">Status</th>
-                  <th className="px-6 py-4 text-right">Actions</th>
+                  <th>Estimate #</th><th>Customer</th><th>Date</th><th>Amount</th><th>Status</th><th>Actions</th>
                 </tr>
               </thead>
 
               <tbody>
                 {isLoading ? (
                   <tr>
-                    <td
-                      colSpan={6}
-                      className="p-14 text-center text-zinc-400"
-                    >
-                      <Loader2 className="mx-auto mb-3 h-5 w-5 animate-spin" />
+                    <td colSpan={6} className="estimates-dashboard__state">
+                      <Loader2 className="estimates-dashboard__spinner" />
                       Loading estimates...
                     </td>
                   </tr>
                 ) : error ? (
                   <tr>
-                    <td
-                      colSpan={6}
-                      className="p-14 text-center text-red-300"
-                    >
+                    <td colSpan={6} className="estimates-dashboard__state estimates-dashboard__state--error">
                       Unable to load estimates.
                     </td>
                   </tr>
                 ) : estimates.length === 0 ? (
                   <tr>
-                    <td
-                      colSpan={6}
-                      className="p-14 text-center text-zinc-500"
-                    >
+                    <td colSpan={6} className="estimates-dashboard__state">
                       No estimates created yet.
                     </td>
                   </tr>
@@ -137,53 +123,44 @@ export function EstimatesDashboard() {
                       onClick={() =>
                         router.push(`/dashboard/estimates/${estimate.id}`)
                       }
-                      className="cursor-pointer border-b border-zinc-800/70 transition hover:bg-zinc-800/30"
+                      className="estimates-dashboard__row"
                     >
-                      <td className="px-6 py-5 font-bold text-[#FFCC00]">
+                      <td className="estimates-dashboard__number">
                         {estimate.estimate_number}
                       </td>
 
-                      {/* ADDED text-white HERE */}
-                      <td className="px-6 py-5 font-semibold text-white">
+                      <td className="estimates-dashboard__customer">
                         {estimate.customer_name || "Unknown customer"}
                       </td>
 
-                      {/* CHANGED to text-zinc-300 for better visibility */}
-                      <td className="px-6 py-5 text-zinc-300">
+                      <td className="estimates-dashboard__date">
                         {estimate.estimate_date
                           ? new Date(
                             estimate.estimate_date
                           ).toLocaleDateString("en-IN")
                           : "—"}
                       </td>
-                      
-                      {/* ADDED text-white HERE */}
-                      <td className="px-6 py-5 font-bold text-white">
+
+                      <td className="estimates-dashboard__amount">
                         {money.format(estimate.rounded_total)}
                       </td>
 
-                      <td className="px-6 py-5">
-                        <Badge
-                          className={
-                            estimate.is_draft
-                              ? "bg-zinc-700 text-zinc-200 hover:bg-zinc-700"
-                              : "bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/15"
-                          }
-                        >
+                      <td>
+                        <Badge className="estimates-dashboard__badge">
                           {estimate.is_draft ? "Draft" : "Finalized"}
                         </Badge>
                       </td>
 
-                      <td className="px-6 py-5">
-                        <div className="flex justify-end">
+                      <td>
+                        <div className="estimates-dashboard__actions">
                           <Button
                             variant="ghost"
                             size="icon"
                             onClick={(event) => {
-                                event.stopPropagation();
-                                void handleDelete(estimate.id);
+                              event.stopPropagation();
+                              void handleDelete(estimate.id);
                             }}
-                            className="text-zinc-500 hover:bg-red-950/40 hover:text-red-400"
+                            className="estimates-dashboard__delete"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -211,16 +188,13 @@ function Kpi({
   danger?: boolean;
 }) {
   return (
-    <Card className="border-zinc-800 bg-[#1e1e24] text-white">
-      <CardContent className="p-5">
-        <FileText className="mb-4 h-5 w-5 text-[#FFCC00]" />
-        <p className="text-xs font-bold uppercase tracking-wide text-zinc-400">
+    <Card className="estimates-kpi">
+      <CardContent>
+        <FileText className="estimates-kpi__icon" />
+        <p className="estimates-kpi__label">
           {label}
         </p>
-        <p
-          className={`mt-2 text-3xl font-bold ${danger ? "text-red-300" : "text-white"
-            }`}
-        >
+        <p className={`estimates-kpi__value${danger ? " estimates-kpi__value--danger" : ""}`}>
           {value}
         </p>
       </CardContent>

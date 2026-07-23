@@ -118,30 +118,30 @@ export function CustomersDashboard() {
   }
 
   return (
-    <section className="min-h-screen bg-[#111113] p-5 pt-20 text-white lg:p-8 lg:pt-8">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+    <section className="customers-dashboard">
+      <div className="customers-dashboard__header">
         <div>
-          <p className="text-sm font-bold uppercase tracking-[0.16em] text-[#FFCC00]">
+          <p className="customers-dashboard__eyebrow">
             Contacts
           </p>
 
-          <h1 className="mt-1 text-3xl font-bold">Customers</h1>
+          <h1 className="customers-dashboard__title">Customers</h1>
 
-          <p className="mt-2 text-sm text-zinc-400">
+          <p className="customers-dashboard__intro">
             Manage customer contacts, addresses, and GST details.
           </p>
         </div>
 
         <Button
           onClick={openCreate}
-          className="bg-[#FFCC00] font-bold text-black hover:bg-yellow-400"
+          className="customers-dashboard__primary-action"
         >
-          <Plus className="mr-2 h-4 w-4" />
+          <Plus size={16} />
           Add Customer
         </Button>
       </div>
 
-      <div className="mt-7 grid gap-4 md:grid-cols-3">
+      <div className="customers-dashboard__kpis">
         <KpiCard
           label="Total Customers"
           value={customers.length}
@@ -158,22 +158,22 @@ export function CustomersDashboard() {
         />
       </div>
 
-      <Card className="mt-7 border-zinc-800 bg-[#1e1e24] text-white">
-        <CardContent className="p-0">
-          <div className="flex flex-col gap-4 border-b border-zinc-800 p-5 md:flex-row md:items-center md:justify-between">
+      <Card className="customers-dashboard__directory">
+        <CardContent className="customers-dashboard__directory-content">
+          <div className="customers-dashboard__directory-head">
             <div>
-              <h2 className="text-xl font-bold">
+              <h2 className="customers-dashboard__directory-title">
                 Customer Directory
               </h2>
 
-              <p className="mt-1 text-sm text-zinc-500">
+              <p className="customers-dashboard__directory-count">
                 {filteredCustomers.length} customer
                 {filteredCustomers.length === 1 ? "" : "s"} shown
               </p>
             </div>
 
-            <div className="relative w-full md:w-[330px]">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+            <div className="customers-dashboard__search">
+              <Search className="customers-dashboard__search-icon" />
 
               <Input
                 value={search}
@@ -181,26 +181,22 @@ export function CustomersDashboard() {
                   setSearch(event.target.value)
                 }
                 placeholder="Search customers..."
-                className="border-zinc-700 bg-[#151517] pl-10"
+                className="customers-dashboard__search-input"
               />
             </div>
           </div>
 
           {actionError && (
-            <p className="mx-5 mt-5 rounded-xl border border-red-900/60 bg-red-950/40 p-3 text-sm text-red-300">
+            <p className="customers-dashboard__error">
               {actionError}
             </p>
           )}
 
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[950px] text-left text-sm">
-              <thead className="border-b border-zinc-800 text-xs uppercase text-zinc-400">
+          <div className="customers-dashboard__table-scroll">
+            <table className="customers-dashboard__table">
+              <thead>
                 <tr>
-                  <th className="px-6 py-4">Customer</th>
-                  <th className="px-6 py-4">Contact</th>
-                  <th className="px-6 py-4">GST Details</th>
-                  <th className="px-6 py-4">Billing Address</th>
-                  <th className="px-6 py-4 text-right">Actions</th>
+                  <th>Customer</th><th>Contact</th><th>GST Details</th><th>Billing Address</th><th>Actions</th>
                 </tr>
               </thead>
 
@@ -209,9 +205,9 @@ export function CustomersDashboard() {
                   <tr>
                     <td
                       colSpan={5}
-                      className="p-14 text-center text-zinc-400"
+                      className="customers-dashboard__state"
                     >
-                      <Loader2 className="mx-auto mb-3 h-5 w-5 animate-spin" />
+                      <Loader2 className="customers-dashboard__spinner" />
                       Loading customers...
                     </td>
                   </tr>
@@ -219,7 +215,7 @@ export function CustomersDashboard() {
                   <tr>
                     <td
                       colSpan={5}
-                      className="p-14 text-center text-red-300"
+                      className="customers-dashboard__state customers-dashboard__state--error"
                     >
                       Unable to load customers.
                     </td>
@@ -228,7 +224,7 @@ export function CustomersDashboard() {
                   <tr>
                     <td
                       colSpan={5}
-                      className="p-14 text-center text-zinc-500"
+                      className="customers-dashboard__state"
                     >
                       No customers found. Add your first customer.
                     </td>
@@ -237,22 +233,21 @@ export function CustomersDashboard() {
                   filteredCustomers.map((customer) => (
                     <tr
                       key={customer.id}
-                      className="border-b border-zinc-800/70 hover:bg-zinc-800/30"
+                      className="customers-dashboard__row"
                     >
-                      <td className="px-6 py-5">
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FFCC00]/15 font-bold text-[#FFCC00]">
+                      <td><div className="customers-dashboard__customer">
+                          <div className="customers-dashboard__avatar">
                             {customer.customer_name
                               .slice(0, 2)
                               .toUpperCase()}
                           </div>
 
                           <div>
-                            <p className="font-bold text-white">
+                            <p className="customers-dashboard__customer-name">
                               {customer.customer_name}
                             </p>
 
-                            <p className="mt-1 text-xs text-zinc-500">
+                            <p className="customers-dashboard__customer-company">
                               {customer.customer_business_name ||
                                 "Individual customer"}
                             </p>
@@ -260,63 +255,59 @@ export function CustomersDashboard() {
                         </div>
                       </td>
 
-                      <td className="px-6 py-5">
+                      <td>
                         {customer.customer_phone && (
-                          <p className="flex items-center gap-2 text-zinc-300">
-                            <Phone className="h-3.5 w-3.5 text-zinc-500" />
+                          <p className="customers-dashboard__contact"><Phone size={14} />
                             {customer.customer_phone}
                           </p>
                         )}
 
                         {customer.customer_email && (
-                          <p className="mt-2 flex items-center gap-2 text-zinc-400">
-                            <Mail className="h-3.5 w-3.5 text-zinc-500" />
+                          <p className="customers-dashboard__contact customers-dashboard__contact--email"><Mail size={14} />
                             {customer.customer_email}
                           </p>
                         )}
 
                         {!customer.customer_phone &&
                           !customer.customer_email && (
-                            <span className="text-zinc-500">
+                            <span className="customers-dashboard__empty">
                               No contact details
                             </span>
                           )}
                       </td>
 
-                      <td className="px-6 py-5">
+                      <td>
                         {customer.customer_gst ? (
                           <>
-                            <Badge className="bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/15">
+                            <Badge className="customers-dashboard__badge">
                               GST Registered
                             </Badge>
 
-                            <p className="mt-2 font-mono text-xs text-zinc-400">
+                            <p className="customers-dashboard__gst">
                               {customer.customer_gst}
                             </p>
                           </>
                         ) : (
-                          <Badge className="bg-zinc-700 text-zinc-300 hover:bg-zinc-700">
+                          <Badge className="customers-dashboard__badge">
                             Unregistered
                           </Badge>
                         )}
                       </td>
 
-                      <td className="max-w-[250px] px-6 py-5">
-                        <p className="line-clamp-2 text-zinc-400">
+                      <td className="customers-dashboard__address"><p>
                           {customer.customer_billing_address ||
                             "No billing address"}
                         </p>
                       </td>
 
-                      <td className="px-6 py-5">
-                        <div className="flex justify-end gap-2">
+                      <td><div className="customers-dashboard__actions">
                           <Button
                             variant="ghost"
                             size="icon"
                             onClick={() => openEdit(customer)}
-                            className="text-zinc-400 hover:bg-zinc-800 hover:text-[#FFCC00]"
+                            className="customers-dashboard__icon-action"
                           >
-                            <Edit3 className="h-4 w-4" />
+                            <Edit3 size={16} />
                           </Button>
 
                           <Button
@@ -325,9 +316,9 @@ export function CustomersDashboard() {
                             onClick={() =>
                               void removeCustomer(customer)
                             }
-                            className="text-zinc-400 hover:bg-red-950/40 hover:text-red-400"
+                            className="customers-dashboard__icon-action"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 size={16} />
                           </Button>
                         </div>
                       </td>
@@ -362,15 +353,14 @@ function KpiCard({
   value: number;
 }) {
   return (
-    <Card className="border-zinc-800 bg-[#1e1e24] text-white">
-      <CardContent className="p-5">
-        <Users className="mb-4 h-5 w-5 text-[#FFCC00]" />
+    <Card className="customers-kpi"><CardContent className="customers-kpi__content">
+        <Users size={20} className="customers-kpi__icon" />
 
-        <p className="text-xs font-bold uppercase tracking-wide text-zinc-400">
+        <p className="customers-kpi__label">
           {label}
         </p>
 
-        <p className="mt-2 text-3xl font-bold">{value}</p>
+        <p className="customers-kpi__value">{value}</p>
       </CardContent>
     </Card>
   );

@@ -46,44 +46,39 @@ export function ItemPickerDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button
-          type="button"
-          className="bg-[#FFCC00] font-bold text-black hover:bg-yellow-400"
-        >
+        <Button type="button" className="item-picker__trigger">
           <Plus className="mr-2 h-4 w-4" />
           Add Items
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="max-w-3xl border-zinc-800 bg-[#1e1e24] text-white">
+      <DialogContent className="form-dialog">
         <DialogHeader>
-          <DialogTitle className="text-xl">
-            Add Item from Catalogue
-          </DialogTitle>
+          <DialogTitle>Add Item from Catalogue</DialogTitle>
         </DialogHeader>
 
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+        <div className="item-picker__search">
+          <Search className="item-picker__search-icon" />
 
           <Input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Filter catalogue items..."
-            className="border-zinc-700 bg-[#151517] pl-10 text-white"
+            className="item-picker__search-input"
           />
         </div>
 
-        <div className="max-h-[420px] overflow-y-auto rounded-xl border border-zinc-800">
+        <div className="item-picker__list">
           {isLoading ? (
-            <div className="flex justify-center p-10 text-zinc-400">
+            <div className="item-picker__state">
               <Loader2 className="h-5 w-5 animate-spin" />
             </div>
           ) : error ? (
-            <p className="p-6 text-sm text-red-300">
+            <p className="item-picker__state item-picker__state--error">
               Unable to load items.
             </p>
           ) : filteredItems.length === 0 ? (
-            <p className="p-8 text-center text-sm text-zinc-500">
+            <p className="item-picker__state">
               No catalogue items found.
             </p>
           ) : (
@@ -92,26 +87,26 @@ export function ItemPickerDialog({
                 key={item.id}
                 type="button"
                 onClick={() => addItem(item)}
-                className="flex w-full items-center justify-between border-b border-zinc-800 px-4 py-4 text-left last:border-0 hover:bg-zinc-800/70"
+                className="item-picker__row"
               >
-                <div className="flex items-center gap-3">
-                  <div className="rounded-lg bg-zinc-800 p-2 text-[#FFCC00]">
+                <div className="item-picker__item">
+                  <div className="item-picker__icon">
                     <Package className="h-4 w-4" />
                   </div>
 
                   <div>
-                    <p className="font-semibold">{item.item_name}</p>
-                    <p className="mt-1 text-xs text-zinc-500">
+                    <p className="item-picker__name">{item.item_name}</p>
+                    <p className="item-picker__meta">
                       {item.item_code} · {item.unit || "PCS"}
                     </p>
                   </div>
                 </div>
 
-                <div className="text-right">
-                  <p className="font-semibold">
+                <div className="item-picker__price-block">
+                  <p className="item-picker__price">
                     ₹{Number(item.item_cost).toFixed(2)}
                   </p>
-                  <p className="mt-1 text-xs text-zinc-500">
+                  <p className="item-picker__tax">
                     GST {Number(item.tax_rate)}%
                   </p>
                 </div>

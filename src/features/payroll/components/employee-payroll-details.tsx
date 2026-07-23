@@ -33,33 +33,26 @@ export function EmployeePayrollDetails({
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto border-zinc-800 bg-[#1e1e24] text-white">
-        <DialogHeader className="flex flex-row items-center justify-between">
-          <DialogTitle className="text-2xl">
-            {employeeName}
-          </DialogTitle>
+      <DialogContent className="form-dialog">
+        <DialogHeader>
+          <DialogTitle>{employeeName}</DialogTitle>
 
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onClose}
-            className="text-zinc-400 hover:text-white"
-          >
+          <Button variant="ghost" size="icon" onClick={onClose}>
             <X className="h-5 w-5" />
           </Button>
         </DialogHeader>
 
         {isLoading ? (
-          <div className="flex justify-center p-12 text-zinc-400">
+          <div className="payroll-details__loading">
             <Loader2 className="h-6 w-6 animate-spin" />
           </div>
         ) : error || !data ? (
-          <p className="p-6 text-red-300">
+          <p className="payroll-details__error">
             Unable to load employee payroll details.
           </p>
         ) : (
-          <div className="space-y-6 pt-3">
-            <div className="grid gap-4 md:grid-cols-3">
+          <div className="payroll-details">
+            <div className="payroll-details__summary">
               <Summary
                 label="Total Loans"
                 value={money(data.summary.totalLoans)}
@@ -105,14 +98,12 @@ function Summary({
   highlight?: boolean;
 }) {
   return (
-    <div className="rounded-xl border border-zinc-800 bg-[#151517] p-4">
-      <p className="text-xs font-bold uppercase text-zinc-500">
-        {label}
-      </p>
+    <div className="payroll-details__summary-card">
+      <p className="payroll-details__summary-label">{label}</p>
 
       <p
-        className={`mt-2 text-xl font-black ${
-          highlight ? "text-[#FFCC00]" : "text-white"
+        className={`payroll-details__summary-value${
+          highlight ? " payroll-kpi__value--highlight" : ""
         }`}
       >
         {value}
@@ -139,44 +130,39 @@ function TransactionTable({
   titleKey: "reason" | "source";
 }) {
   return (
-    <div className="overflow-hidden rounded-xl border border-zinc-800">
-      <div className="border-b border-zinc-800 bg-[#151517] px-5 py-4">
-        <h3 className="font-bold">{title}</h3>
+    <div className="payroll-details__table-block">
+      <div className="payroll-details__table-head">
+        <h3 className="payroll-details__table-title">{title}</h3>
       </div>
 
-      <table className="w-full text-left text-sm">
-        <thead className="border-b border-zinc-800 text-xs uppercase text-zinc-500">
+      <table className="payroll-details__table">
+        <thead>
           <tr>
-            <th className="px-5 py-3">Date</th>
-            <th className="px-5 py-3">Details</th>
-            <th className="px-5 py-3 text-right">Amount</th>
+            <th>Date</th>
+            <th>Details</th>
+            <th style={{ textAlign: "right" }}>Amount</th>
           </tr>
         </thead>
 
         <tbody>
           {rows.length === 0 ? (
             <tr>
-              <td colSpan={3} className="p-6 text-center text-zinc-500">
+              <td colSpan={3} className="payroll-details__summary-label" style={{ textAlign: "center", padding: 24 }}>
                 No records found.
               </td>
             </tr>
           ) : (
             rows.map((row) => (
-              <tr
-                key={row.id}
-                className="border-b border-zinc-800/70 last:border-0"
-              >
-                <td className="px-5 py-4 text-zinc-400">
+              <tr key={row.id} className="payroll-details__row">
+                <td>
                   {row.date
                     ? new Date(row.date).toLocaleDateString("en-IN")
                     : "—"}
                 </td>
 
-                <td className="px-5 py-4 font-medium">
-                  {row[titleKey] || "—"}
-                </td>
+                <td>{row[titleKey] || "—"}</td>
 
-                <td className="px-5 py-4 text-right font-bold text-[#FFCC00]">
+                <td className="payroll-details__amount">
                   {money(Number(row.amount || 0))}
                 </td>
               </tr>
