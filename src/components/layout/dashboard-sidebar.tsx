@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   BarChart3,
+  Box,
   ClipboardList,
   FileText,
   LayoutDashboard,
@@ -48,6 +49,11 @@ const navigation = [
     label: "Manage Items",
     href: "/dashboard/items",
     icon: Package,
+  },
+  {
+    label: "Products",
+    href: "/dashboard/products",
+    icon: Box,
   },
   {
     label: "Employees",
