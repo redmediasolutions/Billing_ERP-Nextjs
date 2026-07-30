@@ -31,45 +31,34 @@
       "static/chunks/main-app.js",
       "static/chunks/app/(dashboard)/layout.js"
     ],
-    "/(dashboard)/dashboard/estimates/page": [
+    "/(dashboard)/dashboard/products/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/(dashboard)/dashboard/estimates/page.js"
+      "static/css/app/(dashboard)/dashboard/products/page.css",
+      "static/chunks/app/(dashboard)/dashboard/products/page.js"
     ],
-    "/(dashboard)/dashboard/invoices/page": [
+    "/(dashboard)/dashboard/stocks/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/(dashboard)/dashboard/invoices/page.js"
+      "static/css/app/(dashboard)/dashboard/stocks/page.css",
+      "static/chunks/app/(dashboard)/dashboard/stocks/page.js"
     ],
-    "/(dashboard)/dashboard/estimates/[id]/page": [
+    "/(dashboard)/dashboard/brands/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/(dashboard)/dashboard/estimates/[id]/page.js"
+      "static/css/app/(dashboard)/dashboard/brands/page.css",
+      "static/chunks/app/(dashboard)/dashboard/brands/page.js"
     ],
-    "/(dashboard)/dashboard/payroll/page": [
+    "/(dashboard)/dashboard/vendors/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/(dashboard)/dashboard/payroll/page.js"
+      "static/css/app/(dashboard)/dashboard/vendors/page.css",
+      "static/chunks/app/(dashboard)/dashboard/vendors/page.js"
     ],
-    "/(dashboard)/dashboard/customers/page": [
+    "/_not-found/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/(dashboard)/dashboard/customers/page.js"
-    ],
-    "/(dashboard)/dashboard/estimates/new/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(dashboard)/dashboard/estimates/new/page.js"
-    ],
-    "/(dashboard)/dashboard/employees/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(dashboard)/dashboard/employees/page.js"
-    ],
-    "/(dashboard)/dashboard/items/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(dashboard)/dashboard/items/page.js"
+      "static/chunks/app/_not-found/page.js"
     ]
   }
 }

@@ -1,65 +1,61 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { productsService } from "../services/products.service";
-import type { Product, ProductInput } from "../types";
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 
-export function useProducts() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+import { productRepository } from "../repository/product-repository";
+import type { ProductInput } from "../types/product.types";
 
-  const refresh = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError("");
+const PRODUCTS_QUERY_KEY = ["products"];
 
-      const result = await productsService.list();
-      setProducts(result);
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Unable to load products."
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+export function useProducts(search = "") {
+  return useQuery({
+    queryKey: [...PRODUCTS_QUERY_KEY, search],
+    queryFn: () => productRepository.getAll(search),
+  });
+}
 
-  useEffect(() => {
-    void refresh();
-  }, [refresh]);
+export function useCreateProduct() {
+  const queryClient = useQueryClient();
 
-  async function create(input: ProductInput) {
-    const newProduct = await productsService.create(input);
+  return useMutation({
+    mutationFn: (input: ProductInput) => productRepository.create(input),
+    onSuccess: () =>
+      queryClient.invalidateQueries({
+        queryKey: PRODUCTS_QUERY_KEY,
+      }),
+  });
+}
 
-    setProducts((current) => [newProduct, ...current]);
-  }
+export function useUpdateProduct() {
+  const queryClient = useQueryClient();
 
-  async function update(id: number, input: ProductInput) {
-    const updatedProduct = await productsService.update(id, input);
+  return useMutation({
+    mutationFn: ({
+      id,
+      input,
+    }: {
+      id: number;
+      input: ProductInput;
+    }) => productRepository.update(id, input),
+    onSuccess: () =>
+      queryClient.invalidateQueries({
+        queryKey: PRODUCTS_QUERY_KEY,
+      }),
+  });
+}
 
-    setProducts((current) =>
-      current.map((product) =>
-        product.id === id ? updatedProduct : product
-      )
-    );
-  }
+export function useDeleteProduct() {
+  const queryClient = useQueryClient();
 
-  async function remove(id: number) {
-    await productsService.remove(id);
-
-    setProducts((current) =>
-      current.filter((product) => product.id !== id)
-    );
-  }
-
-  return {
-    products,
-    loading,
-    error,
-    refresh,
-    create,
-    update,
-    remove,
-  };
+  return useMutation({
+    mutationFn: (id: number) => productRepository.remove(id),
+    onSuccess: () =>
+      queryClient.invalidateQueries({
+        queryKey: PRODUCTS_QUERY_KEY,
+      }),
+  });
 }

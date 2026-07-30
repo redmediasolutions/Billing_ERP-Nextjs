@@ -1,295 +1,199 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
-  Box,
   Edit3,
   Loader2,
+  PackagePlus,
   Plus,
-  RefreshCw,
   Search,
   Trash2,
 } from "lucide-react";
-import { ProductFormModal } from "../addform/product-form-modal";
-import { useProducts } from "../hooks/use-products";
-import type { Product, ProductInput } from "../types";
+
+import {
+  useDeleteProduct,
+  useProducts,
+} from "../hooks/use-products";
+import type { Product } from "../types/product.types";
+import { ProductForm } from "./product-form";
+import styles from "../products.module.css";
 
 export function ProductsDashboard() {
-  const { products, loading, error, refresh, create, update, remove } =
-    useProducts();
-
   const [search, setSearch] = useState("");
-  const [formOpen, setFormOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [actionError, setActionError] = useState("");
+  const [showForm, setShowForm] = useState(false);
+  const [selectedProduct, setSelectedProduct] =
+    useState<Product | null>(null);
 
-  const filteredProducts = useMemo(() => {
-    const term = search.trim().toLowerCase();
+  const { data: products = [], isLoading, error } = useProducts(search);
+  const deleteProduct = useDeleteProduct();
 
-    if (!term) return products;
-
-    return products.filter((product) =>
-      [
-        product.product_name,
-        product.product_code,
-        product.product_HSN || "",
-        product.product_description || "",
-      ].some((value) => value.toLowerCase().includes(term))
-    );
-  }, [products, search]);
-
-  const withImageCount = products.filter((product) => product.image).length;
-  const withHsnCount = products.filter((product) => product.product_HSN).length;
-
-  async function saveProduct(input: ProductInput) {
-    try {
-      setActionError("");
-
-      if (editingProduct) {
-        await update(editingProduct.id, input);
-      } else {
-        await create(input);
-      }
-
-      setFormOpen(false);
-      setEditingProduct(null);
-    } catch (err) {
-      setActionError(
-        err instanceof Error ? err.message : "Unable to save product."
-      );
-    }
+  function openCreate() {
+    setSelectedProduct(null);
+    setShowForm(true);
   }
 
-  async function deleteProduct(product: Product) {
+  function openEdit(product: Product) {
+    setSelectedProduct(product);
+    setShowForm(true);
+  }
+
+  async function removeProduct(product: Product) {
     const confirmed = window.confirm(
-      `Delete "${product.product_name}"? It will be archived and removed from this list.`
+      `Archive "${product.product_name}"? This cannot be done while available stock exists.`
     );
 
     if (!confirmed) return;
 
     try {
-      setActionError("");
-      await remove(product.id);
-    } catch (err) {
-      setActionError(
-        err instanceof Error ? err.message : "Unable to delete product."
+      await deleteProduct.mutateAsync(product.id);
+    } catch (error) {
+      window.alert(
+        error instanceof Error
+          ? error.message
+          : "Unable to archive product."
       );
     }
   }
 
   return (
-    <section className="products-dashboard">
-      <div className="products-dashboard__toolbar">
-        <div className="products-dashboard__search">
-          <Search className="products-dashboard__search-icon" />
+    <section className={styles.page}>
+      <header className={styles.pageHeader}>
+        <div>
+          <p className={styles.eyebrow}>Product catalogue</p>
+          <h1>All Products</h1>
+          <p className={styles.subtitle}>
+            Create master products before adding individual serialised stock.
+          </p>
+        </div>
 
+        <button className={styles.primaryButton} onClick={openCreate}>
+          <Plus size={18} />
+          Add Master Product
+        </button>
+      </header>
+
+      <div className={styles.toolbar}>
+        <label className={styles.searchBox}>
+          <Search size={19} />
           <input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search products, codes, or descriptions..."
-            className="products-dashboard__search-input"
+            placeholder="Search product, brand, type, or code..."
           />
-        </div>
+        </label>
 
-        <button
-          onClick={() => {
-            setEditingProduct(null);
-            setFormOpen(true);
-          }}
-          className="products-dashboard__primary-action"
-        >
-          <Plus size={16} />
-          Add Product
-        </button>
+        <span className={styles.resultCount}>
+          {products.length} product{products.length === 1 ? "" : "s"}
+        </span>
       </div>
 
-      <div className="products-dashboard__kpis">
-        <Kpi label="Total Products" value={String(products.length)} />
-        <Kpi label="With HSN Code" value={String(withHsnCount)} />
-        <Kpi label="With Image" value={String(withImageCount)} />
-        <Kpi
-          label="Showing"
-          value={String(filteredProducts.length)}
-        />
-      </div>
-
-      <div className="products-dashboard__summary">
-        <p className="products-dashboard__summary-label">
-          Product Catalogue
-        </p>
-
-        <p className="products-dashboard__summary-copy">
-          Manage your product master data, configurations, and HSN codes.
-        </p>
-      </div>
-
-      <div>
-        <div className="products-dashboard__directory-heading">
-          <div>
-            <h1 className="products-dashboard__title">Product Directory</h1>
-            <p className="products-dashboard__count">
-              Listing {filteredProducts.length} product
-              {filteredProducts.length === 1 ? "" : "s"}
-            </p>
+      <div className={styles.tableCard}>
+        {isLoading ? (
+          <div className={styles.loadingState}>
+            <Loader2 size={25} className={styles.spin} />
+            Loading products...
           </div>
-
-          <button
-            onClick={() => void refresh()}
-            className="products-dashboard__refresh"
-          >
-            <RefreshCw size={16} />
-            Refresh
-          </button>
-        </div>
-
-        {actionError && (
-          <p className="products-dashboard__error">
-            {actionError}
-          </p>
-        )}
-
-        <div className="products-dashboard__table-card">
-          <div className="products-dashboard__table-scroll">
-            <table className="products-dashboard__table">
+        ) : error ? (
+          <div className={styles.errorState}>
+            Unable to load products. Please refresh and try again.
+          </div>
+        ) : products.length === 0 ? (
+          <div className={styles.emptyState}>
+            <PackagePlus size={36} />
+            <h3>No products found</h3>
+            <p>
+              Add your first master product before entering serialised stock.
+            </p>
+            <button className={styles.primaryButton} onClick={openCreate}>
+              <Plus size={18} />
+              Add First Product
+            </button>
+          </div>
+        ) : (
+          <div className={styles.tableWrap}>
+            <table className={styles.table}>
               <thead>
                 <tr>
-                  <th>Product Name & Code</th><th>HSN</th><th>USP</th><th>Description</th><th>Actions</th>
+                  <th>Product</th>
+                  <th>Brand</th>
+                  <th>Type</th>
+                  <th>Code</th>
+                  <th>Available Stock</th>
+                  <th className={styles.actionsColumn}>Actions</th>
                 </tr>
               </thead>
 
               <tbody>
-                {loading ? (
-                  <tr>
-                    <td
-                      colSpan={5}
-                      className="products-dashboard__state"
-                    >
-                      <Loader2 className="products-dashboard__spinner" />
-                      Loading products...
-                    </td>
-                  </tr>
-                ) : error ? (
-                  <tr>
-                    <td
-                      colSpan={5}
-                      className="products-dashboard__state products-dashboard__state--error"
-                    >
-                      {error}
-                    </td>
-                  </tr>
-                ) : filteredProducts.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={5}
-                      className="products-dashboard__state"
-                    >
-                      No products found. Click “Add Product” to create one.
-                    </td>
-                  </tr>
-                ) : (
-                  filteredProducts.map((product) => (
-                    <tr
-                      key={product.id}
-                      className="products-dashboard__row"
-                    >
-                      <td><div className="products-dashboard__product">
-                          <div className="products-dashboard__product-icon">
-                            {product.image ? (
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img
-                                src={product.image}
-                                alt={product.product_name}
-                                className="products-dashboard__product-image"
-                              />
-                            ) : (
-                              <Box size={20} />
-                            )}
+                {products.map((product) => (
+                  <tr key={product.id}>
+                    <td>
+                      <div className={styles.productCell}>
+                        {product.image ? (
+                          <img
+                            className={styles.productImage}
+                            src={product.image}
+                            alt={product.product_name}
+                          />
+                        ) : (
+                          <div className={styles.productFallback}>
+                            {product.product_name.charAt(0).toUpperCase()}
                           </div>
-
-                          <div>
-                            <p className="products-dashboard__product-name">
-                              {product.product_name}
-                            </p>
-
-                            <p className="products-dashboard__product-code">
-                              {product.product_code}
-                            </p>
-                          </div>
-                        </div>
-                      </td>
-
-                      <td>
-                        {product.product_HSN || (
-                          <span className="products-dashboard__empty">—</span>
                         )}
-                      </td>
 
-                      <td className="products-dashboard__usp"><p>
-                          {product.product_usp || "—"}
-                        </p>
-                      </td>
-
-                      <td className="products-dashboard__description"><p>
-                          {product.product_description || "No description"}
-                        </p>
-                      </td>
-
-                      <td><div className="products-dashboard__actions">
-                          <button
-                            onClick={() => {
-                              setEditingProduct(product);
-                              setFormOpen(true);
-                            }}
-                            className="products-dashboard__icon-action"
-                            title="Edit product"
-                          >
-                            <Edit3 size={16} />
-                          </button>
-
-                          <button
-                            onClick={() => void deleteProduct(product)}
-                            className="products-dashboard__icon-action"
-                            title="Archive product"
-                          >
-                            <Trash2 size={16} />
-                          </button>
+                        <div>
+                          <strong>{product.product_name}</strong>
+                          <small>
+                            {product.product_config || "No configuration"}
+                          </small>
                         </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
+                      </div>
+                    </td>
+
+                    <td>{product.brand_name || "—"}</td>
+                    <td>{product.product_type || "—"}</td>
+                    <td>{product.product_code}</td>
+
+                    <td>
+                      <span className={styles.stockBadge}>
+                        {Number(product.available_stock || 0)}
+                      </span>
+                    </td>
+
+                    <td className={styles.tableActions}>
+                      <button
+                        className={styles.iconButton}
+                        onClick={() => openEdit(product)}
+                        aria-label={`Edit ${product.product_name}`}
+                      >
+                        <Edit3 size={17} />
+                      </button>
+
+                      <button
+                        className={`${styles.iconButton} ${styles.deleteButton}`}
+                        disabled={deleteProduct.isPending}
+                        onClick={() => removeProduct(product)}
+                        aria-label={`Archive ${product.product_name}`}
+                      >
+                        <Trash2 size={17} />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
-        </div>
+        )}
       </div>
 
-      {formOpen && (
-        <ProductFormModal
-          product={editingProduct}
+      {showForm ? (
+        <ProductForm
+          product={selectedProduct}
           onClose={() => {
-            setFormOpen(false);
-            setEditingProduct(null);
+            setShowForm(false);
+            setSelectedProduct(null);
           }}
-          onSave={saveProduct}
         />
-      )}
+      ) : null}
     </section>
-  );
-}
-
-function Kpi({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="products-kpi">
-      <Box size={20} className="products-kpi__icon" />
-      <p className="products-kpi__label">{label}</p>
-      <p className="products-kpi__value">{value}</p>
-    </div>
   );
 }

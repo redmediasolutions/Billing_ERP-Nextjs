@@ -4,25 +4,27 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   BarChart3,
-  Box,
   ClipboardList,
   FileText,
   LayoutDashboard,
   LogOut,
   Menu,
   Package,
+  PanelLeft,
+  PanelLeftClose,
   ReceiptText,
+  Tags,
+  Truck,
   Users,
   WalletCards,
+  Warehouse,
   X,
-  PanelLeftClose,
-  PanelLeft,
 } from "lucide-react";
 import { useState } from "react";
-import { auth } from "@/firebase/config";
 
-import { useTenant } from "@/features/tenant/hooks/use-tenant";
+import { auth } from "@/firebase/config";
 import { BusinessLogo } from "@/features/tenant/components/business-logo";
+import { useTenant } from "@/features/tenant/hooks/use-tenant";
 
 const navigation = [
   {
@@ -50,11 +52,29 @@ const navigation = [
     href: "/dashboard/items",
     icon: Package,
   },
+
+  // Inventory catalogue modules
   {
     label: "Products",
     href: "/dashboard/products",
-    icon: Box,
+    icon: Package,
   },
+  {
+    label: "Stocks",
+    href: "/dashboard/stocks",
+    icon: Warehouse,
+  },
+  {
+    label: "Brands",
+    href: "/dashboard/brands",
+    icon: Tags,
+  },
+  {
+    label: "Vendors",
+    href: "/dashboard/vendors",
+    icon: Truck,
+  },
+
   {
     label: "Employees",
     href: "/dashboard/employees",
@@ -76,18 +96,13 @@ export function DashboardSidebar() {
   const pathname = usePathname();
   const router = useRouter();
 
-  // States to handle layout and interactions
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  // Pinned open by default so the sidebar reads as a normal, fully
-  // labeled navigation panel rather than a collapsed icon rail that
-  // only expands on hover.
   const [isPinned, setIsPinned] = useState(true);
   const [loggingOut, setLoggingOut] = useState(false);
 
   const { data: tenant } = useTenant();
 
-  // Combine logic to determine if sidebar should show full content
   const isSidebarExpanded = mobileOpen || isPinned || isHovered;
 
   async function handleLogout() {
@@ -105,12 +120,12 @@ export function DashboardSidebar() {
     if (href === "/dashboard") {
       return pathname === "/dashboard";
     }
+
     return pathname.startsWith(href);
   }
 
   return (
     <>
-      {/* Mobile Menu Trigger */}
       <button
         onClick={() => setMobileOpen(true)}
         className="sidebar-trigger"
@@ -119,27 +134,27 @@ export function DashboardSidebar() {
         <Menu className="h-5 w-5" />
       </button>
 
-      {/* Mobile Overlay */}
-      {mobileOpen && (
+      {mobileOpen ? (
         <button
           onClick={() => setMobileOpen(false)}
           className="sidebar-overlay"
           aria-label="Close sidebar overlay"
         />
-      )}
+      ) : null}
 
-      {/* Desktop Layout Spacer: Pushes main content ONLY when pinned */}
       <div
-        className={`sidebar-spacer ${isPinned ? "sidebar-spacer--open" : ""}`}
+        className={`sidebar-spacer ${
+          isPinned ? "sidebar-spacer--open" : ""
+        }`}
       />
 
-      {/* Sidebar Container */}
       <aside
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        className={`sidebar ${isSidebarExpanded ? "sidebar--open" : ""}`}
+        className={`sidebar ${
+          isSidebarExpanded ? "sidebar--open" : ""
+        }`}
       >
-        {/* Header / Logo Area */}
         <div className="sidebar__header">
           <Link
             href="/dashboard"
@@ -152,13 +167,13 @@ export function DashboardSidebar() {
               <p className="sidebar__brand-name">
                 {tenant?.business_name || "Billing ERP"}
               </p>
+
               <p className="sidebar__plan">
                 {tenant?.subscription_plan || "Enterprise Suite"}
               </p>
             </div>
           </Link>
 
-          {/* Close button — mobile only */}
           <button
             onClick={() => setMobileOpen(false)}
             className="sidebar__icon-button sidebar__mobile-close"
@@ -167,18 +182,15 @@ export function DashboardSidebar() {
             <X className="h-5 w-5" />
           </button>
 
-          {/* Pin/Unpin button — desktop only, shown once expanded */}
           <button
             onClick={() =>
-              setIsPinned((prev) => {
-                const next = !prev;
-                // If we're unpinning while the cursor is still resting on
-                // the sidebar, drop the hover state too — otherwise the
-                // rail stays visually expanded (hover-driven) even though
-                // the layout spacer has already shrunk, until the mouse
-                // physically leaves. That desync is what causes the
-                // content to jump while the sidebar lags a beat behind.
-                if (!next) setIsHovered(false);
+              setIsPinned((previous) => {
+                const next = !previous;
+
+                if (!next) {
+                  setIsHovered(false);
+                }
+
                 return next;
               })
             }
@@ -193,7 +205,6 @@ export function DashboardSidebar() {
           </button>
         </div>
 
-        {/* Navigation Links */}
         <nav className="sidebar__nav">
           {navigation.map((item) => {
             const Icon = item.icon;
@@ -204,17 +215,17 @@ export function DashboardSidebar() {
                 key={item.href}
                 href={item.href}
                 onClick={() => setMobileOpen(false)}
-                className={`sidebar__link ${active ? "sidebar__link--active" : ""}`}
+                className={`sidebar__link ${
+                  active ? "sidebar__link--active" : ""
+                }`}
               >
                 <Icon className="h-5 w-5 shrink-0" />
-
                 <span className="sidebar__label">{item.label}</span>
               </Link>
             );
           })}
         </nav>
 
-        {/* Footer / Logout */}
         <div className="sidebar__footer">
           <button
             onClick={() => void handleLogout()}
