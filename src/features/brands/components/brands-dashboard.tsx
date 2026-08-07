@@ -10,13 +10,24 @@ import {
   Trash2,
 } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
 import {
   useBrands,
   useDeleteBrand,
 } from "../hooks/use-brands";
 import type { Brand } from "../types/brand.types";
 import { BrandForm } from "./brand-form";
-import styles from "../brands.module.css";
 
 export function BrandsDashboard() {
   const { data: brands = [], isLoading, error } = useBrands();
@@ -24,8 +35,7 @@ export function BrandsDashboard() {
 
   const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
-  const [selectedBrand, setSelectedBrand] =
-    useState<Brand | null>(null);
+  const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null);
 
   const filteredBrands = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -71,144 +81,177 @@ export function BrandsDashboard() {
   }
 
   return (
-    <section className={styles.page}>
-      <header className={styles.pageHeader}>
-        <div>
-          <p className={styles.eyebrow}>Product catalogue</p>
-          <h1>Brands</h1>
-          <p className={styles.subtitle}>
-            Create and manage the brands used by your product
-            catalogue.
+    <section className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-1">
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Product catalogue
+          </p>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+            Brands
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Create and manage the brands used by your product catalogue.
           </p>
         </div>
 
-        <button
-          className={styles.primaryButton}
-          onClick={openCreate}
-        >
-          <Plus size={18} />
+        <Button onClick={openCreate} className="gap-2 self-start sm:self-auto">
+          <Plus className="h-4 w-4" />
           Add Brand
-        </button>
-      </header>
-
-      <div className={styles.kpiGrid}>
-        <article className={styles.kpiCard}>
-          <span>Total Brands</span>
-          <strong>{brands.length}</strong>
-          <Tag size={22} />
-        </article>
+        </Button>
       </div>
 
-      <div className={styles.toolbar}>
-        <label className={styles.searchBox}>
-          <Search size={19} />
-          <input
+      {/* KPI Card Grid */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <Card>
+          <CardContent className="flex items-center justify-between p-6">
+            <div className="space-y-1">
+              <p className="text-xs font-medium text-muted-foreground">
+                Total Brands
+              </p>
+              <p className="text-2xl font-bold tracking-tight text-foreground">
+                {brands.length}
+              </p>
+            </div>
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <Tag className="h-6 w-6" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Toolbar */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative w-full sm:w-80">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Search brands..."
+            className="pl-9"
           />
-        </label>
+        </div>
 
-        <span className={styles.resultCount}>
-          {filteredBrands.length} brand
-          {filteredBrands.length === 1 ? "" : "s"}
+        <span className="text-xs font-medium text-muted-foreground">
+          {filteredBrands.length} brand{filteredBrands.length === 1 ? "" : "s"}
         </span>
       </div>
 
-      <div className={styles.tableCard}>
-        {isLoading ? (
-          <div className={styles.loadingState}>
-            <Loader2 size={25} className={styles.spin} />
-            Loading brands...
-          </div>
-        ) : error ? (
-          <div className={styles.errorState}>
-            Unable to load brands. Please refresh and try again.
-          </div>
-        ) : filteredBrands.length === 0 ? (
-          <div className={styles.emptyState}>
-            <Tag size={34} />
-            <h3>No brands found</h3>
-            <p>
-              Create a brand before adding products to your
-              catalogue.
-            </p>
-            <button
-              className={styles.primaryButton}
-              onClick={openCreate}
-            >
-              <Plus size={18} />
-              Add First Brand
-            </button>
-          </div>
-        ) : (
-          <div className={styles.tableWrap}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>Brand</th>
-                  <th>Description</th>
-                  <th>Created</th>
-                  <th className={styles.actionsColumn}>Actions</th>
-                </tr>
-              </thead>
+      {/* Main Table Card */}
+      <Card>
+        <CardContent className="p-0">
+          {isLoading ? (
+            <div className="flex h-64 items-center justify-center gap-2 text-sm text-muted-foreground">
+              <Loader2 className="h-5 w-5 animate-spin text-primary" />
+              <span>Loading brands...</span>
+            </div>
+          ) : error ? (
+            <div className="flex h-64 items-center justify-center p-6 text-center text-sm font-medium text-destructive">
+              Unable to load brands. Please refresh and try again.
+            </div>
+          ) : filteredBrands.length === 0 ? (
+            <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <Tag className="h-6 w-6" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-base font-semibold text-foreground">
+                  No brands found
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  Create a brand before adding products to your catalogue.
+                </p>
+              </div>
+              <Button onClick={openCreate} className="mt-2 gap-2" size="sm">
+                <Plus className="h-4 w-4" />
+                Add First Brand
+              </Button>
+            </div>
+          ) : (
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[280px]">Brand</TableHead>
+                    <TableHead>Description</TableHead>
+                    <TableHead>Created</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
 
-              <tbody>
-                {filteredBrands.map((brand) => (
-                  <tr key={brand.id}>
-                    <td>
-                      <div className={styles.brandCell}>
-                        {brand.brand_logo ? (
-                          <img
-                            src={brand.brand_logo}
-                            alt={`${brand.name} logo`}
-                            className={styles.brandLogo}
-                          />
-                        ) : (
-                          <div className={styles.brandFallback}>
-                            {brand.name.charAt(0).toUpperCase()}
-                          </div>
-                        )}
+                <TableBody>
+                  {filteredBrands.map((brand) => (
+                    <TableRow key={brand.id}>
+                      {/* Brand Logo & Name */}
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          {brand.brand_logo ? (
+                            <img
+                              src={brand.brand_logo}
+                              alt={`${brand.name} logo`}
+                              className="h-9 w-9 rounded-md object-cover border border-border"
+                            />
+                          ) : (
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-xs font-bold text-primary">
+                              {brand.name.charAt(0).toUpperCase()}
+                            </div>
+                          )}
 
-                        <strong>{brand.name}</strong>
-                      </div>
-                    </td>
+                          <span className="font-medium text-foreground">
+                            {brand.name}
+                          </span>
+                        </div>
+                      </TableCell>
 
-                    <td className={styles.descriptionCell}>
-                      {brand.description || "No description"}
-                    </td>
+                      {/* Description */}
+                      <TableCell>
+                        <p
+                          className="max-w-[300px] truncate text-xs text-muted-foreground"
+                          title={brand.description || undefined}
+                        >
+                          {brand.description || "No description"}
+                        </p>
+                      </TableCell>
 
-                    <td>
-                      {new Date(
-                        brand.created_at
-                      ).toLocaleDateString("en-IN")}
-                    </td>
+                      {/* Created Date */}
+                      <TableCell className="text-xs text-muted-foreground">
+                        {new Date(brand.created_at).toLocaleDateString("en-IN")}
+                      </TableCell>
 
-                    <td className={styles.tableActions}>
-                      <button
-                        className={styles.iconButton}
-                        onClick={() => openEdit(brand)}
-                        aria-label={`Edit ${brand.name}`}
-                      >
-                        <Edit3 size={17} />
-                      </button>
+                      {/* Actions */}
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => openEdit(brand)}
+                            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                          >
+                            <Edit3 className="h-4 w-4" />
+                            <span className="sr-only">Edit {brand.name}</span>
+                          </Button>
 
-                      <button
-                        className={`${styles.iconButton} ${styles.deleteButton}`}
-                        onClick={() => removeBrand(brand)}
-                        disabled={deleteBrand.isPending}
-                        aria-label={`Delete ${brand.name}`}
-                      >
-                        <Trash2 size={17} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            disabled={deleteBrand.isPending}
+                            onClick={() => removeBrand(brand)}
+                            className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            <span className="sr-only">Delete {brand.name}</span>
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {showForm && (
         <BrandForm

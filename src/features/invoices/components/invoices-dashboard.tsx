@@ -1,222 +1,252 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
-    FileText,
-    Loader2,
-    Plus,
-    Trash2,
+  FileText,
+  Loader2,
+  Plus,
+  Trash2,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
-    useDeleteInvoice,
-    useInvoices,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
+import {
+  useInvoices,
+  useDeleteInvoice,
 } from "../hooks/use-invoices";
 
-import { useRouter } from "next/navigation";
-
 const money = new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-    maximumFractionDigits: 2,
+  style: "currency",
+  currency: "INR",
+  maximumFractionDigits: 2,
 });
 
 export function InvoicesDashboard() {
-    const { data: invoices = [], isLoading, error } =
-        useInvoices();
+  const router = useRouter();
 
-    const router = useRouter();
-    const deleteInvoice = useDeleteInvoice();
+  const { data: invoices = [], isLoading, error } = useInvoices();
+  const deleteInvoice = useDeleteInvoice();
 
-    const draftCount = invoices.filter(
-        (invoice) => invoice.is_draft
-    ).length;
+  const draftCount = invoices.filter(
+    (invoice) => invoice.is_draft
+  ).length;
 
-    const totalValue = invoices.reduce(
-        (sum, invoice) => sum + invoice.rounded_total,
-        0
-    );
+  const totalValue = invoices.reduce(
+    (sum, invoice) => sum + invoice.rounded_total,
+    0
+  );
 
-    async function removeInvoice(id: number) {
-        if (
-            !window.confirm(
-                "Archive this invoice? Stock will be automatically restored."
-            )
-        ) {
-            return;
-        }
-
-        await deleteInvoice.mutateAsync(id);
+  async function removeInvoice(id: number) {
+    if (
+      !window.confirm(
+        "Archive this invoice? Stock will be automatically restored."
+      )
+    ) {
+      return;
     }
 
-    return (
-        <section className="invoices-dashboard">
-            <div className="invoices-dashboard__header">
-                <div>
-                    <p className="invoices-dashboard__eyebrow">
-                        Sales
-                    </p>
+    await deleteInvoice.mutateAsync(id);
+  }
 
-                    <h1 className="invoices-dashboard__title">Invoices</h1>
+  return (
+    <div className="space-y-8">
+      {/* Page Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-1">
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Sales
+          </p>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+            Invoices
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Create invoices and manage billing records.
+          </p>
+        </div>
 
-                    <p className="invoices-dashboard__intro">
-                        Create invoices and manage billing records.
-                    </p>
-                </div>
+        <Button asChild className="gap-2 self-start sm:self-auto">
+          <Link href="/dashboard/invoices/new">
+            <Plus className="h-4 w-4" />
+            New Invoice
+          </Link>
+        </Button>
+      </div>
 
-                <Button
-                    asChild
-                    className="invoices-dashboard__primary-action"
-                >
-                    <Link href="/dashboard/invoices/new">
-                        <Plus size={16} />
-                        New Invoice
-                    </Link>
-                </Button>
-            </div>
+      {/* KPI Cards Grid */}
+      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+        <Kpi label="Total Invoices" value={invoices.length} />
+        <Kpi label="Draft Invoices" value={draftCount} />
+        <Kpi label="Invoice Value" value={money.format(totalValue)} />
+      </div>
 
-            <div className="invoices-dashboard__kpis">
-                <Kpi label="Total Invoices" value={invoices.length} />
+      {/* Main Table Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Invoice Directory</CardTitle>
+          <CardDescription>
+            All invoices created in the system.
+          </CardDescription>
+        </CardHeader>
 
-                <Kpi label="Draft Invoices" value={draftCount} />
+        <CardContent>
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Invoice #</TableHead>
+                  <TableHead>Customer</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
 
-                <Kpi
-                    label="Invoice Value"
-                    value={money.format(totalValue)}
-                />
-            </div>
+              <TableBody>
+                {isLoading && (
+                  <TableRow>
+                    <TableCell
+                      colSpan={6}
+                      className="h-32 text-center text-muted-foreground"
+                    >
+                      <div className="flex items-center justify-center gap-2">
+                        <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                        <span>Loading invoices...</span>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
 
-            <Card className="invoices-dashboard__directory"><CardContent className="invoices-dashboard__directory-content">
-                    <div className="invoices-dashboard__directory-head"><h2 className="invoices-dashboard__directory-title">Invoice Directory</h2>
-                    </div>
+                {!isLoading && error && (
+                  <TableRow>
+                    <TableCell
+                      colSpan={6}
+                      className="h-32 text-center text-destructive"
+                    >
+                      Unable to load invoices.
+                    </TableCell>
+                  </TableRow>
+                )}
 
-                    <div className="invoices-dashboard__table-scroll"><table className="invoices-dashboard__table"><thead>
-                                <tr>
-                                    <th>Invoice #</th><th>Customer</th><th>Date</th><th>Amount</th><th>Status</th><th>Actions</th>
-                                </tr>
-                            </thead>
+                {!isLoading && !error && invoices.length === 0 && (
+                  <TableRow>
+                    <TableCell
+                      colSpan={6}
+                      className="h-32 text-center text-muted-foreground"
+                    >
+                      No invoices created yet.
+                    </TableCell>
+                  </TableRow>
+                )}
 
-                            <tbody>
-                                {isLoading ? (
-                                    <tr>
-                                        <td
-                                            colSpan={6}
-                                            className="invoices-dashboard__state"
-                                        >
-                                            <Loader2 className="invoices-dashboard__spinner" />
-                                            Loading invoices...
-                                        </td>
-                                    </tr>
-                                ) : error ? (
-                                    <tr>
-                                        <td
-                                            colSpan={6}
-                                            className="invoices-dashboard__state invoices-dashboard__state--error"
-                                        >
-                                            Unable to load invoices.
-                                        </td>
-                                    </tr>
-                                ) : invoices.length === 0 ? (
-                                    <tr>
-                                        <td
-                                            colSpan={6}
-                                            className="invoices-dashboard__state"
-                                        >
-                                            No invoices created yet.
-                                        </td>
-                                    </tr>
-                                ) : (
-                                    invoices.map((invoice) => (
-                                        <tr
-                                            key={invoice.id}
-                                            onClick={() =>
-                                                router.push(`/dashboard/invoices/${invoice.id}`)
-                                            }
-                                            className="invoices-dashboard__row"
-                                        >
-                                            <td className="invoices-dashboard__number">
-                                                {invoice.invoice_number}
-                                            </td>
+                {!isLoading &&
+                  invoices.map((invoice) => (
+                    <TableRow
+                      key={invoice.id}
+                      className="cursor-pointer transition-colors hover:bg-muted/50"
+                      onClick={() =>
+                        router.push(`/dashboard/invoices/${invoice.id}`)
+                      }
+                    >
+                      <TableCell className="font-medium text-foreground">
+                        {invoice.invoice_number}
+                      </TableCell>
 
-                                            {/* ADDED text-white HERE */}
-                                            <td className="invoices-dashboard__customer">
-                                                {invoice.customer_name || "Unknown customer"}
-                                            </td>
+                      <TableCell className="text-foreground">
+                        {invoice.customer_name ?? "Unknown customer"}
+                      </TableCell>
 
-                                            {/* CHANGED to text-zinc-300 for better visibility */}
-                                            <td className="invoices-dashboard__date">
-                                                {invoice.invoice_date
-                                                    ? new Date(
-                                                        invoice.invoice_date
-                                                    ).toLocaleDateString("en-IN")
-                                                    : "—"}
-                                            </td>
+                      <TableCell className="text-muted-foreground">
+                        {invoice.invoice_date
+                          ? new Date(invoice.invoice_date).toLocaleDateString(
+                              "en-IN"
+                            )
+                          : "—"}
+                      </TableCell>
 
-                                            {/* ADDED text-white HERE */}
-                                            <td className="invoices-dashboard__amount">
-                                                {money.format(invoice.rounded_total)}
-                                            </td>
+                      <TableCell className="font-semibold text-foreground">
+                        {money.format(invoice.rounded_total)}
+                      </TableCell>
 
-                                            <td>
-                                                <Badge
-                                                    className={
-                                                        invoice.is_draft
-                                                            ? "invoices-dashboard__status"
-                                                            : "invoices-dashboard__status"
-                                                    }
-                                                >
-                                                    {invoice.is_draft
-                                                        ? "Draft"
-                                                        : "Finalized"}
-                                                </Badge>
-                                            </td>
+                      <TableCell>
+                        <Badge
+                          variant={invoice.is_draft ? "secondary" : "default"}
+                          className={
+                            invoice.is_draft
+                              ? ""
+                              : "bg-emerald-600 hover:bg-emerald-700 text-white dark:bg-emerald-600 dark:hover:bg-emerald-700"
+                          }
+                        >
+                          {invoice.is_draft ? "Draft" : "Finalized"}
+                        </Badge>
+                      </TableCell>
 
-                                            <td><div className="invoices-dashboard__actions">
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        disabled={deleteInvoice.isPending}
-                                                        onClick={(event) => {
-                                                            event.stopPropagation();
-                                                            void removeInvoice(invoice.id);
-                                                        }}
-                                                        className="invoices-dashboard__delete"
-                                                    >
-                                                        <Trash2 size={16} />
-                                                    </Button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-                </CardContent>
-            </Card>
-        </section>
-    );
+                      <TableCell
+                        className="text-right"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          disabled={deleteInvoice.isPending}
+                          onClick={() => removeInvoice(invoice.id)}
+                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          <span className="sr-only">Delete invoice</span>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
 }
 
 function Kpi({
-    label,
-    value,
+  label,
+  value,
 }: {
-    label: string;
-    value: string | number;
+  label: string;
+  value: string | number;
 }) {
-    return (
-        <Card className="invoices-kpi"><CardContent className="invoices-kpi__content"><FileText size={20} className="invoices-kpi__icon" />
+  return (
+    <Card>
+      <CardContent className="flex items-center justify-between p-6">
+        <div className="space-y-1">
+          <p className="text-xs font-medium text-muted-foreground">
+            {label}
+          </p>
+          <p className="text-2xl font-bold tracking-tight text-foreground">
+            {value}
+          </p>
+        </div>
 
-                <p className="invoices-kpi__label">
-                    {label}
-                </p>
-
-                <p className="invoices-kpi__value">{value}</p>
-            </CardContent>
-        </Card>
-    );
+        <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <FileText className="h-6 w-6" />
+        </div>
+      </CardContent>
+    </Card>
+  );
 }

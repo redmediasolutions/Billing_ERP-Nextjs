@@ -11,13 +11,25 @@ import {
   Truck,
 } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
 import {
   useDeleteVendor,
   useVendors,
 } from "../hooks/use-vendors";
 import type { Vendor } from "../types/vendor.types";
 import { VendorForm } from "./vendor-form";
-import styles from "../vendors.module.css";
 
 export function VendorsDashboard() {
   const { data: vendors = [], isLoading, error } = useVendors();
@@ -25,8 +37,7 @@ export function VendorsDashboard() {
 
   const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
-  const [selectedVendor, setSelectedVendor] =
-    useState<Vendor | null>(null);
+  const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
 
   const filteredVendors = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -74,165 +85,222 @@ export function VendorsDashboard() {
   }
 
   return (
-    <section className={styles.page}>
-      <header className={styles.pageHeader}>
-        <div>
-          <p className={styles.eyebrow}>Purchase management</p>
-          <h1>Vendors</h1>
-          <p className={styles.subtitle}>
+    <section className="space-y-6">
+      {/* Page Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-1">
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Purchase management
+          </p>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+            Vendors
+          </h1>
+          <p className="text-sm text-muted-foreground">
             Manage your suppliers and local purchase vendors.
           </p>
         </div>
 
-        <button className={styles.primaryButton} onClick={openCreate}>
-          <Plus size={18} />
+        <Button onClick={openCreate} className="gap-2 self-start sm:self-auto">
+          <Plus className="h-4 w-4" />
           Add Vendor
-        </button>
-      </header>
-
-      <div className={styles.kpiGrid}>
-        <article className={styles.kpiCard}>
-          <span>Total Vendors</span>
-          <strong>{vendors.length}</strong>
-          <Truck size={22} />
-        </article>
-
-        <article className={styles.kpiCard}>
-          <span>Local Vendors</span>
-          <strong>
-            {
-              vendors.filter((vendor) =>
-                Boolean(vendor.is_local_vendor)
-              ).length
-            }
-          </strong>
-          <MapPin size={22} />
-        </article>
+        </Button>
       </div>
 
-      <div className={styles.toolbar}>
-        <label className={styles.searchBox}>
-          <Search size={19} />
-          <input
+      {/* KPI Cards Grid */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <Card>
+          <CardContent className="flex items-center justify-between p-6">
+            <div className="space-y-1">
+              <p className="text-xs font-medium text-muted-foreground">
+                Total Vendors
+              </p>
+              <p className="text-2xl font-bold tracking-tight text-foreground">
+                {vendors.length}
+              </p>
+            </div>
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <Truck className="h-6 w-6" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="flex items-center justify-between p-6">
+            <div className="space-y-1">
+              <p className="text-xs font-medium text-muted-foreground">
+                Local Vendors
+              </p>
+              <p className="text-2xl font-bold tracking-tight text-foreground">
+                {vendors.filter((vendor) => Boolean(vendor.is_local_vendor)).length}
+              </p>
+            </div>
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+              <MapPin className="h-6 w-6" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Toolbar & Search */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative w-full sm:w-80">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Search vendors, phone, or email..."
+            className="pl-9"
           />
-        </label>
+        </div>
 
-        <span className={styles.resultCount}>
+        <span className="text-xs font-medium text-muted-foreground">
           {filteredVendors.length} vendor
           {filteredVendors.length === 1 ? "" : "s"}
         </span>
       </div>
 
-      <div className={styles.tableCard}>
-        {isLoading ? (
-          <div className={styles.loadingState}>
-            <Loader2 size={25} className={styles.spin} />
-            Loading vendors...
-          </div>
-        ) : error ? (
-          <div className={styles.errorState}>
-            Unable to load vendors. Please refresh and try again.
-          </div>
-        ) : filteredVendors.length === 0 ? (
-          <div className={styles.emptyState}>
-            <Truck size={34} />
-            <h3>No vendors found</h3>
-            <p>
-              Add vendors before creating purchase and stock records.
-            </p>
-            <button
-              className={styles.primaryButton}
-              onClick={openCreate}
-            >
-              <Plus size={18} />
-              Add First Vendor
-            </button>
-          </div>
-        ) : (
-          <div className={styles.tableWrap}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>Vendor</th>
-                  <th>Contact</th>
-                  <th>Address</th>
-                  <th>Type</th>
-                  <th className={styles.actionsColumn}>Actions</th>
-                </tr>
-              </thead>
+      {/* Main Table Card */}
+      <Card>
+        <CardContent className="p-0">
+          {isLoading ? (
+            <div className="flex h-64 items-center justify-center gap-2 text-sm text-muted-foreground">
+              <Loader2 className="h-5 w-5 animate-spin text-primary" />
+              <span>Loading vendors...</span>
+            </div>
+          ) : error ? (
+            <div className="flex h-64 items-center justify-center p-6 text-center text-sm font-medium text-destructive">
+              Unable to load vendors. Please refresh and try again.
+            </div>
+          ) : filteredVendors.length === 0 ? (
+            <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <Truck className="h-6 w-6" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-base font-semibold text-foreground">
+                  No vendors found
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  Add vendors before creating purchase and stock records.
+                </p>
+              </div>
+              <Button onClick={openCreate} className="mt-2 gap-2" size="sm">
+                <Plus className="h-4 w-4" />
+                Add First Vendor
+              </Button>
+            </div>
+          ) : (
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[280px]">Vendor</TableHead>
+                    <TableHead>Contact</TableHead>
+                    <TableHead>Address</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
 
-              <tbody>
-                {filteredVendors.map((vendor) => (
-                  <tr key={vendor.id}>
-                    <td>
-                      <div className={styles.vendorCell}>
-                        {vendor.vendor_logo ? (
-                          <img
-                            src={vendor.vendor_logo}
-                            alt={`${vendor.vendor_name} logo`}
-                            className={styles.vendorLogo}
-                          />
-                        ) : (
-                          <div className={styles.vendorFallback}>
-                            {vendor.vendor_name
-                              .charAt(0)
-                              .toUpperCase()}
-                          </div>
-                        )}
+                <TableBody>
+                  {filteredVendors.map((vendor) => (
+                    <TableRow key={vendor.id}>
+                      {/* Vendor Logo & Name */}
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          {vendor.vendor_logo ? (
+                            <img
+                              src={vendor.vendor_logo}
+                              alt={`${vendor.vendor_name} logo`}
+                              className="h-9 w-9 rounded-md object-cover border border-border"
+                            />
+                          ) : (
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-xs font-bold text-primary">
+                              {vendor.vendor_name.charAt(0).toUpperCase()}
+                            </div>
+                          )}
 
-                        <strong>{vendor.vendor_name}</strong>
-                      </div>
-                    </td>
+                          <span className="font-medium text-foreground">
+                            {vendor.vendor_name}
+                          </span>
+                        </div>
+                      </TableCell>
 
-                    <td>
-                      <div className={styles.contactCell}>
-                        <span>{vendor.vendor_phone || "—"}</span>
-                        <small>{vendor.vendor_email || "—"}</small>
-                      </div>
-                    </td>
+                      {/* Contact Info */}
+                      <TableCell>
+                        <div className="space-y-0.5 text-xs">
+                          <p className="font-medium text-foreground">
+                            {vendor.vendor_phone || "—"}
+                          </p>
+                          <p className="text-muted-foreground">
+                            {vendor.vendor_email || "—"}
+                          </p>
+                        </div>
+                      </TableCell>
 
-                    <td className={styles.addressCell}>
-                      {vendor.vendor_address || "—"}
-                    </td>
+                      {/* Address */}
+                      <TableCell>
+                        <p
+                          className="max-w-[280px] truncate text-xs text-muted-foreground"
+                          title={vendor.vendor_address || undefined}
+                        >
+                          {vendor.vendor_address || "—"}
+                        </p>
+                      </TableCell>
 
-                    <td>
-                      <span className={styles.statusBadge}>
-                        {vendor.is_local_vendor
-                          ? "Local"
-                          : "External"}
-                      </span>
-                    </td>
+                      {/* Vendor Type Badge */}
+                      <TableCell>
+                        <Badge
+                          variant={vendor.is_local_vendor ? "outline" : "secondary"}
+                          className={
+                            vendor.is_local_vendor
+                              ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-400"
+                              : ""
+                          }
+                        >
+                          {vendor.is_local_vendor ? "Local" : "External"}
+                        </Badge>
+                      </TableCell>
 
-                    <td className={styles.tableActions}>
-                      <button
-                        className={styles.iconButton}
-                        onClick={() => openEdit(vendor)}
-                        aria-label={`Edit ${vendor.vendor_name}`}
-                      >
-                        <Edit3 size={17} />
-                      </button>
+                      {/* Actions */}
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => openEdit(vendor)}
+                            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                          >
+                            <Edit3 className="h-4 w-4" />
+                            <span className="sr-only">
+                              Edit {vendor.vendor_name}
+                            </span>
+                          </Button>
 
-                      <button
-                        className={`${styles.iconButton} ${styles.deleteButton}`}
-                        onClick={() => removeVendor(vendor)}
-                        disabled={deleteVendor.isPending}
-                        aria-label={`Delete ${vendor.vendor_name}`}
-                      >
-                        <Trash2 size={17} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            disabled={deleteVendor.isPending}
+                            onClick={() => removeVendor(vendor)}
+                            className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            <span className="sr-only">
+                              Delete {vendor.vendor_name}
+                            </span>
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
-      {showForm ? (
+      {showForm && (
         <VendorForm
           vendor={selectedVendor}
           onClose={() => {
@@ -240,7 +308,7 @@ export function VendorsDashboard() {
             setSelectedVendor(null);
           }}
         />
-      ) : null}
+      )}
     </section>
   );
 }

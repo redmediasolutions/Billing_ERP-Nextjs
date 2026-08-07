@@ -6,8 +6,18 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/firebase/config";
 import { apiRequest } from "@/lib/api";
 
-// Icons for the UI
-import { Zap, Mail, Lock, ShieldCheck, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, ShieldCheck, Eye, EyeOff, Loader2 } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 function getFriendlyError(code: string, fallback: string) {
   switch (code) {
@@ -79,118 +89,96 @@ export function LoginForm() {
   }
 
   return (
-    <div className="login-page">
-      <div className="login-card">
+    <div className="flex min-h-[80vh] items-center justify-center p-4">
+      <Card className="w-full max-w-md border-border bg-card shadow-lg">
+        <CardHeader className="space-y-1 text-center">
+          <CardTitle className="text-2xl font-bold tracking-tight text-foreground">
+            Welcome Back
+          </CardTitle>
+          <CardDescription className="text-muted-foreground">
+            Sign in to continue to your dashboard
+          </CardDescription>
+        </CardHeader>
 
-        {/* Header */}
-        <div className="login-header">
-          {/* <div className="login-mark">
-            <Zap className="h-6 w-6" />
-          </div> */}
-
-          <h1 className="login-title">Welcome Back</h1>
-          <p className="login-subtitle">Sign in to continue to your dashboard</p>
-        </div>
-
-        {/* Form */}
-        <form onSubmit={handleLogin} className="login-form">
-
-          {/* Email Field */}
-          <div className="login-field">
-            <label htmlFor="email" className="login-label">
-              Email Address
-            </label>
-            <div className="login-input-wrap">
-              <Mail className="login-input-icon" />
-              <input
-                id="email"
-                type="email"
-                placeholder="name@company.com"
-                autoComplete="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="login-input"
-              />
+        <CardContent className="space-y-6">
+          <form onSubmit={handleLogin} className="space-y-4">
+            {/* Email Field */}
+            <div className="space-y-2">
+              <Label htmlFor="email">Email Address</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="name@company.com"
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
             </div>
+
+            {/* Password Field */}
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="pl-9 pr-10"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowPassword((s) => !s)}
+                  className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                  <span className="sr-only">
+                    {showPassword ? "Hide password" : "Show password"}
+                  </span>
+                </Button>
+              </div>
+            </div>
+
+            {/* Error Message */}
+            {error && (
+              <div className="rounded-md bg-destructive/10 p-3 text-sm font-medium text-destructive">
+                {error}
+              </div>
+            )}
+
+            {/* Submit Button */}
+            <Button type="submit" disabled={loading} className="w-full">
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Signing In...
+                </>
+              ) : (
+                "Login"
+              )}
+            </Button>
+          </form>
+
+          {/* Footer Security Badge */}
+          <div className="flex items-center justify-center gap-1.5 pt-2 text-xs text-muted-foreground">
+            <ShieldCheck className="h-3.5 w-3.5" />
+            <span>Designed and Developed by Red Media Solutions</span>
           </div>
-
-          {/* Password Field */}
-          <div className="login-field">
-            <div className="login-field-row">
-              <label htmlFor="password" className="login-label">
-                Password
-              </label>
-              {/* <a href="#" className="login-link">
-                Forgot?
-              </a> */}
-            </div>
-            <div className="login-input-wrap login-input-wrap--has-toggle">
-              <Lock className="login-input-icon" />
-              <input
-                id="password"
-                type={showPassword ? "text" : "password"}
-                placeholder="••••••••"
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="login-input"
-              />
-              <button
-                type="button"
-                aria-label={showPassword ? "Hide password" : "Show password"}
-                onClick={() => setShowPassword((s) => !s)}
-                className="login-input-icon-btn"
-              >
-                {showPassword ? <EyeOff /> : <Eye />}
-              </button>
-            </div>
-          </div>
-
-          {/* Error Message */}
-          {error && (
-            <div className="login-error">
-              {error}
-            </div>
-          )}
-
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="login-submit"
-          >
-            {loading ? "Signing In..." : "Login"}
-          </button>
-
-          {/* Create Account Link */}
-          {/* <div>
-            <p className="login-signup">
-              Don't have an account?{" "}
-              <a href="#" className="login-link">
-                Create one
-              </a>
-            </p>
-          </div> */}
-        </form>
-
-        {/* Footer Security Badge */}
-        <div className="login-security">
-          <ShieldCheck size={14} />
-          Designed and Developed by Red Media Solutions
-        </div>
-      </div>
-
-      {/* Page Footer (Outside Card) */}
-      {/* <div className="login-footer">
-        <div>
-          <strong>BILLING ERP</strong> © {new Date().getFullYear()} Enterprise Billing ERP. All rights reserved.
-        </div>
-        <div className="login-footer-links">
-          <a href="#">Privacy Policy</a>
-          <a href="#">Terms of Service</a>
-          <a href="#">Help Center</a>
-        </div>
-      </div> */}
+        </CardContent>
+      </Card>
     </div>
   );
 }

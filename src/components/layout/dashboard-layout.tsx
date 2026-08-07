@@ -7,10 +7,10 @@ export default function DashboardLayout({
   children: ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-neutral-50">
+    <div className="min-h-screen bg-background text-foreground">
       <TopNavigation />
 
-      <main className="mx-auto max-w-7xl px-8 py-8">
+      <main className="w-full px-6 py-8 lg:px-8 xl:px-10">
         {children}
       </main>
     </div>

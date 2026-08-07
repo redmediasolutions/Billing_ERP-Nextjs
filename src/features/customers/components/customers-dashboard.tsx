@@ -15,7 +15,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { CustomerFormModal } from "../addform/customer-form-modal";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { CustomerFormSheet } from "../addform/customer-form-sheet";
 import {
   useCreateCustomer,
   useCustomers,
@@ -33,8 +41,7 @@ export function CustomersDashboard() {
 
   const [search, setSearch] = useState("");
   const [formOpen, setFormOpen] = useState(false);
-  const [editingCustomer, setEditingCustomer] =
-    useState<Customer | null>(null);
+  const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const [actionError, setActionError] = useState("");
 
   const filteredCustomers = useMemo(() => {
@@ -53,13 +60,8 @@ export function CustomersDashboard() {
     );
   }, [customers, search]);
 
-  const gstRegistered = customers.filter(
-    (customer) => customer.customer_gst
-  ).length;
-
-  const emailAvailable = customers.filter(
-    (customer) => customer.customer_email
-  ).length;
+  const gstRegistered = customers.filter((customer) => customer.customer_gst).length;
+  const emailAvailable = customers.filter((customer) => customer.customer_email).length;
 
   function openCreate() {
     setEditingCustomer(null);
@@ -90,257 +92,228 @@ export function CustomersDashboard() {
       setEditingCustomer(null);
     } catch (err) {
       setActionError(
-        err instanceof Error
-          ? err.message
-          : "Unable to save customer."
+        err instanceof Error ? err.message : "Unable to save customer."
       );
     }
   }
 
   async function removeCustomer(customer: Customer) {
-    const accepted = window.confirm(
-      `Archive "${customer.customer_name}"?`
-    );
-
+    const accepted = window.confirm(`Archive "${customer.customer_name}"?`);
     if (!accepted) return;
 
     try {
       setActionError("");
-
       await deleteCustomer.mutateAsync(customer.id);
     } catch (err) {
       setActionError(
-        err instanceof Error
-          ? err.message
-          : "Unable to delete customer."
+        err instanceof Error ? err.message : "Unable to delete customer."
       );
     }
   }
 
   return (
-    <section className="customers-dashboard">
-      <div className="customers-dashboard__header">
-        <div>
-          <p className="customers-dashboard__eyebrow">
+    <section className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-1">
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Contacts
           </p>
-
-          <h1 className="customers-dashboard__title">Customers</h1>
-
-          <p className="customers-dashboard__intro">
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+            Customers
+          </h1>
+          <p className="text-sm text-muted-foreground">
             Manage customer contacts, addresses, and GST details.
           </p>
         </div>
 
-        <Button
-          onClick={openCreate}
-          className="customers-dashboard__primary-action"
-        >
-          <Plus size={16} />
+        <Button onClick={openCreate} className="gap-2 self-start sm:self-auto">
+          <Plus className="h-4 w-4" />
           Add Customer
         </Button>
       </div>
 
-      <div className="customers-dashboard__kpis">
-        <KpiCard
-          label="Total Customers"
-          value={customers.length}
-        />
-
-        <KpiCard
-          label="GST Registered"
-          value={gstRegistered}
-        />
-
-        <KpiCard
-          label="Email Available"
-          value={emailAvailable}
-        />
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <KpiCard label="Total Customers" value={customers.length} />
+        <KpiCard label="GST Registered" value={gstRegistered} />
+        <KpiCard label="Email Available" value={emailAvailable} />
       </div>
 
-      <Card className="customers-dashboard__directory">
-        <CardContent className="customers-dashboard__directory-content">
-          <div className="customers-dashboard__directory-head">
+      {/* Main Content Card */}
+      <Card>
+        <CardContent className="p-6">
+          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="customers-dashboard__directory-title">
+              <h2 className="text-lg font-semibold text-foreground">
                 Customer Directory
               </h2>
-
-              <p className="customers-dashboard__directory-count">
+              <p className="text-xs text-muted-foreground">
                 {filteredCustomers.length} customer
                 {filteredCustomers.length === 1 ? "" : "s"} shown
               </p>
             </div>
 
-            <div className="customers-dashboard__search">
-              <Search className="customers-dashboard__search-icon" />
-
+            {/* Search Input */}
+            <div className="relative w-full sm:w-72">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 value={search}
-                onChange={(event) =>
-                  setSearch(event.target.value)
-                }
+                onChange={(event) => setSearch(event.target.value)}
                 placeholder="Search customers..."
-                className="customers-dashboard__search-input"
+                className="pl-9"
               />
             </div>
           </div>
 
           {actionError && (
-            <p className="customers-dashboard__error">
+            <p className="mb-4 text-sm font-medium text-destructive">
               {actionError}
             </p>
           )}
 
-          <div className="customers-dashboard__table-scroll">
-            <table className="customers-dashboard__table">
-              <thead>
-                <tr>
-                  <th>Customer</th><th>Contact</th><th>GST Details</th><th>Billing Address</th><th>Actions</th>
-                </tr>
-              </thead>
+          {/* Table */}
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[280px]">Customer</TableHead>
+                  <TableHead>Contact</TableHead>
+                  <TableHead>GST Details</TableHead>
+                  <TableHead>Billing Address</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
 
-              <tbody>
+              <TableBody>
                 {isLoading ? (
-                  <tr>
-                    <td
-                      colSpan={5}
-                      className="customers-dashboard__state"
-                    >
-                      <Loader2 className="customers-dashboard__spinner" />
-                      Loading customers...
-                    </td>
-                  </tr>
+                  <TableRow>
+                    <TableCell colSpan={5} className="h-32 text-center text-muted-foreground">
+                      <div className="flex items-center justify-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                        <span>Loading customers...</span>
+                      </div>
+                    </TableCell>
+                  </TableRow>
                 ) : error ? (
-                  <tr>
-                    <td
-                      colSpan={5}
-                      className="customers-dashboard__state customers-dashboard__state--error"
-                    >
+                  <TableRow>
+                    <TableCell colSpan={5} className="h-32 text-center text-destructive">
                       Unable to load customers.
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ) : filteredCustomers.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={5}
-                      className="customers-dashboard__state"
-                    >
+                  <TableRow>
+                    <TableCell colSpan={5} className="h-32 text-center text-muted-foreground">
                       No customers found. Add your first customer.
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ) : (
                   filteredCustomers.map((customer) => (
-                    <tr
-                      key={customer.id}
-                      className="customers-dashboard__row"
-                    >
-                      <td><div className="customers-dashboard__customer">
-                          <div className="customers-dashboard__avatar">
-                            {customer.customer_name
-                              .slice(0, 2)
-                              .toUpperCase()}
+                    <TableRow key={customer.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+                            {customer.customer_name.slice(0, 2).toUpperCase()}
                           </div>
-
-                          <div>
-                            <p className="customers-dashboard__customer-name">
+                          <div className="min-w-0">
+                            <p className="truncate font-medium text-foreground">
                               {customer.customer_name}
                             </p>
-
-                            <p className="customers-dashboard__customer-company">
-                              {customer.customer_business_name ||
-                                "Individual customer"}
+                            <p className="truncate text-xs text-muted-foreground">
+                              {customer.customer_business_name || "Individual customer"}
                             </p>
                           </div>
                         </div>
-                      </td>
+                      </TableCell>
 
-                      <td>
-                        {customer.customer_phone && (
-                          <p className="customers-dashboard__contact"><Phone size={14} />
-                            {customer.customer_phone}
-                          </p>
-                        )}
+                      <TableCell>
+                        <div className="space-y-1 text-xs">
+                          {customer.customer_phone && (
+                            <div className="flex items-center gap-1.5 text-muted-foreground">
+                              <Phone className="h-3.5 w-3.5" />
+                              <span>{customer.customer_phone}</span>
+                            </div>
+                          )}
 
-                        {customer.customer_email && (
-                          <p className="customers-dashboard__contact customers-dashboard__contact--email"><Mail size={14} />
-                            {customer.customer_email}
-                          </p>
-                        )}
+                          {customer.customer_email && (
+                            <div className="flex items-center gap-1.5 text-muted-foreground">
+                              <Mail className="h-3.5 w-3.5" />
+                              <span>{customer.customer_email}</span>
+                            </div>
+                          )}
 
-                        {!customer.customer_phone &&
-                          !customer.customer_email && (
-                            <span className="customers-dashboard__empty">
+                          {!customer.customer_phone && !customer.customer_email && (
+                            <span className="italic text-muted-foreground">
                               No contact details
                             </span>
                           )}
-                      </td>
+                        </div>
+                      </TableCell>
 
-                      <td>
-                        {customer.customer_gst ? (
-                          <>
-                            <Badge className="customers-dashboard__badge">
-                              GST Registered
-                            </Badge>
+                      <TableCell>
+                        <div className="space-y-1">
+                          {customer.customer_gst ? (
+                            <>
+                              <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-400">
+                                GST Registered
+                              </Badge>
+                              <p className="font-mono text-xs text-muted-foreground">
+                                {customer.customer_gst}
+                              </p>
+                            </>
+                          ) : (
+                            <Badge variant="secondary">Unregistered</Badge>
+                          )}
+                        </div>
+                      </TableCell>
 
-                            <p className="customers-dashboard__gst">
-                              {customer.customer_gst}
-                            </p>
-                          </>
-                        ) : (
-                          <Badge className="customers-dashboard__badge">
-                            Unregistered
-                          </Badge>
-                        )}
-                      </td>
-
-                      <td className="customers-dashboard__address"><p>
-                          {customer.customer_billing_address ||
-                            "No billing address"}
+                      <TableCell>
+                        <p className="max-w-[220px] truncate text-xs text-muted-foreground" title={customer.customer_billing_address || undefined}>
+                          {customer.customer_billing_address || "No billing address"}
                         </p>
-                      </td>
+                      </TableCell>
 
-                      <td><div className="customers-dashboard__actions">
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-1">
                           <Button
                             variant="ghost"
                             size="icon"
                             onClick={() => openEdit(customer)}
-                            className="customers-dashboard__icon-action"
+                            className="h-8 w-8 text-muted-foreground hover:text-foreground"
                           >
-                            <Edit3 size={16} />
+                            <Edit3 className="h-4 w-4" />
+                            <span className="sr-only">Edit customer</span>
                           </Button>
 
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() =>
-                              void removeCustomer(customer)
-                            }
-                            className="customers-dashboard__icon-action"
+                            onClick={() => void removeCustomer(customer)}
+                            className="h-8 w-8 text-muted-foreground hover:text-destructive"
                           >
-                            <Trash2 size={16} />
+                            <Trash2 className="h-4 w-4" />
+                            <span className="sr-only">Delete customer</span>
                           </Button>
                         </div>
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   ))
                 )}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         </CardContent>
       </Card>
 
-      {formOpen && (
-        <CustomerFormModal
-          customer={editingCustomer}
-          onClose={() => {
-            setFormOpen(false);
-            setEditingCustomer(null);
-          }}
-          onSave={saveCustomer}
-        />
-      )}
+      <CustomerFormSheet
+        open={formOpen}
+        customer={editingCustomer}
+        onClose={() => {
+          setFormOpen(false);
+          setEditingCustomer(null);
+        }}
+        onSave={saveCustomer}
+      />
     </section>
   );
 }
@@ -353,14 +326,15 @@ function KpiCard({
   value: number;
 }) {
   return (
-    <Card className="customers-kpi"><CardContent className="customers-kpi__content">
-        <Users size={20} className="customers-kpi__icon" />
-
-        <p className="customers-kpi__label">
-          {label}
-        </p>
-
-        <p className="customers-kpi__value">{value}</p>
+    <Card>
+      <CardContent className="flex items-center gap-4 p-6">
+        <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <Users className="h-6 w-6" />
+        </div>
+        <div>
+          <p className="text-xs font-medium text-muted-foreground">{label}</p>
+          <p className="text-2xl font-bold text-foreground">{value}</p>
+        </div>
       </CardContent>
     </Card>
   );

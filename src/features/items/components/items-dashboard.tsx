@@ -10,6 +10,19 @@ import {
   Search,
   Trash2,
 } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
 import { ItemFormModal } from "../addform/item-form-modal";
 import { useItems } from "../hooks/use-items";
 import type { Item, ItemInput } from "../types";
@@ -94,194 +107,223 @@ export function ItemsDashboard() {
   }
 
   return (
-    <section className="items-dashboard">
-      <div className="items-dashboard__toolbar">
-        <div className="items-dashboard__search">
-          <Search className="items-dashboard__search-icon" />
-
-          <input
+    <section className="space-y-6">
+      {/* Search Bar & Primary Actions */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative w-full sm:w-80">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Search items, codes, or descriptions..."
-            className="items-dashboard__search-input"
+            className="pl-9"
           />
         </div>
 
-        <button
+        <Button
           onClick={() => {
             setEditingItem(null);
             setFormOpen(true);
           }}
-          className="items-dashboard__primary-action"
+          className="gap-2 self-start sm:self-auto"
         >
-          <Plus size={16} />
+          <Plus className="h-4 w-4" />
           Add Item
-        </button>
+        </Button>
       </div>
 
-      <div className="items-dashboard__kpis">
+      {/* KPI Section */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Kpi label="Total Items" value={String(items.length)} />
         <Kpi label="Inventory Tracked" value={String(trackedCount)} />
         <Kpi label="Batch Tracked" value={String(batchCount)} />
         <Kpi label="Total Stock Units" value={String(totalStock)} />
       </div>
 
-      <div className="items-dashboard__summary">
-        <p className="items-dashboard__summary-label">
+      {/* Section Summary */}
+      <div className="space-y-1">
+        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           Inventory & Catalogue
         </p>
-
-        <p className="items-dashboard__summary-copy">
+        <p className="text-sm text-muted-foreground">
           Manage standard items, services, and batch-tracked inventory.
         </p>
       </div>
 
-      <div>
-        <div className="items-dashboard__directory-heading">
+      {/* Item Directory Section */}
+      <div className="space-y-4">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="items-dashboard__title">Item & Services Directory</h1>
-            <p className="items-dashboard__count">
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">
+              Item & Services Directory
+            </h1>
+            <p className="text-xs text-muted-foreground">
               Listing {filteredItems.length} item
               {filteredItems.length === 1 ? "" : "s"}
             </p>
           </div>
 
-          <button
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => void refresh()}
-            className="items-dashboard__refresh"
+            className="gap-2 self-start sm:self-auto"
           >
-            <RefreshCw size={16} />
+            <RefreshCw className="h-4 w-4" />
             Refresh
-          </button>
+          </Button>
         </div>
 
         {actionError && (
-          <p className="items-dashboard__error">
+          <p className="text-sm font-medium text-destructive">
             {actionError}
           </p>
         )}
 
-        <div className="items-dashboard__table-card">
-          <div className="items-dashboard__table-scroll">
-            <table className="items-dashboard__table">
-              <thead>
-                <tr>
-                  <th>Item Name & Code</th><th>Price / Unit</th><th>Stock</th><th>Description</th><th>Actions</th>
-                </tr>
-              </thead>
+        {/* Directory Table Card */}
+        <Card>
+          <CardContent className="p-0">
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[280px]">Item Name & Code</TableHead>
+                    <TableHead>Price / Unit</TableHead>
+                    <TableHead>Stock</TableHead>
+                    <TableHead>Description</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
 
-              <tbody>
-                {loading ? (
-                  <tr>
-                    <td
-                      colSpan={5}
-                      className="items-dashboard__state"
-                    >
-                      <Loader2 className="items-dashboard__spinner" />
-                      Loading items...
-                    </td>
-                  </tr>
-                ) : error ? (
-                  <tr>
-                    <td
-                      colSpan={5}
-                      className="items-dashboard__state items-dashboard__state--error"
-                    >
-                      {error}
-                    </td>
-                  </tr>
-                ) : filteredItems.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={5}
-                      className="items-dashboard__state"
-                    >
-                      No items found. Click “Add Item” to create one.
-                    </td>
-                  </tr>
-                ) : (
-                  filteredItems.map((item) => (
-                    <tr
-                      key={item.id}
-                      className="items-dashboard__row"
-                    >
-                      <td><div className="items-dashboard__item">
-                          <div className="items-dashboard__item-icon"><Package size={20} />
-                          </div>
-
-                          <div>
-                            <p className="items-dashboard__item-name">
-                              {item.item_name}
-                            </p>
-
-                            <p className="items-dashboard__item-code">
-                              {item.item_code}
-                              {item.hsn_code
-                                ? ` · HSN: ${item.hsn_code}`
-                                : ""}
-                            </p>
-                          </div>
+                <TableBody>
+                  {loading ? (
+                    <TableRow>
+                      <TableCell
+                        colSpan={5}
+                        className="h-32 text-center text-muted-foreground"
+                      >
+                        <div className="flex items-center justify-center gap-2">
+                          <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                          <span>Loading items...</span>
                         </div>
-                      </td>
-
-                      <td className="items-dashboard__price">
-                        {money.format(item.item_cost)}
-                        <span className="items-dashboard__unit">
-                          / {item.unit || "PCS"}
-                        </span>
-                      </td>
-
-                      <td>
-                        {item.track_inventory ? (
-                          <div>
-                            <p className="items-dashboard__stock">
-                              {item.total_stock}
-                            </p>
-
-                            <p className="items-dashboard__stock-label">
-                              {item.is_batch_tracked
-                                ? "Batch tracked"
-                                : "Inventory tracked"}
-                            </p>
+                      </TableCell>
+                    </TableRow>
+                  ) : error ? (
+                    <TableRow>
+                      <TableCell
+                        colSpan={5}
+                        className="h-32 text-center text-destructive"
+                      >
+                        {error}
+                      </TableCell>
+                    </TableRow>
+                  ) : filteredItems.length === 0 ? (
+                    <TableRow>
+                      <TableCell
+                        colSpan={5}
+                        className="h-32 text-center text-muted-foreground"
+                      >
+                        No items found. Click &ldquo;Add Item&rdquo; to create one.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredItems.map((item) => (
+                      <TableRow key={item.id}>
+                        {/* Item Name & Code */}
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                              <Package className="h-5 w-5" />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="truncate font-medium text-foreground">
+                                {item.item_name}
+                              </p>
+                              <p className="truncate text-xs text-muted-foreground">
+                                {item.item_code}
+                                {item.hsn_code
+                                  ? ` · HSN: ${item.hsn_code}`
+                                  : ""}
+                              </p>
+                            </div>
                           </div>
-                        ) : (
-                          <span className="items-dashboard__empty">—</span>
-                        )}
-                      </td>
+                        </TableCell>
 
-                      <td className="items-dashboard__description"><p>
-                          {item.item_description || "No description"}
-                        </p>
-                      </td>
+                        {/* Price & Unit */}
+                        <TableCell>
+                          <div className="text-sm font-medium text-foreground">
+                            {money.format(item.item_cost)}{" "}
+                            <span className="text-xs font-normal text-muted-foreground">
+                              / {item.unit || "PCS"}
+                            </span>
+                          </div>
+                        </TableCell>
 
-                      <td><div className="items-dashboard__actions">
-                          <button
-                            onClick={() => {
-                              setEditingItem(item);
-                              setFormOpen(true);
-                            }}
-                            className="items-dashboard__icon-action"
-                            title="Edit item"
+                        {/* Stock */}
+                        <TableCell>
+                          {item.track_inventory ? (
+                            <div>
+                              <p className="font-medium text-foreground">
+                                {item.total_stock}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {item.is_batch_tracked
+                                  ? "Batch tracked"
+                                  : "Inventory tracked"}
+                              </p>
+                            </div>
+                          ) : (
+                            <span className="text-muted-foreground">—</span>
+                          )}
+                        </TableCell>
+
+                        {/* Description */}
+                        <TableCell>
+                          <p
+                            className="max-w-[250px] truncate text-xs text-muted-foreground"
+                            title={item.item_description || undefined}
                           >
-                            <Edit3 size={16} />
-                          </button>
+                            {item.item_description || "No description"}
+                          </p>
+                        </TableCell>
 
-                          <button
-                            onClick={() => void deleteItem(item)}
-                            className="items-dashboard__icon-action"
-                            title="Archive item"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
+                        {/* Actions */}
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => {
+                                setEditingItem(item);
+                                setFormOpen(true);
+                              }}
+                              className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                              title="Edit item"
+                            >
+                              <Edit3 className="h-4 w-4" />
+                              <span className="sr-only">Edit item</span>
+                            </Button>
+
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => void deleteItem(item)}
+                              className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                              title="Archive item"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                              <span className="sr-only">Archive item</span>
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {formOpen && (
@@ -306,10 +348,16 @@ function Kpi({
   value: string;
 }) {
   return (
-    <div className="items-kpi">
-      <Package size={20} className="items-kpi__icon" />
-      <p className="items-kpi__label">{label}</p>
-      <p className="items-kpi__value">{value}</p>
-    </div>
+    <Card>
+      <CardContent className="flex items-center gap-4 p-6">
+        <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <Package className="h-6 w-6" />
+        </div>
+        <div>
+          <p className="text-xs font-medium text-muted-foreground">{label}</p>
+          <p className="text-2xl font-bold text-foreground">{value}</p>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

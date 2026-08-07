@@ -10,13 +10,25 @@ import {
   Trash2,
 } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
 import {
   useDeleteProduct,
   useProducts,
 } from "../hooks/use-products";
 import type { Product } from "../types/product.types";
 import { ProductForm } from "./product-form";
-import styles from "../products.module.css";
 
 export function ProductsDashboard() {
   const [search, setSearch] = useState("");
@@ -56,134 +68,172 @@ export function ProductsDashboard() {
   }
 
   return (
-    <section className={styles.page}>
-      <header className={styles.pageHeader}>
-        <div>
-          <p className={styles.eyebrow}>Product catalogue</p>
-          <h1>All Products</h1>
-          <p className={styles.subtitle}>
+    <section className="space-y-6">
+      {/* Page Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-1">
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Product catalogue
+          </p>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+            All Products
+          </h1>
+          <p className="text-sm text-muted-foreground">
             Create master products before adding individual serialised stock.
           </p>
         </div>
 
-        <button className={styles.primaryButton} onClick={openCreate}>
-          <Plus size={18} />
+        <Button onClick={openCreate} className="gap-2 self-start sm:self-auto">
+          <Plus className="h-4 w-4" />
           Add Master Product
-        </button>
-      </header>
+        </Button>
+      </div>
 
-      <div className={styles.toolbar}>
-        <label className={styles.searchBox}>
-          <Search size={19} />
-          <input
+      {/* Toolbar & Search */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative w-full sm:w-80">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Search product, brand, type, or code..."
+            className="pl-9"
           />
-        </label>
+        </div>
 
-        <span className={styles.resultCount}>
+        <span className="text-xs font-medium text-muted-foreground">
           {products.length} product{products.length === 1 ? "" : "s"}
         </span>
       </div>
 
-      <div className={styles.tableCard}>
-        {isLoading ? (
-          <div className={styles.loadingState}>
-            <Loader2 size={25} className={styles.spin} />
-            Loading products...
-          </div>
-        ) : error ? (
-          <div className={styles.errorState}>
-            Unable to load products. Please refresh and try again.
-          </div>
-        ) : products.length === 0 ? (
-          <div className={styles.emptyState}>
-            <PackagePlus size={36} />
-            <h3>No products found</h3>
-            <p>
-              Add your first master product before entering serialised stock.
-            </p>
-            <button className={styles.primaryButton} onClick={openCreate}>
-              <Plus size={18} />
-              Add First Product
-            </button>
-          </div>
-        ) : (
-          <div className={styles.tableWrap}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>Product</th>
-                  <th>Brand</th>
-                  <th>Type</th>
-                  <th>Code</th>
-                  <th>Available Stock</th>
-                  <th className={styles.actionsColumn}>Actions</th>
-                </tr>
-              </thead>
+      {/* Main Table Card */}
+      <Card>
+        <CardContent className="p-0">
+          {isLoading ? (
+            <div className="flex h-64 items-center justify-center gap-2 text-sm text-muted-foreground">
+              <Loader2 className="h-5 w-5 animate-spin text-primary" />
+              <span>Loading products...</span>
+            </div>
+          ) : error ? (
+            <div className="flex h-64 items-center justify-center p-6 text-center text-sm font-medium text-destructive">
+              Unable to load products. Please refresh and try again.
+            </div>
+          ) : products.length === 0 ? (
+            <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <PackagePlus className="h-6 w-6" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-base font-semibold text-foreground">
+                  No products found
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  Add your first master product before entering serialised stock.
+                </p>
+              </div>
+              <Button onClick={openCreate} className="mt-2 gap-2" size="sm">
+                <Plus className="h-4 w-4" />
+                Add First Product
+              </Button>
+            </div>
+          ) : (
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[300px]">Product</TableHead>
+                    <TableHead>Brand</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Code</TableHead>
+                    <TableHead>Available Stock</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
 
-              <tbody>
-                {products.map((product) => (
-                  <tr key={product.id}>
-                    <td>
-                      <div className={styles.productCell}>
-                        {product.image ? (
-                          <img
-                            className={styles.productImage}
-                            src={product.image}
-                            alt={product.product_name}
-                          />
-                        ) : (
-                          <div className={styles.productFallback}>
-                            {product.product_name.charAt(0).toUpperCase()}
+                <TableBody>
+                  {products.map((product) => (
+                    <TableRow key={product.id}>
+                      {/* Product Name & Config */}
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          {product.image ? (
+                            <img
+                              className="h-10 w-10 rounded-md object-cover border border-border"
+                              src={product.image}
+                              alt={product.product_name}
+                            />
+                          ) : (
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-primary/10 text-sm font-bold text-primary">
+                              {product.product_name.charAt(0).toUpperCase()}
+                            </div>
+                          )}
+
+                          <div className="min-w-0">
+                            <p className="truncate font-medium text-foreground">
+                              {product.product_name}
+                            </p>
+                            <p className="truncate text-xs text-muted-foreground">
+                              {product.product_config || "No configuration"}
+                            </p>
                           </div>
-                        )}
-
-                        <div>
-                          <strong>{product.product_name}</strong>
-                          <small>
-                            {product.product_config || "No configuration"}
-                          </small>
                         </div>
-                      </div>
-                    </td>
+                      </TableCell>
 
-                    <td>{product.brand_name || "—"}</td>
-                    <td>{product.product_type || "—"}</td>
-                    <td>{product.product_code}</td>
+                      <TableCell className="text-foreground">
+                        {product.brand_name || "—"}
+                      </TableCell>
 
-                    <td>
-                      <span className={styles.stockBadge}>
-                        {Number(product.available_stock || 0)}
-                      </span>
-                    </td>
+                      <TableCell className="text-foreground">
+                        {product.product_type || "—"}
+                      </TableCell>
 
-                    <td className={styles.tableActions}>
-                      <button
-                        className={styles.iconButton}
-                        onClick={() => openEdit(product)}
-                        aria-label={`Edit ${product.product_name}`}
-                      >
-                        <Edit3 size={17} />
-                      </button>
+                      <TableCell className="font-mono text-xs text-muted-foreground">
+                        {product.product_code}
+                      </TableCell>
 
-                      <button
-                        className={`${styles.iconButton} ${styles.deleteButton}`}
-                        disabled={deleteProduct.isPending}
-                        onClick={() => removeProduct(product)}
-                        aria-label={`Archive ${product.product_name}`}
-                      >
-                        <Trash2 size={17} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+                      <TableCell>
+                        <Badge variant="secondary" className="font-medium">
+                          {Number(product.available_stock || 0)}
+                        </Badge>
+                      </TableCell>
+
+                      {/* Actions */}
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => openEdit(product)}
+                            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                          >
+                            <Edit3 className="h-4 w-4" />
+                            <span className="sr-only">
+                              Edit {product.product_name}
+                            </span>
+                          </Button>
+
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            disabled={deleteProduct.isPending}
+                            onClick={() => removeProduct(product)}
+                            className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            <span className="sr-only">
+                              Archive {product.product_name}
+                            </span>
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {showForm ? (
         <ProductForm

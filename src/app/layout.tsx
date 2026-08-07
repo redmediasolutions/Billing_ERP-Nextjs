@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
-import { QueryProvider } from "@/components/providers/query-provider";
+import { Geist } from "next/font/google";
 
-const inter = Inter({
+import "./globals.css";
+
+import { QueryProvider } from "@/components/providers/query-provider";
+import { ThemeProvider } from "@/components/providers/theme-provider";
+import { cn } from "@/lib/utils";
+
+const geist = Geist({
   subsets: ["latin"],
   variable: "--font-sans",
 });
@@ -24,9 +28,14 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${inter.variable} min-h-screen bg-background font-sans antialiased`}
+        className={cn(
+          geist.variable,
+          "min-h-screen bg-background font-sans text-foreground antialiased"
+        )}
       >
-        <QueryProvider>{children}</QueryProvider>
+        <ThemeProvider>
+          <QueryProvider>{children}</QueryProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

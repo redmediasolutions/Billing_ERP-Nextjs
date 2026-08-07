@@ -15,6 +15,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 import { useEmployees } from "@/features/employees/hooks/use-employees";
 import {
@@ -35,18 +43,14 @@ function money(value: number) {
 }
 
 export function PayrollDashboard() {
-  const { data: payroll = [], isLoading, error } =
-    usePayrollDashboard();
-
+  const { data: payroll = [], isLoading, error } = usePayrollDashboard();
   const { data: employees = [] } = useEmployees();
 
   const addLoan = useAddLoan();
   const addDeduction = useAddDeduction();
 
   const [search, setSearch] = useState("");
-  const [modalType, setModalType] = useState<
-    "loan" | "deduction" | null
-  >(null);
+  const [modalType, setModalType] = useState<"loan" | "deduction" | null>(null);
 
   const [selectedEmployee, setSelectedEmployee] =
     useState<PayrollRow | null>(null);
@@ -118,171 +122,178 @@ export function PayrollDashboard() {
   }
 
   return (
-    <section className="payroll-dashboard">
-      <div className="payroll-dashboard__header">
-        <div>
-          <p className="payroll-dashboard__eyebrow">
+    <section className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-1">
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Workforce Finance
           </p>
 
-          <h1 className="payroll-dashboard__title">
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
             Payroll & Loans
           </h1>
 
-          <p className="payroll-dashboard__intro">
+          <p className="text-sm text-muted-foreground">
             Track employee loans, deductions, and outstanding balances.
           </p>
         </div>
 
-        <div className="payroll-dashboard__actions">
+        <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
           <Button
             onClick={() => setModalType("deduction")}
             variant="outline"
-            className="payroll-dashboard__secondary-action"
+            className="gap-2"
           >
-            <MinusCircle className="mr-2 h-4 w-4" />
+            <MinusCircle className="h-4 w-4" />
             Add Deduction
           </Button>
 
           <Button
             onClick={() => setModalType("loan")}
-            className="payroll-dashboard__primary-action"
+            className="gap-2"
           >
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus className="h-4 w-4" />
             Add Loan
           </Button>
         </div>
       </div>
 
-      <div className="payroll-dashboard__kpis">
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Kpi
           label="Total Loan Value"
           value={money(totalLoans)}
-          icon={<HandCoins />}
+          icon={<HandCoins className="h-6 w-6" />}
         />
 
         <Kpi
           label="Total Recovered"
           value={money(totalDeductions)}
-          icon={<Landmark />}
+          icon={<Landmark className="h-6 w-6" />}
         />
 
         <Kpi
           label="Outstanding Balance"
           value={money(outstanding)}
-          icon={<Users />}
+          icon={<Users className="h-6 w-6" />}
           highlight
         />
       </div>
 
-      <Card className="payroll-ledger">
-        <CardContent style={{ padding: 0 }}>
-          <div className="payroll-ledger__head">
+      {/* Ledger Table Section */}
+      <Card>
+        <CardContent className="p-6 space-y-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="payroll-ledger__title">
+              <h2 className="text-lg font-semibold text-foreground">
                 Employee Loan Ledger
               </h2>
 
-              <p className="payroll-ledger__subtitle">
+              <p className="text-xs text-muted-foreground">
                 Click an employee to view loan and deduction history.
               </p>
             </div>
 
-            <div className="payroll-ledger__search">
-              <Search className="payroll-ledger__search-icon" />
-
+            <div className="relative w-full sm:w-72">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 value={search}
-                onChange={(event) =>
-                  setSearch(event.target.value)
-                }
+                onChange={(event) => setSearch(event.target.value)}
                 placeholder="Search employee..."
-                className="payroll-ledger__search-input"
+                className="pl-9"
               />
             </div>
           </div>
 
           {actionError && (
-            <p className="payroll-ledger__error">{actionError}</p>
+            <p className="text-sm font-medium text-destructive">{actionError}</p>
           )}
 
-          <div className="payroll-ledger__table-scroll">
-            <table className="payroll-ledger__table">
-              <thead>
-                <tr>
-                  <th>Employee</th>
-                  <th>Total Loans</th>
-                  <th>Deductions</th>
-                  <th>Remaining</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[280px]">Employee</TableHead>
+                  <TableHead>Total Loans</TableHead>
+                  <TableHead>Deductions</TableHead>
+                  <TableHead>Remaining</TableHead>
+                  <TableHead className="text-right">Status</TableHead>
+                </TableRow>
+              </TableHeader>
 
-              <tbody>
+              <TableBody>
                 {isLoading ? (
-                  <tr>
-                    <td colSpan={5} className="payroll-ledger__state">
-                      <Loader2 className="payroll-ledger__spinner" />
-                      Loading payroll ledger...
-                    </td>
-                  </tr>
+                  <TableRow>
+                    <TableCell
+                      colSpan={5}
+                      className="h-32 text-center text-muted-foreground"
+                    >
+                      <div className="flex items-center justify-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                        <span>Loading payroll ledger...</span>
+                      </div>
+                    </TableCell>
+                  </TableRow>
                 ) : error ? (
-                  <tr>
-                    <td colSpan={5} className="payroll-ledger__state payroll-ledger__state--error">
+                  <TableRow>
+                    <TableCell
+                      colSpan={5}
+                      className="h-32 text-center text-destructive"
+                    >
                       Unable to load payroll data.
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ) : filteredPayroll.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="payroll-ledger__state">
+                  <TableRow>
+                    <TableCell
+                      colSpan={5}
+                      className="h-32 text-center text-muted-foreground"
+                    >
                       No employee loans or deductions found.
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ) : (
                   filteredPayroll.map((row) => (
-                    <tr
+                    <TableRow
                       key={row.id}
-                      onClick={() =>
-                        setSelectedEmployee(row)
-                      }
-                      className="payroll-ledger__row"
+                      onClick={() => setSelectedEmployee(row)}
+                      className="cursor-pointer transition-colors hover:bg-muted/50"
                     >
-                      <td>
-                        <div className="payroll-ledger__employee">
-                          <div className="payroll-ledger__avatar">
-                            {row.fullName
-                              .slice(0, 2)
-                              .toUpperCase()}
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+                            {row.fullName.slice(0, 2).toUpperCase()}
                           </div>
 
-                          <span className="payroll-ledger__name">
+                          <span className="font-medium text-foreground">
                             {row.fullName}
                           </span>
                         </div>
-                      </td>
+                      </TableCell>
 
-                      <td style={{ fontWeight: 700 }}>
+                      <TableCell className="font-semibold text-foreground">
                         {money(row.totalLoans)}
-                      </td>
+                      </TableCell>
 
-                      <td className="payroll-ledger__deductions">
+                      <TableCell className="text-muted-foreground">
                         {money(row.totalDeductions)}
-                      </td>
+                      </TableCell>
 
-                      <td className="payroll-ledger__remaining">
+                      <TableCell className="font-medium text-foreground">
                         {money(row.remaining)}
-                      </td>
+                      </TableCell>
 
-                      <td>
-                        <Badge className="payroll-ledger__badge">
+                      <TableCell className="text-right">
+                        <Badge variant="secondary" className="capitalize">
                           {row.status}
                         </Badge>
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   ))
                 )}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         </CardContent>
       </Card>
@@ -319,19 +330,29 @@ function Kpi({
   highlight?: boolean;
 }) {
   return (
-    <Card className="payroll-kpi">
-      <CardContent>
-        <div className="payroll-kpi__icon">{icon}</div>
-
-        <p className="payroll-kpi__label">{label}</p>
-
-        <p
-          className={`payroll-kpi__value${
-            highlight ? " payroll-kpi__value--highlight" : ""
+    <Card>
+      <CardContent className="flex items-center gap-4 p-6">
+        <div
+          className={`flex h-12 w-12 items-center justify-center rounded-lg ${
+            highlight
+              ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+              : "bg-primary/10 text-primary"
           }`}
         >
-          {value}
-        </p>
+          {icon}
+        </div>
+        <div className="space-y-0.5">
+          <p className="text-xs font-medium text-muted-foreground">{label}</p>
+          <p
+            className={`text-2xl font-bold tracking-tight ${
+              highlight
+                ? "text-amber-600 dark:text-amber-400"
+                : "text-foreground"
+            }`}
+          >
+            {value}
+          </p>
+        </div>
       </CardContent>
     </Card>
   );

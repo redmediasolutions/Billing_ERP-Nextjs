@@ -5,10 +5,18 @@ import { ArrowLeft, FileText, Loader2, Trash2, UserRound } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 import { ItemPickerDialog } from "@/features/estimates/addform/item-picker-dialog";
 import { useCustomers } from "@/features/customers/hooks/use-customers";
@@ -226,26 +234,29 @@ export function InvoiceForm() {
   }
 
   return (
-    <section className="invoice-form">
-      <div className="invoice-form__header">
-        <div className="invoice-form__title-group">
+    <section className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-2">
           <Button
             variant="ghost"
+            size="icon"
             onClick={() => router.push("/dashboard/invoices")}
-            className="invoice-form__back"
           >
-            <ArrowLeft size={20} />
+            <ArrowLeft className="h-5 w-5" />
+            <span className="sr-only">Back</span>
           </Button>
 
-          <h1 className="invoice-form__title">Create Invoice</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+            Create Invoice
+          </h1>
         </div>
 
-        <div className="invoice-form__header-actions">
+        <div className="flex items-center gap-2">
           <Button
             variant="outline"
             disabled={createInvoice.isPending}
             onClick={() => void saveInvoice(true)}
-            className="invoice-form__secondary-action"
           >
             Save Draft
           </Button>
@@ -253,32 +264,31 @@ export function InvoiceForm() {
           <Button
             disabled={createInvoice.isPending}
             onClick={() => void saveInvoice(false)}
-            className="invoice-form__primary-action"
           >
             {createInvoice.isPending && (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             )}
-
             Finalize Invoice
           </Button>
         </div>
       </div>
 
-      <div className="invoice-form__details-grid">
-        <Card className="invoice-form__section">
-          <CardContent className="invoice-form__section-content">
-            <h2 className="invoice-form__section-title">
-              <UserRound size={20} />
+      {/* Details Grid */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        {/* Customer Info Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <UserRound className="h-5 w-5 text-muted-foreground" />
               Customer Info
-            </h2>
-
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-5">
             <Field label="Select Customer *">
               <select
                 value={customerId}
-                onChange={(event) =>
-                  setCustomerId(event.target.value)
-                }
-                className="employee-form__select"
+                onChange={(event) => setCustomerId(event.target.value)}
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <option value="">
                   {loadingCustomers
@@ -294,48 +304,42 @@ export function InvoiceForm() {
               </select>
             </Field>
 
-            <div className="form-grid form-grid--2col" style={{ marginTop: 20 }}>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <AddressCard
                 title="Billing Address"
-                value={
-                  selectedCustomer?.customer_billing_address
-                }
+                value={selectedCustomer?.customer_billing_address}
               />
 
               <AddressCard
                 title="Delivery Address"
-                value={
-                  selectedCustomer?.customer_shipping_address
-                }
+                value={selectedCustomer?.customer_shipping_address}
               />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="invoice-form__section">
-          <CardContent className="invoice-form__section-content">
-            <h2 className="invoice-form__section-title">
-              <FileText size={20} />
+        {/* Invoice Details Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <FileText className="h-5 w-5 text-muted-foreground" />
               Invoice Details
-            </h2>
-
-            <div className="form-grid form-grid--2col">
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <Field label="Invoice Number *">
                 <Input
                   value={invoiceNumber}
-                  onChange={(event) =>
-                    setInvoiceNumber(event.target.value)
-                  }
+                  onChange={(event) => setInvoiceNumber(event.target.value)}
                 />
               </Field>
 
               <Field label="Order Type">
                 <select
                   value={orderType}
-                  onChange={(event) =>
-                    setOrderType(event.target.value)
-                  }
-                  className="employee-form__select"
+                  onChange={(event) => setOrderType(event.target.value)}
+                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <option value="SALE">Sale</option>
                   <option value="SERVICE">Service</option>
@@ -346,9 +350,7 @@ export function InvoiceForm() {
                 <Input
                   type="date"
                   value={invoiceDate}
-                  onChange={(event) =>
-                    setInvoiceDate(event.target.value)
-                  }
+                  onChange={(event) => setInvoiceDate(event.target.value)}
                 />
               </Field>
 
@@ -356,186 +358,182 @@ export function InvoiceForm() {
                 <Input
                   type="date"
                   value={dueDate}
-                  onChange={(event) =>
-                    setDueDate(event.target.value)
-                  }
+                  onChange={(event) => setDueDate(event.target.value)}
                 />
               </Field>
 
               <Field label="Table Name">
                 <Input
                   value={tableName}
-                  onChange={(event) =>
-                    setTableName(event.target.value)
-                  }
+                  onChange={(event) => setTableName(event.target.value)}
                   placeholder="Optional"
                 />
               </Field>
             </div>
 
-            <div style={{ marginTop: 20 }}>
-              <Field label="Notes">
-                <Textarea
-                  value={notes}
-                  onChange={(event) => setNotes(event.target.value)}
-                  placeholder="Invoice notes..."
-                />
-              </Field>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="line-items">
-        <div className="line-items__header">
-          <h2 className="line-items__title">Line Items</h2>
-
-          <ItemPickerDialog onSelect={addItem} />
-        </div>
-
-        <div className="line-items__table-scroll">
-          <table className="line-items__table">
-            <thead>
-              <tr>
-                <th>Item Details</th>
-                <th>Quantity</th>
-                <th>Rate</th>
-                <th>Tax</th>
-                <th>Discount</th>
-                <th>Amount</th>
-                <th />
-              </tr>
-            </thead>
-
-            <tbody>
-              {lineItems.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="line-items__empty">
-                    Click &ldquo;Add Items&rdquo; to choose catalogue items.
-                  </td>
-                </tr>
-              ) : (
-                lineItems.map((line) => (
-                  <tr key={line.id} className="line-items__row">
-                    <td>
-                      <p className="line-items__name">
-                        {line.item_name}
-                      </p>
-
-                      <p className="line-items__meta">
-                        {line.unit} · HSN: {line.hsn_code || "—"}
-                      </p>
-                    </td>
-
-                    <td>
-                      <Input
-                        type="number"
-                        min="1"
-                        value={line.quantity}
-                        onChange={(event) =>
-                          updateLine(line.id, {
-                            quantity: Math.max(
-                              1,
-                              Number(event.target.value)
-                            ),
-                          })
-                        }
-                        className="line-items__input--qty"
-                      />
-                    </td>
-
-                    <td>
-                      <Input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={line.unit_price}
-                        onChange={(event) =>
-                          updateLine(line.id, {
-                            unit_price: Number(event.target.value),
-                          })
-                        }
-                        className="line-items__input--rate"
-                      />
-                    </td>
-
-                    <td>
-                      <Input
-                        type="number"
-                        min="0"
-                        value={line.tax_rate}
-                        onChange={(event) =>
-                          updateLine(line.id, {
-                            tax_rate: Number(event.target.value),
-                          })
-                        }
-                        className="line-items__input--tax"
-                      />
-                    </td>
-
-                    <td>
-                      <Input
-                        type="number"
-                        min="0"
-                        max="100"
-                        value={line.line_discount}
-                        onChange={(event) =>
-                          updateLine(line.id, {
-                            line_discount: Number(event.target.value),
-                          })
-                        }
-                        className="line-items__input--discount"
-                      />
-                    </td>
-
-                    <td className="line-items__amount">
-                      ₹{line.line_total.toFixed(2)}
-                    </td>
-
-                    <td>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => removeLine(line.id)}
-                        className="line-items__delete"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div className="invoice-form__details-grid" style={{ marginTop: 24 }}>
-        <Card className="invoice-form__section">
-          <CardContent className="invoice-form__section-content">
-            <Field label="Payment Terms">
+            <Field label="Notes">
               <Textarea
-                value={paymentTerms}
-                onChange={(event) =>
-                  setPaymentTerms(event.target.value)
-                }
-                placeholder="e.g. Payment due within 15 days"
+                value={notes}
+                onChange={(event) => setNotes(event.target.value)}
+                placeholder="Invoice notes..."
+                rows={3}
               />
             </Field>
           </CardContent>
         </Card>
+      </div>
 
-        <Card className="invoice-form__section">
-          <CardContent className="invoice-form__section-content" style={{ display: "grid", gap: 16 }}>
+      {/* Line Items Table */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+          <CardTitle className="text-lg">Line Items</CardTitle>
+          <ItemPickerDialog onSelect={addItem} />
+        </CardHeader>
+        <CardContent>
+          <div className="rounded-md border overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="min-w-[200px]">Item Details</TableHead>
+                  <TableHead className="w-[100px]">Quantity</TableHead>
+                  <TableHead className="w-[120px]">Rate</TableHead>
+                  <TableHead className="w-[100px]">Tax (%)</TableHead>
+                  <TableHead className="w-[100px]">Discount (%)</TableHead>
+                  <TableHead className="w-[120px] text-right">Amount</TableHead>
+                  <TableHead className="w-[50px]"></TableHead>
+                </TableRow>
+              </TableHeader>
+
+              <TableBody>
+                {lineItems.length === 0 ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={7}
+                      className="h-24 text-center text-muted-foreground"
+                    >
+                      Click &ldquo;Add Items&rdquo; to choose catalogue items.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  lineItems.map((line) => (
+                    <TableRow key={line.id}>
+                      <TableCell>
+                        <p className="font-medium text-foreground">
+                          {line.item_name}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {line.unit} · HSN: {line.hsn_code || "—"}
+                        </p>
+                      </TableCell>
+
+                      <TableCell>
+                        <Input
+                          type="number"
+                          min="1"
+                          value={line.quantity}
+                          onChange={(event) =>
+                            updateLine(line.id, {
+                              quantity: Math.max(
+                                1,
+                                Number(event.target.value)
+                              ),
+                            })
+                          }
+                          className="w-20"
+                        />
+                      </TableCell>
+
+                      <TableCell>
+                        <Input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={line.unit_price}
+                          onChange={(event) =>
+                            updateLine(line.id, {
+                              unit_price: Number(event.target.value),
+                            })
+                          }
+                          className="w-24"
+                        />
+                      </TableCell>
+
+                      <TableCell>
+                        <Input
+                          type="number"
+                          min="0"
+                          value={line.tax_rate}
+                          onChange={(event) =>
+                            updateLine(line.id, {
+                              tax_rate: Number(event.target.value),
+                            })
+                          }
+                          className="w-20"
+                        />
+                      </TableCell>
+
+                      <TableCell>
+                        <Input
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={line.line_discount}
+                          onChange={(event) =>
+                            updateLine(line.id, {
+                              line_discount: Number(event.target.value),
+                            })
+                          }
+                          className="w-20"
+                        />
+                      </TableCell>
+
+                      <TableCell className="text-right font-medium">
+                        ₹{line.line_total.toFixed(2)}
+                      </TableCell>
+
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => removeLine(line.id)}
+                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          <span className="sr-only">Delete line item</span>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Payment Terms & Summary Grid */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Payment Terms</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Textarea
+              value={paymentTerms}
+              onChange={(event) => setPaymentTerms(event.target.value)}
+              placeholder="e.g. Payment due within 15 days"
+              rows={4}
+            />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="space-y-3 pt-6">
             <Summary label="Subtotal" value={totals.subtotal} />
-
             <Summary label="Total Tax" value={totals.taxAmount} />
 
-            <div className="summary-panel__row">
-              <span className="summary-panel__label">
-                Discount %
-              </span>
-
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Discount %</span>
               <Input
                 type="number"
                 min="0"
@@ -544,7 +542,7 @@ export function InvoiceForm() {
                 onChange={(event) =>
                   setDiscountPercent(Number(event.target.value))
                 }
-                className="summary-panel__discount-input"
+                className="w-20 text-right"
               />
             </div>
 
@@ -553,10 +551,9 @@ export function InvoiceForm() {
               value={totals.discountAmount}
             />
 
-            <div className="summary-panel__total">
-              <span className="summary-panel__total-label">Grand Total</span>
-
-              <span className="summary-panel__total-value">
+            <div className="flex items-center justify-between border-t pt-3 font-semibold text-foreground">
+              <span className="text-base">Grand Total</span>
+              <span className="text-xl text-primary">
                 ₹{totals.roundedTotal.toFixed(2)}
               </span>
             </div>
@@ -565,7 +562,7 @@ export function InvoiceForm() {
       </div>
 
       {formError && (
-        <p className="form-error" style={{ marginTop: 24 }}>
+        <p className="text-sm font-medium text-destructive">
           {formError}
         </p>
       )}
@@ -581,11 +578,8 @@ function Field({
   children: React.ReactNode;
 }) {
   return (
-    <div className="form-field">
-      <Label className="form-field__label">
-        {label}
-      </Label>
-
+    <div className="space-y-1.5">
+      <Label>{label}</Label>
       {children}
     </div>
   );
@@ -599,12 +593,11 @@ function AddressCard({
   value?: string | null;
 }) {
   return (
-    <div className="address-card">
-      <p className="address-card__title">
+    <div className="rounded-md border bg-muted/40 p-3 space-y-1">
+      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
         {title}
       </p>
-
-      <p className="address-card__value">
+      <p className="text-xs text-foreground leading-relaxed">
         {value || "Select a customer to populate address"}
       </p>
     </div>
@@ -619,9 +612,11 @@ function Summary({
   value: number;
 }) {
   return (
-    <div className="summary-panel__row">
-      <span className="summary-panel__label">{label}</span>
-      <span className="summary-panel__value">₹{value.toFixed(2)}</span>
+    <div className="flex items-center justify-between text-sm">
+      <span className="text-muted-foreground">{label}</span>
+      <span className="font-medium text-foreground">
+        ₹{value.toFixed(2)}
+      </span>
     </div>
   );
 }

@@ -1,9 +1,13 @@
+// src/app/(dashboard)/dashboard/invoices/[id]/page.tsx
+
 import { InvoicePreview } from "@/features/invoices/document/invoice-preview";
 
-export default function InvoiceDocumentPage({
+export default async function InvoiceDocumentPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  return <InvoicePreview invoiceId={Number(params.id)} />;
+  const { id } = await params;
+
+  return <InvoicePreview invoiceId={Number(id)} />;
 }

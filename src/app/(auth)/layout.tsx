@@ -1,15 +1,18 @@
 import type { Metadata } from "next";
-import "@/app/globals.css"; 
 
 export const metadata: Metadata = {
   title: "Billing ERP",
   description: "Billing ERP",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function AuthLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html lang="en">
-      <body>{children}</body>
-    </html>
+    <main className="min-h-screen bg-background text-foreground">
+      {children}
+    </main>
   );
 }
