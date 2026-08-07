@@ -1,20 +1,19 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getAuth, signOut } from "firebase/auth";
-import {
-  LogOut,
-  Mail,
-  UserCircle,
-} from "lucide-react";
+import { User, onAuthStateChanged, signOut } from "firebase/auth";
+import { LogOut, Mail, UserCircle } from "lucide-react";
+
+import { auth } from "@/firebase/config";
 
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 
 import { Button } from "@/components/ui/button";
@@ -22,12 +21,35 @@ import { Button } from "@/components/ui/button";
 export function ProfileMenu() {
   const router = useRouter();
 
-  const auth = getAuth();
-  const user = auth.currentUser;
+  const [mounted, setMounted] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+
+    const unsubscribe = onAuthStateChanged(auth, (u) => {
+      setUser(u);
+    });
+
+    return unsubscribe;
+  }, []);
 
   async function logout() {
     await signOut(auth);
     router.replace("/login");
+  }
+
+  // Prevent SSR hydration issues
+  if (!mounted) {
+    return (
+      <Button
+        variant="outline"
+        size="icon"
+        className="h-10 w-10 rounded-full"
+      >
+        U
+      </Button>
+    );
   }
 
   return (
@@ -38,7 +60,7 @@ export function ProfileMenu() {
           size="icon"
           className="h-10 w-10 rounded-full font-semibold"
         >
-          {user?.email?.charAt(0).toUpperCase() ?? "U"}
+          {user?.email?.[0]?.toUpperCase() ?? "U"}
         </Button>
       </DropdownMenuTrigger>
 
@@ -51,15 +73,12 @@ export function ProfileMenu() {
             <UserCircle className="h-10 w-10 text-muted-foreground" />
 
             <div className="min-w-0">
-              <p className="font-semibold">
-                Logged in
-              </p>
+              <p className="font-semibold">Logged in</p>
 
               <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
                 <Mail className="h-3.5 w-3.5" />
-
                 <span className="truncate">
-                  {user?.email ?? "Unknown"}
+                  {user?.email ?? "Not signed in"}
                 </span>
               </div>
             </div>
@@ -70,7 +89,7 @@ export function ProfileMenu() {
 
         <DropdownMenuItem
           onClick={logout}
-          className="cursor-pointer text-destructive focus:text-destructive"
+          className="cursor-pointer text-destructive"
         >
           <LogOut className="mr-2 h-4 w-4" />
           Log out
