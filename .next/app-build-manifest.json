@@ -1,26 +1,5 @@
 {
   "pages": {
-    "/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/page.js"
-    ],
-    "/layout": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/css/app/layout.css",
-      "static/chunks/app/layout.js"
-    ],
-    "/(auth)/login/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(auth)/login/page.js"
-    ],
-    "/(auth)/layout": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(auth)/layout.js"
-    ],
     "/(dashboard)/dashboard/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
@@ -31,29 +10,16 @@
       "static/chunks/main-app.js",
       "static/chunks/app/(dashboard)/layout.js"
     ],
-    "/(dashboard)/dashboard/products/page": [
+    "/layout": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/css/app/(dashboard)/dashboard/products/page.css",
-      "static/chunks/app/(dashboard)/dashboard/products/page.js"
+      "static/css/app/layout.css",
+      "static/chunks/app/layout.js"
     ],
-    "/(dashboard)/dashboard/stocks/page": [
+    "/(dashboard)/dashboard/invoices/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/css/app/(dashboard)/dashboard/stocks/page.css",
-      "static/chunks/app/(dashboard)/dashboard/stocks/page.js"
-    ],
-    "/(dashboard)/dashboard/brands/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/css/app/(dashboard)/dashboard/brands/page.css",
-      "static/chunks/app/(dashboard)/dashboard/brands/page.js"
-    ],
-    "/(dashboard)/dashboard/vendors/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/css/app/(dashboard)/dashboard/vendors/page.css",
-      "static/chunks/app/(dashboard)/dashboard/vendors/page.js"
+      "static/chunks/app/(dashboard)/dashboard/invoices/page.js"
     ],
     "/_not-found/page": [
       "static/chunks/webpack.js",
