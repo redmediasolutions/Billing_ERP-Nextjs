@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import {
+  Edit3,
   FileText,
   Loader2,
   Plus,
@@ -158,11 +159,26 @@ export function EstimatesDashboard() {
                             size="icon"
                             onClick={(event) => {
                               event.stopPropagation();
+                              router.push(
+                                `/dashboard/estimates/${estimate.id}/edit`
+                              );
+                            }}
+                            className="estimates-dashboard__edit"
+                            title="Edit estimate"
+                          >
+                            <Edit3 size={16} />
+                          </Button>
+
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={(event) => {
+                              event.stopPropagation();
                               void handleDelete(estimate.id);
                             }}
                             className="estimates-dashboard__delete"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 size={16} />
                           </Button>
                         </div>
                       </td>

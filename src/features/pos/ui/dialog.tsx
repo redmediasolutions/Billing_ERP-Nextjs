@@ -11,6 +11,7 @@ export function Dialog({
   description,
   children,
   width = 520,
+  mobileSheet = false,
 }: {
   open: boolean;
   onClose: () => void;
@@ -18,6 +19,7 @@ export function Dialog({
   description?: string;
   children: React.ReactNode;
   width?: number;
+  mobileSheet?: boolean;
 }) {
   useEffect(() => {
     if (!open) return;
@@ -33,9 +35,9 @@ export function Dialog({
   if (!open) return null;
 
   return (
-    <div className="dialog-overlay" onMouseDown={onClose}>
+    <div className={cn("dialog-overlay", mobileSheet && "dialog-overlay-sheet")} onMouseDown={onClose}>
       <div
-        className="dialog-panel"
+        className={cn("dialog-panel", mobileSheet && "dialog-panel-sheet")}
         style={{ maxWidth: width }}
         onMouseDown={(e) => e.stopPropagation()}
       >

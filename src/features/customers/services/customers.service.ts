@@ -29,5 +29,5 @@ export const customersService = {
     return normalizeCustomer(customer);
   },
 
-  remove: (id: number) => customersRepository.remove(id),
+  archive: (id: number) => customersRepository.archive(id),
 };

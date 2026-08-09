@@ -1,0 +1,34 @@
+.invoices-page-header {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.invoices-page-tabs {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.invoices-page-tabs .tab-btn {
+  flex: 1;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+@media (min-width: 720px) {
+  .invoices-page-header {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+
+  .invoices-page-tabs {
+    width: auto;
+    flex-shrink: 0;
+  }
+
+  .invoices-page-tabs .tab-btn {
+    flex: initial;
+  }
+}

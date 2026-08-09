@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   Edit3,
   Loader2,
@@ -29,6 +30,7 @@ function money(value: string | number) {
 }
 
 export function StocksDashboard() {
+  const searchParams = useSearchParams();
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
   const [showForm, setShowForm] = useState(false);
@@ -37,6 +39,13 @@ export function StocksDashboard() {
 
   const { data: stocks = [], isLoading, error } = useStocks(search, status);
   const deleteStock = useDeleteStock();
+
+  useEffect(() => {
+    if (searchParams.get("create") === "1") {
+      setEditingStock(null);
+      setShowForm(true);
+    }
+  }, [searchParams]);
 
   const summary = useMemo(
     () => ({

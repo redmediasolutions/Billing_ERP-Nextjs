@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   Edit3,
   Loader2,
@@ -19,6 +20,7 @@ import { BrandForm } from "./brand-form";
 import styles from "../brands.module.css";
 
 export function BrandsDashboard() {
+  const searchParams = useSearchParams();
   const { data: brands = [], isLoading, error } = useBrands();
   const deleteBrand = useDeleteBrand();
 
@@ -41,6 +43,13 @@ export function BrandsDashboard() {
       );
     });
   }, [brands, search]);
+
+  useEffect(() => {
+    if (searchParams.get("create") === "1") {
+      setSelectedBrand(null);
+      setShowForm(true);
+    }
+  }, [searchParams]);
 
   function openCreate() {
     setSelectedBrand(null);

@@ -1,14 +1,15 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
+  Archive,
   Edit3,
   Loader2,
   Mail,
   Phone,
   Plus,
   Search,
-  Trash2,
   Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -19,23 +20,32 @@ import { CustomerFormModal } from "../addform/customer-form-modal";
 import {
   useCreateCustomer,
   useCustomers,
-  useDeleteCustomer,
+  useArchiveCustomer,
   useUpdateCustomer,
 } from "../hooks/use-customers";
 import type { Customer, CustomerInput } from "../types";
 
 export function CustomersDashboard() {
+  const searchParams = useSearchParams();
   const { data: customers = [], isLoading, error } = useCustomers();
 
   const createCustomer = useCreateCustomer();
   const updateCustomer = useUpdateCustomer();
-  const deleteCustomer = useDeleteCustomer();
+  const archiveCustomer = useArchiveCustomer();
 
   const [search, setSearch] = useState("");
   const [formOpen, setFormOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] =
     useState<Customer | null>(null);
   const [actionError, setActionError] = useState("");
+
+  useEffect(() => {
+    if (searchParams.get("create") === "1") {
+      setEditingCustomer(null);
+      setActionError("");
+      setFormOpen(true);
+    }
+  }, [searchParams]);
 
   const filteredCustomers = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -97,9 +107,9 @@ export function CustomersDashboard() {
     }
   }
 
-  async function removeCustomer(customer: Customer) {
+  async function handleArchive(customer: Customer) {
     const accepted = window.confirm(
-      `Archive "${customer.customer_name}"?`
+      `Archive "${customer.customer_name}"? They will be hidden from the list but not permanently deleted.`
     );
 
     if (!accepted) return;
@@ -107,12 +117,12 @@ export function CustomersDashboard() {
     try {
       setActionError("");
 
-      await deleteCustomer.mutateAsync(customer.id);
+      await archiveCustomer.mutateAsync(customer.id);
     } catch (err) {
       setActionError(
         err instanceof Error
           ? err.message
-          : "Unable to delete customer."
+          : "Unable to archive customer."
       );
     }
   }
@@ -314,11 +324,12 @@ export function CustomersDashboard() {
                             variant="ghost"
                             size="icon"
                             onClick={() =>
-                              void removeCustomer(customer)
+                              void handleArchive(customer)
                             }
                             className="customers-dashboard__icon-action"
+                            title="Archive customer"
                           >
-                            <Trash2 size={16} />
+                            <Archive size={16} />
                           </Button>
                         </div>
                       </td>

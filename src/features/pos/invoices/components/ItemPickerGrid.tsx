@@ -1,15 +1,35 @@
 "use client";
-import { ImageOff, Plus } from "lucide-react";
-import { Item } from "@/features/items/types";
+import { ImageOff } from "lucide-react";
+import type { Item } from "@/features/items/types";
 import { money } from "@/features/pos/lib/money";
 import { useCart, priceFor } from "../hooks/useCart";
 import "./ItemPickerGrid.css";
+
+function ItemVisual({ item }: { item: Item }) {
+  if (item.item_image) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img src={item.item_image} alt="" className="picker-image" />
+    );
+  }
+
+  return (
+    <span className="picker-initial" aria-hidden>
+      {item.item_name.charAt(0).toUpperCase()}
+    </span>
+  );
+}
 
 export function ItemPickerGrid({ items }: { items: Item[] }) {
   const { addItem, channel } = useCart();
 
   if (items.length === 0) {
-    return <p className="text-sm text-muted" style={{ padding: "40px 0", textAlign: "center" }}>No items match your search.</p>;
+    return (
+      <div className="picker-empty">
+        <ImageOff size={22} />
+        <p>No items match your search.</p>
+      </div>
+    );
   }
 
   return (
@@ -18,20 +38,14 @@ export function ItemPickerGrid({ items }: { items: Item[] }) {
         const price = priceFor(item, channel);
         return (
           <button key={item.id} type="button" className="picker-card" onClick={() => addItem(item)}>
-            <div className="picker-thumb">
-              {item.item_image ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={item.item_image} alt="" />
-              ) : (
-                <ImageOff size={20} />
-              )}
-              <span className="picker-add"><Plus size={14} /></span>
+            <div className="picker-visual">
+              <ItemVisual item={item} />
             </div>
             <div className="picker-body">
-              <div className="picker-name truncate">{item.item_name}</div>
-              <div className="flex items-center justify-between" style={{ marginTop: 4 }}>
-                <span className="picker-unit text-xs text-faint">{item.unit}</span>
-                <span className="amount">{money(price)}</span>
+              <div className="picker-name">{item.item_name}</div>
+              <div className="picker-footer">
+                <span className="picker-unit">{item.unit || "—"}</span>
+                <span className="picker-price amount">{money(price)}</span>
               </div>
             </div>
           </button>

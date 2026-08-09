@@ -1,12 +1,84 @@
 "use client";
+
 import { useState } from "react";
 import { Pencil, Trash2, ImageOff } from "lucide-react";
-import { Table, THead, TBody, TR, TH, TD } from "@/features/pos/ui/table";
 import { Badge } from "@/features/pos/ui/badge";
 import { Button } from "@/features/pos/ui/button";
 import { Skeleton } from "@/features/pos/ui/skeleton";
 import { money } from "@/features/pos/lib/money";
-import { Item } from "@/features/items/types";
+import type { Item } from "@/features/items/types";
+import "./ItemsTable.css";
+
+function ItemVisual({ item }: { item: Item }) {
+  if (item.item_image) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img src={item.item_image} alt="" />
+    );
+  }
+  return <span className="item-card-initial">{item.item_name.charAt(0).toUpperCase()}</span>;
+}
+
+function ItemCard({
+  item,
+  deleting,
+  onEdit,
+  onDelete,
+}: {
+  item: Item;
+  deleting: boolean;
+  onEdit: (item: Item) => void;
+  onDelete: (item: Item) => void;
+}) {
+  const walkIn = money(item.walk_in_price ?? item.item_cost);
+  const cloud = money(item.cloud_kitchen_price ?? item.item_cost);
+
+  return (
+    <article className="item-card">
+      <div className="item-card-head">
+        <div className="item-card-visual">
+          <ItemVisual item={item} />
+        </div>
+        <div className="item-card-info">
+          <div className="item-card-name">{item.item_name}</div>
+          <div className="item-card-code mono">{item.item_code}</div>
+          <div className="item-card-meta">
+            <Badge variant="outline">{item.category || "Uncategorized"}</Badge>
+            {item.track_inventory && (
+              <span className="item-card-stock mono">Stock {item.total_stock}</span>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="item-card-prices">
+        <div className="item-card-price">
+          <span className="item-card-price-label">Walk-in</span>
+          <span className="item-card-price-value amount">{walkIn}</span>
+        </div>
+        <div className="item-card-price">
+          <span className="item-card-price-label">Cloud kitchen</span>
+          <span className="item-card-price-value amount">{cloud}</span>
+        </div>
+      </div>
+
+      <div className="item-card-foot">
+        <Button variant="outline" size="sm" className="item-card-action" onClick={() => onEdit(item)}>
+          <Pencil size={14} /> Edit
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="item-card-action item-card-action-danger"
+          onClick={() => onDelete(item)}
+          loading={deleting}
+        >
+          <Trash2 size={14} /> Delete
+        </Button>
+      </div>
+    </article>
+  );
+}
 
 export function ItemsTable({
   items,
@@ -33,8 +105,10 @@ export function ItemsTable({
 
   if (loading) {
     return (
-      <div className="flex flex-col gap-2">
-        {[...Array(5)].map((_, i) => <Skeleton key={i} style={{ height: 52, borderRadius: 10 }} />)}
+      <div className="items-list">
+        {[...Array(4)].map((_, i) => (
+          <Skeleton key={i} className="item-skeleton" />
+        ))}
       </div>
     );
   }
@@ -50,59 +124,16 @@ export function ItemsTable({
   }
 
   return (
-    <Table>
-      <THead>
-        <TR>
-          <TH>Item</TH>
-          <TH>Category</TH>
-          <TH>Walk-in</TH>
-          <TH>Cloud kitchen</TH>
-          <TH>Tax</TH>
-          <TH>Stock</TH>
-          <TH></TH>
-        </TR>
-      </THead>
-      <TBody>
-        {items.map((item) => (
-          <TR key={item.id}>
-            <TD>
-              <div className="flex items-center gap-3">
-                {item.item_image ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={item.item_image} alt="" className="item-thumb" />
-                ) : (
-                  <div className="item-thumb-placeholder"><ImageOff size={14} /></div>
-                )}
-                <div>
-                  <div className="font-medium">{item.item_name}</div>
-                  <div className="text-xs text-faint mono">{item.item_code} · {item.unit}</div>
-                </div>
-              </div>
-            </TD>
-            <TD><Badge variant="outline">{item.category || "Uncategorized"}</Badge></TD>
-            <TD className="amount">{money(item.walk_in_price ?? item.item_cost)}</TD>
-            <TD className="amount">{money(item.cloud_kitchen_price ?? item.item_cost)}</TD>
-            <TD className="mono">{Number(item.tax_rate)}%</TD>
-            <TD>
-              {item.track_inventory ? (
-                <span className="mono">{item.total_stock}</span>
-              ) : (
-                <span className="text-faint text-sm">Not tracked</span>
-              )}
-            </TD>
-            <TD>
-              <div className="flex items-center gap-1 justify-end">
-                <Button variant="ghost" size="icon" onClick={() => onEdit(item)} aria-label="Edit">
-                  <Pencil size={14} />
-                </Button>
-                <Button variant="ghost" size="icon" onClick={() => handleDelete(item)} loading={deletingId === item.id} aria-label="Delete">
-                  <Trash2 size={14} />
-                </Button>
-              </div>
-            </TD>
-          </TR>
-        ))}
-      </TBody>
-    </Table>
+    <div className="items-list">
+      {items.map((item) => (
+        <ItemCard
+          key={item.id}
+          item={item}
+          deleting={deletingId === item.id}
+          onEdit={onEdit}
+          onDelete={handleDelete}
+        />
+      ))}
+    </div>
   );
 }

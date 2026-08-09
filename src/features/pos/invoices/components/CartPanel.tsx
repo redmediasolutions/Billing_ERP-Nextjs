@@ -1,28 +1,29 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Minus, Plus, ShoppingCart, Trash2, Printer } from "lucide-react";
+import { Minus, Plus, ShoppingCart, Trash2, Printer, X } from "lucide-react";
 import { Button } from "@/features/pos/ui/button";
 import { money } from "@/features/pos/lib/money";
 import { useCart, useCartTotals } from "../hooks/useCart";
 import { ChannelToggle } from "./ChannelToggle";
-import { CustomerPicker } from "./CustomerPicker";
 import { generateInvoiceNumber } from "@/features/pos/lib/invoices";
 import { invoicesService } from "@/features/invoices/services/invoices.service";
 import type { InvoiceInput } from "@/features/invoices/types";
 import { useToast } from "@/features/pos/ui/toast";
 import "./CartPanel.css";
 
-export function CartContents() {
-  const { lines, increase, decrease, removeItem, clear, channel, customerId, customerLabel } = useCart();
+export function CartContents({ onClose }: { onClose?: () => void }) {
+  const { lines, increase, decrease, removeItem, clear, channel, customerId, customerLoading } = useCart();
   const { rows, subtotal, tax, total, totalQuantity } = useCartTotals();
   const [submitting, setSubmitting] = useState(false);
   const toast = useToast();
   const router = useRouter();
 
+  const checkoutDisabled = rows.length === 0 || customerLoading || !customerId || submitting;
+
   async function checkout() {
     if (!customerId) {
-      toast.error(channel === "cloud_kitchen" ? "Select a customer for this cloud kitchen order" : "Walk-in customer is still loading — try again");
+      toast.error("Still preparing the bill — please try again in a moment");
       return;
     }
     if (rows.length === 0) return;
@@ -33,7 +34,7 @@ export function CartContents() {
       const payload: InvoiceInput = {
         invoice_number: generateInvoiceNumber(channel === "cloud_kitchen" ? "CK" : "WI"),
         customer_id: customerId,
-        custom_billing_address: customerLabel || "Walk-in Customer",
+        custom_billing_address: "Walk-in Customer",
         custom_delivery_address: "",
         invoice_date: today,
         due_date: today,
@@ -69,6 +70,7 @@ export function CartContents() {
       const invoice = await invoicesService.create(payload);
       toast.success(`Bill ${invoice.invoice_number} generated`);
       clear();
+      onClose?.();
       router.push(`/dashboard/pos/invoices/${invoice.id}?print=1`);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Failed to generate bill");
@@ -79,17 +81,25 @@ export function CartContents() {
 
   return (
     <div className="cart-contents">
+      {onClose && <div className="cart-sheet-handle" aria-hidden />}
+
       <div className="cart-panel-head">
-        <div className="flex items-center justify-between" style={{ marginBottom: 12 }}>
+        <div className="cart-panel-head-row">
           <span className="eyebrow">Current bill</span>
-          {lines.length > 0 && (
-            <button className="cart-clear" onClick={clear} type="button"><Trash2 size={12} /> Clear</button>
-          )}
+          <div className="cart-panel-head-actions">
+            {lines.length > 0 && (
+              <button className="cart-clear" onClick={clear} type="button">
+                <Trash2 size={12} /> Clear
+              </button>
+            )}
+            {onClose && (
+              <button className="cart-close" onClick={onClose} type="button" aria-label="Close bill">
+                <X size={16} />
+              </button>
+            )}
+          </div>
         </div>
         <ChannelToggle />
-        <div style={{ marginTop: 12 }}>
-          <CustomerPicker />
-        </div>
       </div>
 
       <div className="cart-lines scroll-y">
@@ -124,7 +134,13 @@ export function CartContents() {
         <div className="cart-total-row"><span className="text-muted">Subtotal ({totalQuantity} item{totalQuantity === 1 ? "" : "s"})</span><span className="mono">{money(subtotal)}</span></div>
         <div className="cart-total-row"><span className="text-muted">Tax</span><span className="mono">{money(tax)}</span></div>
         <div className="cart-total-row cart-total-grand"><span>Total</span><span className="amount">{money(total)}</span></div>
-        <Button size="lg" className="w-full" style={{ marginTop: 12 }} disabled={rows.length === 0} loading={submitting} onClick={checkout}>
+        <Button
+          size="lg"
+          className="w-full cart-checkout-btn"
+          disabled={checkoutDisabled}
+          loading={submitting || customerLoading}
+          onClick={checkout}
+        >
           <Printer size={16} /> Generate &amp; print bill
         </Button>
       </div>

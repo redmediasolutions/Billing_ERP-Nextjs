@@ -1,11 +1,115 @@
-.billing-layout { display: flex; align-items: stretch; }
-.billing-main { flex: 1; min-width: 0; padding: 24px 24px 90px; }
-.billing-toolbar { display: flex; flex-direction: column; gap: 14px; margin-bottom: 18px; }
-.billing-categories { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; }
-.category-chip {
-  flex-shrink: 0; height: 32px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--border);
-  background: var(--surface); color: var(--text-muted); font-size: 12.5px; font-weight: 600; cursor: pointer;
-  white-space: nowrap; transition: all 120ms ease;
+.billing-layout {
+  display: flex;
+  align-items: stretch;
 }
-.category-chip:hover { border-color: var(--border-strong); color: var(--text); }
-.category-chip-active { background: var(--ink-0); color: var(--paper-0); border-color: var(--ink-0); }
+
+.billing-main {
+  flex: 1;
+  min-width: 0;
+  padding: 20px 24px 40px;
+}
+
+.billing-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.billing-search {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+}
+
+.billing-search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-faint);
+  pointer-events: none;
+}
+
+.billing-search-input {
+  padding-left: 38px !important;
+  height: 42px;
+  border-radius: 12px !important;
+  background: var(--surface) !important;
+}
+
+.billing-categories-wrap {
+  position: relative;
+  margin: 0 -4px;
+}
+
+.billing-categories {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 2px 4px 4px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.billing-categories::-webkit-scrollbar {
+  display: none;
+}
+
+.category-chip {
+  flex-shrink: 0;
+  height: 34px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 140ms ease;
+}
+
+.category-chip:hover {
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+.category-chip-active {
+  background: var(--ink-0);
+  color: var(--paper-0);
+  border-color: var(--ink-0);
+  box-shadow: var(--shadow-sm);
+}
+
+.billing-loading {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.billing-loading-card {
+  height: 148px;
+  border-radius: 14px;
+}
+
+@media (max-width: 860px) {
+  .billing-main {
+    padding: 14px 16px var(--pos-page-bottom, 120px);
+  }
+
+  .billing-search {
+    max-width: none;
+  }
+
+  .billing-loading {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 720px) {
+  .billing-loading {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  }
+}

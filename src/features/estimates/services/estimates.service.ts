@@ -34,11 +34,15 @@ export const estimatesService = {
     return normalizeEstimate(estimate);
   },
 
-  create: (input: EstimateInput) =>
-    estimatesRepository.create(input),
+  async create(input: EstimateInput) {
+    const estimate = await estimatesRepository.create(input);
+    return normalizeEstimate(estimate);
+  },
 
-  update: (id: number, input: EstimateInput) =>
-    estimatesRepository.update(id, input),
+  async update(id: number, input: EstimateInput) {
+    const estimate = await estimatesRepository.update(id, input);
+    return normalizeEstimate(estimate);
+  },
 
   remove: (id: number) =>
     estimatesRepository.remove(id),

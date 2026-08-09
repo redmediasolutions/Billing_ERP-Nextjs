@@ -1,11 +1,12 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { Loader2, X } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -113,25 +114,15 @@ export function CustomerFormModal({
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto border-zinc-800 bg-[#1e1e24] text-white">
-        <DialogHeader className="flex flex-row items-center justify-between">
-          <DialogTitle className="text-2xl">
+      <DialogContent className="form-dialog">
+        <DialogHeader>
+          <DialogTitle>
             {customer ? "Edit Customer" : "Add New Customer"}
           </DialogTitle>
-
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={onClose}
-            className="text-zinc-400 hover:text-white"
-          >
-            <X className="h-5 w-5" />
-          </Button>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6 pt-3">
-          <div className="grid gap-5 md:grid-cols-2">
+        <form onSubmit={handleSubmit} className="customer-form">
+          <div className="form-grid form-grid--2col">
             <Field label="Customer Name *">
               <Input
                 value={form.customer_name}
@@ -142,7 +133,6 @@ export function CustomerFormModal({
                   )
                 }
                 placeholder="e.g. Acme Logistics"
-                className="border-zinc-700 bg-[#151517]"
               />
             </Field>
 
@@ -156,7 +146,6 @@ export function CustomerFormModal({
                   )
                 }
                 placeholder="e.g. Acme Logistics Pvt. Ltd."
-                className="border-zinc-700 bg-[#151517]"
               />
             </Field>
 
@@ -170,7 +159,6 @@ export function CustomerFormModal({
                   )
                 }
                 placeholder="e.g. 9876543210"
-                className="border-zinc-700 bg-[#151517]"
               />
             </Field>
 
@@ -185,7 +173,6 @@ export function CustomerFormModal({
                   )
                 }
                 placeholder="customer@company.com"
-                className="border-zinc-700 bg-[#151517]"
               />
             </Field>
 
@@ -199,7 +186,6 @@ export function CustomerFormModal({
                   )
                 }
                 placeholder="e.g. 27ABCDE1234F1Z5"
-                className="border-zinc-700 bg-[#151517]"
               />
             </Field>
 
@@ -213,7 +199,6 @@ export function CustomerFormModal({
                   )
                 }
                 placeholder="e.g. Maharashtra"
-                className="border-zinc-700 bg-[#151517]"
               />
             </Field>
 
@@ -227,12 +212,11 @@ export function CustomerFormModal({
                   )
                 }
                 placeholder="e.g. 27"
-                className="border-zinc-700 bg-[#151517]"
               />
             </Field>
           </div>
 
-          <div className="grid gap-5 md:grid-cols-2">
+          <div className="form-grid form-grid--2col" style={{ marginTop: 20 }}>
             <Field label="Billing Address">
               <Textarea
                 rows={4}
@@ -244,7 +228,6 @@ export function CustomerFormModal({
                   )
                 }
                 placeholder="Customer billing address..."
-                className="border-zinc-700 bg-[#151517]"
               />
             </Field>
 
@@ -259,39 +242,22 @@ export function CustomerFormModal({
                   )
                 }
                 placeholder="Customer shipping address..."
-                className="border-zinc-700 bg-[#151517]"
               />
             </Field>
           </div>
 
-          {error && (
-            <p className="rounded-lg border border-red-900/60 bg-red-950/40 p-3 text-sm text-red-300">
-              {error}
-            </p>
-          )}
+          {error && <p className="form-error">{error}</p>}
 
-          <div className="flex justify-end gap-3 border-t border-zinc-800 pt-5">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              className="border-zinc-600 bg-transparent"
-            >
+          <DialogFooter className="form-actions">
+            <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
 
-            <Button
-              type="submit"
-              disabled={saving}
-              className="bg-[#FFCC00] font-bold text-black hover:bg-yellow-400"
-            >
-              {saving && (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              )}
-
+            <Button type="submit" disabled={saving}>
+              {saving && <Loader2 size={16} className="form-spinner" />}
               {customer ? "Save Changes" : "Add Customer"}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
@@ -306,10 +272,8 @@ function Field({
   children: React.ReactNode;
 }) {
   return (
-    <div>
-      <Label className="mb-2 block text-xs font-bold uppercase text-zinc-400">
-        {label}
-      </Label>
+    <div className="form-field">
+      <Label className="form-field__label">{label}</Label>
       {children}
     </div>
   );

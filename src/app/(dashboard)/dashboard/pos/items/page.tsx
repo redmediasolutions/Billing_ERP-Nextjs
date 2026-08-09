@@ -1,4 +1,5 @@
 "use client";
+
 import { useMemo, useState } from "react";
 import { Plus, Search } from "lucide-react";
 import { Button } from "@/features/pos/ui/button";
@@ -7,6 +8,7 @@ import { usePosItems } from "@/features/pos/hooks/use-pos-items";
 import { ItemsTable } from "@/features/pos/items/components/ItemsTable";
 import { ItemForm } from "@/features/pos/items/components/ItemForm";
 import type { Item, ItemInput } from "@/features/items/types";
+import "./items-page.css";
 
 export default function ItemsPage() {
   const { items, loading, create, update, remove } = usePosItems();
@@ -29,6 +31,7 @@ export default function ItemsPage() {
     setEditing(null);
     setFormOpen(true);
   }
+
   function openEdit(item: Item) {
     setEditing(item);
     setFormOpen(true);
@@ -41,19 +44,28 @@ export default function ItemsPage() {
 
   return (
     <div className="container-page">
-      <div className="page-header">
-        <div>
-          <div className="eyebrow">Catalog</div>
-          <h1 className="page-title">Items</h1>
-          <p className="page-subtitle">{items.length} item{items.length === 1 ? "" : "s"} · walk-in &amp; cloud kitchen pricing</p>
+      <div className="items-page-header">
+        <div className="items-page-header-top">
+          <div>
+            <div className="eyebrow">Catalog</div>
+            <h1 className="page-title">Items</h1>
+            <p className="page-subtitle">
+              {items.length} item{items.length === 1 ? "" : "s"} · walk-in &amp; cloud kitchen pricing
+            </p>
+          </div>
+          <Button className="items-page-add" onClick={openCreate}>
+            <Plus size={15} /> Add item
+          </Button>
         </div>
-        <Button onClick={openCreate}><Plus size={15} /> Add item</Button>
-      </div>
 
-      <div style={{ maxWidth: 320, marginBottom: 16 }}>
-        <div style={{ position: "relative" }}>
-          <Search size={14} style={{ position: "absolute", left: 11, top: 11, color: "var(--text-faint)" }} />
-          <Input placeholder="Search items…" value={query} onChange={(e) => setQuery(e.target.value)} style={{ paddingLeft: 32 }} />
+        <div className="items-page-search">
+          <Search size={15} className="items-page-search-icon" />
+          <Input
+            className="items-page-search-input"
+            placeholder="Search items…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
         </div>
       </div>
 

@@ -22,3 +22,28 @@
 .dialog-close:hover { background: var(--surface-sunken); color: var(--text); }
 .dialog-body { padding: 18px 20px 20px; }
 .dialog-footer { display: flex; justify-content: flex-end; gap: 10px; padding-top: 18px; margin-top: 6px; border-top: 1px solid var(--border); }
+
+@media (max-width: 520px) {
+  .dialog-overlay-sheet {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .dialog-panel-sheet {
+    max-width: none !important;
+    width: 100%;
+    border-radius: 18px 18px 0 0;
+    max-height: 92vh;
+    overflow-y: auto;
+    animation: dialog-sheet-pop 200ms ease;
+  }
+
+  .dialog-panel-sheet .dialog-body {
+    padding-bottom: calc(20px + env(safe-area-inset-bottom));
+  }
+}
+
+@keyframes dialog-sheet-pop {
+  from { opacity: 0; transform: translateY(100%); }
+  to { opacity: 1; transform: none; }
+}

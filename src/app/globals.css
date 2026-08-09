@@ -4566,3 +4566,83 @@ a:hover {
   text-decoration: none;
 }
 
+.customer-picker {
+  display: grid;
+  gap: 8px;
+}
+
+.customer-picker__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.customer-picker__select {
+  flex: 1 1 200px;
+  min-width: 0;
+}
+
+.customer-picker__action {
+  flex-shrink: 0;
+}
+
+.item-picker__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.item-picker__toolbar .item-picker__search {
+  flex: 1 1 200px;
+  margin-bottom: 0;
+}
+
+.item-form-dialog__form {
+  display: grid;
+  gap: 20px;
+}
+
+.item-form-dialog__toggle {
+  grid-column: 1 / -1;
+}
+
+.form-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 240px;
+  color: var(--ink-muted);
+}
+
+.form-loading--error {
+  color: #b91c1c;
+}
+
+.form-loading--overlay {
+  position: fixed;
+  z-index: 60;
+  inset: 0;
+  background: rgb(0 0 0 / 35%);
+}
+
+.form-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.invoices-dashboard__actions,
+.estimates-dashboard__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+

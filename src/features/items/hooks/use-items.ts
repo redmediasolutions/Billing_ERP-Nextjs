@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { itemsService } from "../services/items.service";
 import type { Item, ItemInput } from "../types";
 
-export function useItems() {
+export function useItems(search?: string) {
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -14,7 +14,8 @@ export function useItems() {
       setLoading(true);
       setError("");
 
-      const result = await itemsService.list();
+      const term = search?.trim();
+      const result = await itemsService.list(term || undefined);
       setItems(result);
     } catch (err) {
       setError(
@@ -23,7 +24,7 @@ export function useItems() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [search]);
 
   useEffect(() => {
     void refresh();

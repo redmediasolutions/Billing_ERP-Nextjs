@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import {
+    Edit3,
     FileText,
     Loader2,
     Plus,
@@ -175,6 +176,21 @@ export function InvoicesDashboard() {
                                             </td>
 
                                             <td><div className="invoices-dashboard__actions">
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        onClick={(event) => {
+                                                            event.stopPropagation();
+                                                            router.push(
+                                                                `/dashboard/invoices/${invoice.id}/edit`
+                                                            );
+                                                        }}
+                                                        className="invoices-dashboard__edit"
+                                                        title="Edit invoice"
+                                                    >
+                                                        <Edit3 size={16} />
+                                                    </Button>
+
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"

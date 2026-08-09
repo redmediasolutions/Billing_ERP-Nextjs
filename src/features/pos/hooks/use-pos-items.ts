@@ -31,29 +31,47 @@ export function usePosItems() {
 
   const create = useCallback(
     async (input: ItemInput) => {
-      const created = await itemsService.create(input);
-      setItems((prev) => [created, ...prev]);
-      toast.success("Item created");
-      return created;
+      try {
+        const created = await itemsService.create(input);
+        setItems((prev) => [created, ...prev]);
+        toast.success("Item created");
+        return created;
+      } catch (e) {
+        const message = e instanceof Error ? e.message : "Failed to create item";
+        toast.error(message);
+        throw e;
+      }
     },
     [toast]
   );
 
   const update = useCallback(
     async (id: number, input: ItemInput) => {
-      const updated = await itemsService.update(id, input);
-      setItems((prev) => prev.map((it) => (it.id === id ? updated : it)));
-      toast.success("Item updated");
-      return updated;
+      try {
+        const updated = await itemsService.update(id, input);
+        setItems((prev) => prev.map((it) => (it.id === id ? updated : it)));
+        toast.success("Item updated");
+        return updated;
+      } catch (e) {
+        const message = e instanceof Error ? e.message : "Failed to update item";
+        toast.error(message);
+        throw e;
+      }
     },
     [toast]
   );
 
   const remove = useCallback(
     async (id: number) => {
-      await itemsService.remove(id);
-      setItems((prev) => prev.filter((it) => it.id !== id));
-      toast.success("Item deleted");
+      try {
+        await itemsService.remove(id);
+        setItems((prev) => prev.filter((it) => it.id !== id));
+        toast.success("Item deleted");
+      } catch (e) {
+        const message = e instanceof Error ? e.message : "Failed to delete item";
+        toast.error(message);
+        throw e;
+      }
     },
     [toast]
   );

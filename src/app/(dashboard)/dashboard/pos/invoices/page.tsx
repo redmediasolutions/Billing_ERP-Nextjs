@@ -5,6 +5,7 @@ import { InvoicesTable } from "@/features/pos/invoices/components/InvoicesTable"
 import { invoicesService } from "@/features/invoices/services/invoices.service";
 import type { Invoice } from "@/features/invoices/types";
 import { money } from "@/features/pos/lib/money";
+import "./invoices-page.css";
 
 export default function InvoicesListPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -23,17 +24,23 @@ export default function InvoicesListPage() {
     return invoices.filter((i) => i.sales_channel === filter);
   }, [invoices, filter]);
 
-  const totalSales = useMemo(() => filtered.reduce((s, i) => s + Number(i.grand_total || 0), 0), [filtered]);
+  const totalSales = useMemo(
+    () => filtered.reduce((s, i) => s + Number(i.grand_total || 0), 0),
+    [filtered]
+  );
 
   return (
     <div className="container-page">
-      <div className="page-header">
+      <div className="invoices-page-header">
         <div>
           <div className="eyebrow">Sales</div>
           <h1 className="page-title">Invoices</h1>
-          <p className="page-subtitle">{filtered.length} bill{filtered.length === 1 ? "" : "s"} · {money(totalSales)} total</p>
+          <p className="page-subtitle">
+            {filtered.length} bill{filtered.length === 1 ? "" : "s"} · {money(totalSales)} total
+          </p>
         </div>
         <Tabs
+          className="invoices-page-tabs"
           value={filter}
           onChange={setFilter}
           options={[

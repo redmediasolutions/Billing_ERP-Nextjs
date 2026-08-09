@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   Edit3,
   Loader2,
@@ -30,6 +31,7 @@ import {
 import type { Employee, EmployeeInput } from "../types";
 
 export function EmployeesDashboard() {
+  const searchParams = useSearchParams();
   const { data: employees = [], isLoading, error } = useEmployees();
 
   const createEmployee = useCreateEmployee();
@@ -43,6 +45,14 @@ export function EmployeesDashboard() {
   const [salaryEmployee, setSalaryEmployee] =
     useState<Employee | null>(null);
   const [actionError, setActionError] = useState("");
+
+  useEffect(() => {
+    if (searchParams.get("create") === "1") {
+      setEditingEmployee(null);
+      setActionError("");
+      setFormOpen(true);
+    }
+  }, [searchParams]);
 
   const filteredEmployees = useMemo(() => {
     const term = search.trim().toLowerCase();

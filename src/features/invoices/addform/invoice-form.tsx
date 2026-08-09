@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, FileText, Loader2, Trash2, UserRound } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -11,11 +11,16 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 import { ItemPickerDialog } from "@/features/estimates/addform/item-picker-dialog";
+import { CustomerPickerField } from "@/features/customers/components/customer-picker-field";
 import { useCustomers } from "@/features/customers/hooks/use-customers";
-import type { Customer } from "@/features/customers/types";
 
-import { useCreateInvoice } from "../hooks/use-invoices";
+import {
+  useCreateInvoice,
+  useInvoice,
+  useUpdateInvoice,
+} from "../hooks/use-invoices";
 import type {
+  Invoice,
   InvoiceInput,
   InvoiceLineItem,
 } from "../types";
@@ -50,6 +55,32 @@ function newLineItem(item: CatalogItem): InvoiceLineItem {
   };
 }
 
+function mapLineItems(lines: InvoiceLineItem[]): InvoiceLineItem[] {
+  return lines.map((line) => ({
+    ...line,
+    id: String(line.id),
+  }));
+}
+
+function deriveDiscountPercent(invoice: Invoice): number {
+  const lines = invoice.line_items ?? [];
+  const subtotal = lines.reduce(
+    (sum, line) => sum + line.amount_before_tax,
+    0
+  );
+  const lineDiscount = lines.reduce(
+    (sum, line) =>
+      sum + (line.amount_before_tax * Number(line.line_discount)) / 100,
+    0
+  );
+  const afterLine = subtotal - lineDiscount;
+  const docDiscount = invoice.discount_amount - lineDiscount;
+
+  if (afterLine <= 0) return 0;
+
+  return Math.round((docDiscount / afterLine) * 10000) / 100;
+}
+
 function calculateLine(
   line: InvoiceLineItem,
   changes: Partial<InvoiceLineItem>
@@ -75,11 +106,20 @@ function calculateLine(
   };
 }
 
-export function InvoiceForm() {
+interface InvoiceFormProps {
+  invoiceId?: number;
+}
+
+export function InvoiceForm({ invoiceId }: InvoiceFormProps) {
   const router = useRouter();
+  const isEditing = Boolean(invoiceId);
+
   const createInvoice = useCreateInvoice();
-  const { data: customers = [], isLoading: loadingCustomers } =
-    useCustomers();
+  const updateInvoice = useUpdateInvoice();
+  const { data: existing, isLoading: loadingExisting } = useInvoice(
+    invoiceId ?? 0
+  );
+  const { data: customers = [] } = useCustomers();
 
   const [invoiceNumber, setInvoiceNumber] = useState(
     `INV-${new Date().getFullYear()}-`
@@ -94,6 +134,25 @@ export function InvoiceForm() {
   const [discountPercent, setDiscountPercent] = useState(0);
   const [lineItems, setLineItems] = useState<InvoiceLineItem[]>([]);
   const [formError, setFormError] = useState("");
+  const [initializedForId, setInitializedForId] = useState<number | null>(
+    null
+  );
+
+  useEffect(() => {
+    if (!invoiceId || !existing || initializedForId === invoiceId) return;
+
+    setInvoiceNumber(existing.invoice_number);
+    setCustomerId(String(existing.customer_id));
+    setInvoiceDate(existing.invoice_date || localDate());
+    setDueDate(existing.due_date || "");
+    setPaymentTerms(existing.payment_terms || "");
+    setNotes(existing.notes || "");
+    setOrderType(existing.order_type || "SALE");
+    setTableName(existing.table_name || "");
+    setDiscountPercent(deriveDiscountPercent(existing));
+    setLineItems(mapLineItems(existing.line_items ?? []));
+    setInitializedForId(invoiceId);
+  }, [invoiceId, existing, initializedForId]);
 
   const selectedCustomer = customers.find(
     (customer) => customer.id === Number(customerId)
@@ -132,13 +191,15 @@ export function InvoiceForm() {
     };
   }, [lineItems, discountPercent]);
 
+  const isPending = createInvoice.isPending || updateInvoice.isPending;
+
   function addItem(item: CatalogItem) {
     setLineItems((current) => {
-      const existing = current.find(
+      const existingLine = current.find(
         (line) => line.item_id === item.id
       );
 
-      if (existing) {
+      if (existingLine) {
         return current.map((line) =>
           line.item_id === item.id
             ? calculateLine(line, {
@@ -191,13 +252,10 @@ export function InvoiceForm() {
       const payload: InvoiceInput = {
         invoice_number: invoiceNumber.trim(),
         customer_id: Number(customerId),
-
         custom_billing_address:
           selectedCustomer?.customer_billing_address || "",
-
         custom_delivery_address:
           selectedCustomer?.customer_shipping_address || "",
-
         invoice_date: invoiceDate,
         due_date: dueDate,
         payment_terms: paymentTerms,
@@ -213,7 +271,11 @@ export function InvoiceForm() {
         line_items: lineItems,
       };
 
-      await createInvoice.mutateAsync(payload);
+      if (isEditing && invoiceId) {
+        await updateInvoice.mutateAsync({ id: invoiceId, input: payload });
+      } else {
+        await createInvoice.mutateAsync(payload);
+      }
 
       router.push("/dashboard/invoices");
     } catch (error) {
@@ -223,6 +285,23 @@ export function InvoiceForm() {
           : "Unable to save invoice."
       );
     }
+  }
+
+  if (isEditing && loadingExisting) {
+    return (
+      <div className="form-loading">
+        <Loader2 className="form-loading__spinner" />
+        Loading invoice...
+      </div>
+    );
+  }
+
+  if (isEditing && !existing && !loadingExisting) {
+    return (
+      <div className="form-loading form-loading--error">
+        Invoice not found.
+      </div>
+    );
   }
 
   return (
@@ -237,13 +316,15 @@ export function InvoiceForm() {
             <ArrowLeft size={20} />
           </Button>
 
-          <h1 className="invoice-form__title">Create Invoice</h1>
+          <h1 className="invoice-form__title">
+            {isEditing ? "Edit Invoice" : "Create Invoice"}
+          </h1>
         </div>
 
         <div className="invoice-form__header-actions">
           <Button
             variant="outline"
-            disabled={createInvoice.isPending}
+            disabled={isPending}
             onClick={() => void saveInvoice(true)}
             className="invoice-form__secondary-action"
           >
@@ -251,15 +332,15 @@ export function InvoiceForm() {
           </Button>
 
           <Button
-            disabled={createInvoice.isPending}
+            disabled={isPending}
             onClick={() => void saveInvoice(false)}
             className="invoice-form__primary-action"
           >
-            {createInvoice.isPending && (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            {isPending && (
+              <Loader2 size={16} className="form-spinner" />
             )}
 
-            Finalize Invoice
+            {isEditing ? "Update Invoice" : "Finalize Invoice"}
           </Button>
         </div>
       </div>
@@ -272,27 +353,10 @@ export function InvoiceForm() {
               Customer Info
             </h2>
 
-            <Field label="Select Customer *">
-              <select
-                value={customerId}
-                onChange={(event) =>
-                  setCustomerId(event.target.value)
-                }
-                className="employee-form__select"
-              >
-                <option value="">
-                  {loadingCustomers
-                    ? "Loading customers..."
-                    : "Select customer"}
-                </option>
-
-                {customers.map((customer: Customer) => (
-                  <option key={customer.id} value={customer.id}>
-                    {customer.customer_name}
-                  </option>
-                ))}
-              </select>
-            </Field>
+            <CustomerPickerField
+              value={customerId}
+              onChange={setCustomerId}
+            />
 
             <div className="form-grid form-grid--2col" style={{ marginTop: 20 }}>
               <AddressCard
@@ -499,7 +563,7 @@ export function InvoiceForm() {
                         onClick={() => removeLine(line.id)}
                         className="line-items__delete"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 size={16} />
                       </Button>
                     </td>
                   </tr>

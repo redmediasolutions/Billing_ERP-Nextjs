@@ -3,88 +3,165 @@
 import Link from "next/link";
 import {
   ArrowRight,
+  ClipboardList,
   FileText,
   Package,
   ReceiptText,
+  Tags,
+  Truck,
+  UserCog,
   Users,
+  Wallet,
+  Warehouse,
 } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
+import { useTenant } from "@/features/tenant/hooks/use-tenant";
+import styles from "./dashboard-home.module.css";
 
-const cards = [
+const primaryModules = [
   {
     title: "Manage Items",
-    description: "Create and manage your products and services.",
+    description: "Catalogue products, services, pricing, and inventory settings.",
     href: "/dashboard/items",
     icon: Package,
   },
   {
     title: "Invoices",
-    description: "Create invoices and track payment status.",
+    description: "Create invoices, track drafts, and manage billing records.",
     href: "/dashboard/invoices",
     icon: ReceiptText,
   },
   {
     title: "Customers",
-    description: "Manage customer contacts and billing details.",
+    description: "Store contacts, GST details, and billing addresses.",
     href: "/dashboard/customers",
     icon: Users,
   },
   {
     title: "Estimates",
-    description: "Prepare and send professional estimates.",
+    description: "Prepare quotes and convert them into invoices.",
     href: "/dashboard/estimates",
-    icon: FileText,
+    icon: ClipboardList,
   },
 ];
 
+const secondaryModules = [
+  { title: "POS Billing", href: "/dashboard/pos", icon: ReceiptText },
+  { title: "Products", href: "/dashboard/products", icon: Package },
+  { title: "Stocks", href: "/dashboard/stocks", icon: Warehouse },
+  { title: "Brands", href: "/dashboard/brands", icon: Tags },
+  { title: "Vendors", href: "/dashboard/vendors", icon: Truck },
+  { title: "Employees", href: "/dashboard/employees", icon: UserCog },
+  { title: "Payroll", href: "/dashboard/payroll", icon: Wallet },
+  { title: "Reports", href: "/dashboard/pos/reports", icon: FileText },
+];
+
 export default function DashboardPage() {
+  const { data: tenant } = useTenant();
+  const businessName = tenant?.business_name || "your business";
+
   return (
-    <div className="space-y-8 p-8">
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.25em] text-muted-foreground">
-          Overview
-        </p>
+    <div className={styles.page}>
+      <div className={styles.inner}>
+        <section className={styles.hero}>
+          <p className={styles.eyebrow}>Overview</p>
+          <h1 className={styles.title}>
+            Welcome back to Billing ERP
+          </h1>
+          <p className={styles.subtitle}>
+            Run {businessName} from one premium workspace. Jump into sales,
+            inventory, payroll, and reporting without leaving the dashboard.
+          </p>
+        </section>
 
-        <h1 className="mt-2 text-4xl font-bold tracking-tight">
-          Welcome to Billing ERP
-        </h1>
+        <section className={styles.stats}>
+          {[
+            { label: "Core Modules", value: "12" },
+            { label: "Sales Suite", value: "4" },
+            { label: "Inventory", value: "4" },
+            { label: "People Ops", value: "2" },
+          ].map((stat) => (
+            <Card key={stat.label} className={styles.statCard}>
+              <CardContent className={styles.statContent}>
+                <p className={styles.statLabel}>{stat.label}</p>
+                <p className={styles.statValue}>{stat.value}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </section>
 
-        <p className="mt-3 max-w-2xl text-muted-foreground">
-          Choose a module to start managing your business.
-        </p>
-      </div>
+        <section className={styles.section}>
+          <div className={styles.sectionHead}>
+            <div>
+              <h2 className={styles.sectionTitle}>Core modules</h2>
+              <p className={styles.sectionCopy}>
+                Your most-used business workflows, designed for speed.
+              </p>
+            </div>
+          </div>
 
-      <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
-        {cards.map((card) => {
-          const Icon = card.icon;
+          <div className={styles.grid}>
+            {primaryModules.map((module) => {
+              const Icon = module.icon;
 
-          return (
-            <Link key={card.href} href={card.href}>
-              <Card className="group h-full transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
-                <CardContent className="flex h-full flex-col p-6">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted">
-                    <Icon className="h-6 w-6" />
+              return (
+                <Link
+                  key={module.href}
+                  href={module.href}
+                  className={styles.moduleCard}
+                >
+                  <CardContent className={styles.moduleContent}>
+                    <div className={styles.moduleIcon}>
+                      <Icon size={22} />
+                    </div>
+
+                    <h3 className={styles.moduleTitle}>{module.title}</h3>
+
+                    <p className={styles.moduleDescription}>
+                      {module.description}
+                    </p>
+
+                    <div className={styles.moduleFooter}>
+                      Open module
+                      <ArrowRight size={16} />
+                    </div>
+                  </CardContent>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+
+        <section className={styles.section}>
+          <div className={styles.sectionHead}>
+            <div>
+              <h2 className={styles.sectionTitle}>More modules</h2>
+              <p className={styles.sectionCopy}>
+                POS, inventory, vendors, payroll, and reporting.
+              </p>
+            </div>
+          </div>
+
+          <div className={styles.secondaryGrid}>
+            {secondaryModules.map((module) => {
+              const Icon = module.icon;
+
+              return (
+                <Link
+                  key={module.href}
+                  href={module.href}
+                  className={styles.secondaryCard}
+                >
+                  <div className={styles.secondaryIcon}>
+                    <Icon size={17} />
                   </div>
-
-                  <h2 className="mt-6 text-lg font-semibold">
-                    {card.title}
-                  </h2>
-
-                  <p className="mt-2 flex-1 text-sm text-muted-foreground">
-                    {card.description}
-                  </p>
-
-                  <div className="mt-6 flex items-center gap-2 font-medium">
-                    Open Module
-
-                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-          );
-        })}
+                  <p className={styles.secondaryTitle}>{module.title}</p>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
       </div>
     </div>
   );

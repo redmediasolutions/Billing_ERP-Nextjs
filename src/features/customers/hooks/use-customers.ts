@@ -55,12 +55,11 @@ export function useUpdateCustomer() {
   });
 }
 
-export function useDeleteCustomer() {
+export function useArchiveCustomer() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: number) =>
-      customersService.remove(id),
+    mutationFn: (id: number) => customersService.archive(id),
 
     onSuccess: () => {
       queryClient.invalidateQueries({

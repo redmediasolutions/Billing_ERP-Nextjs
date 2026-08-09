@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   BarChart3,
   ChevronDown,
@@ -20,134 +20,93 @@ import {
   Warehouse,
 } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { useTenant } from "@/features/tenant/hooks/use-tenant";
+import {
+  APP_MODULES,
+  MODULE_NAV_LINKS,
+  resolveActiveModule,
+} from "./module-actions";
 import styles from "./top-navigation.module.css";
 
-const modules = [
-  {
-    label: "Dashboard",
-    href: "/dashboard",
-    icon: LayoutDashboard,
-  },
-  {
-    label: "POS Billing",
-    href: "/dashboard/pos",
-    icon: ReceiptText,
-  },
-  {
-    label: "Estimates",
-    href: "/dashboard/estimates",
-    icon: ClipboardList,
-  },
-  {
-    label: "Invoices",
-    href: "/dashboard/invoices",
-    icon: ReceiptText,
-  },
-  {
-    label: "Customers",
-    href: "/dashboard/customers",
-    icon: Users,
-  },
-  {
-    label: "Manage Items",
-    href: "/dashboard/items",
-    icon: Package,
-  },
-  {
-    label: "Products",
-    href: "/dashboard/products",
-    icon: Package,
-  },
-  {
-    label: "Stocks",
-    href: "/dashboard/stocks",
-    icon: Warehouse,
-  },
-  {
-    label: "Brands",
-    href: "/dashboard/brands",
-    icon: Tags,
-  },
-  {
-    label: "Vendors",
-    href: "/dashboard/vendors",
-    icon: Truck,
-  },
-  {
-    label: "Employees",
-    href: "/dashboard/employees",
-    icon: UserCog,
-  },
-  {
-    label: "Payroll & Loans",
-    href: "/dashboard/payroll",
-    icon: Wallet,
-  },
-  {
-    label: "Reports",
-    href: "/dashboard/reports",
-    icon: FileText,
-  },
-];
+const PICKER_MODULES = APP_MODULES.map((module) => ({
+  ...module,
+  icon:
+    module.href === "/dashboard"
+      ? LayoutDashboard
+      : module.icon,
+}));
 
 export function TopNavigation() {
   const pathname = usePathname();
   const { data: tenant } = useTenant();
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
 
+  const activeModule = resolveActiveModule(pathname);
+
   const visibleModules = useMemo(() => {
     const query = search.trim().toLowerCase();
-
-    if (!query) return modules;
-
-    return modules.filter((module) =>
+    if (!query) return PICKER_MODULES;
+    return PICKER_MODULES.filter((module) =>
       module.label.toLowerCase().includes(query)
     );
   }, [search]);
 
-  function isActive(href: string) {
-    if (href === "/dashboard") {
-      return pathname === "/dashboard";
+  useEffect(() => {
+    function handleClick(event: MouseEvent) {
+      if (!menuRef.current?.contains(event.target as Node)) {
+        setOpen(false);
+      }
     }
 
-    return pathname.startsWith(href);
+    if (open) {
+      document.addEventListener("mousedown", handleClick);
+    }
+
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [open]);
+
+  function isActive(href: string) {
+    if (href === "/dashboard") return pathname === "/dashboard";
+    return pathname === href || pathname.startsWith(`${href}/`);
   }
 
   return (
-    <header className={styles.topNavigation}>
+    <header className={styles.topNavigation} data-top-navigation>
       <div className={styles.inner}>
         <div className={styles.left}>
-          <div className={styles.moduleMenu}>
-            <button
+          <div className={styles.moduleMenu} ref={menuRef}>
+            <Button
               type="button"
+              variant="ghost"
               className={styles.businessButton}
               onClick={() => setOpen((current) => !current)}
               aria-expanded={open}
             >
               <span className={styles.businessMark}>B</span>
-
               <span className={styles.businessName}>
                 {tenant?.business_name || "Billing ERP"}
               </span>
-
               <ChevronDown
-                size={17}
+                size={16}
                 className={open ? styles.chevronOpen : ""}
               />
-            </button>
+            </Button>
 
             {open ? (
               <div className={styles.dropdown}>
                 <div className={styles.searchField}>
-                  <Search size={17} />
-
-                  <input
+                  <Search size={16} />
+                  <Input
                     value={search}
                     onChange={(event) => setSearch(event.target.value)}
                     placeholder="Search modules..."
+                    className={styles.searchInput}
                     autoFocus
                   />
                 </div>
@@ -167,39 +126,61 @@ export function TopNavigation() {
                           setSearch("");
                         }}
                         className={`${styles.moduleLink} ${
-                          isActive(module.href)
-                            ? styles.moduleLinkActive
-                            : ""
+                          isActive(module.href) ? styles.moduleLinkActive : ""
                         }`}
                       >
-                        <Icon size={18} />
+                        <Icon size={17} />
                         <span>{module.label}</span>
                       </Link>
                     );
                   })}
 
                   {visibleModules.length === 0 ? (
-                    <p className={styles.noResults}>
-                      No matching module.
-                    </p>
+                    <p className={styles.noResults}>No matching module.</p>
                   ) : null}
                 </div>
               </div>
             ) : null}
           </div>
 
-          <nav className={styles.quickLinks}>
-            <Link href="/dashboard">Overview</Link>
-            <Link href="/dashboard/pos">POS</Link>
-            <Link href="/dashboard/invoices">Invoices</Link>
-            <Link href="/dashboard/reports">Reports</Link>
+          <nav className={styles.quickLinks} aria-label="Quick navigation">
+            {MODULE_NAV_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={
+                  isActive(link.href) ? styles.quickLinkActive : styles.quickLink
+                }
+              >
+                {link.label}
+              </Link>
+            ))}
           </nav>
         </div>
 
-        <Link href="/dashboard/pos" className={styles.posShortcut}>
-          <ReceiptText size={17} />
-          New Bill
-        </Link>
+        <div className={styles.center}>
+          <Badge className={styles.moduleBadge}>{activeModule.label}</Badge>
+        </div>
+
+        <div className={styles.actions}>
+          {activeModule.actions.map((action) => {
+            const Icon = action.icon;
+
+            return (
+              <Button
+                key={`${action.href}-${action.label}`}
+                variant={action.variant ?? "outline"}
+                className={styles.actionButton}
+                asChild
+              >
+                <Link href={action.href}>
+                  {Icon ? <Icon size={15} /> : null}
+                  {action.label}
+                </Link>
+              </Button>
+            );
+          })}
+        </div>
       </div>
     </header>
   );

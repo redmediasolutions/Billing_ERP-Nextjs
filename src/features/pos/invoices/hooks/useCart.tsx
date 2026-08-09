@@ -1,6 +1,7 @@
 "use client";
-import { createContext, useCallback, useContext, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { Item } from "@/features/items/types";
+import { customersService } from "@/features/customers/services/customers.service";
 import type { CartLine, SalesChannel } from "@/features/pos/types";
 import { priceFor } from "@/features/pos/lib/pricing";
 
@@ -14,9 +15,7 @@ interface CartContextValue {
   removeItem: (itemId: number) => void;
   clear: () => void;
   customerId: number | null;
-  setCustomerId: (id: number | null) => void;
-  customerLabel: string;
-  setCustomerLabel: (label: string) => void;
+  customerLoading: boolean;
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -25,7 +24,28 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [channel, setChannel] = useState<SalesChannel>("walk_in");
   const [lines, setLines] = useState<CartLine[]>([]);
   const [customerId, setCustomerId] = useState<number | null>(null);
-  const [customerLabel, setCustomerLabel] = useState("Walk-in Customer");
+  const [customerLoading, setCustomerLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    setCustomerLoading(true);
+    customersService
+      .getWalkIn()
+      .then((customer) => {
+        if (!active) return;
+        setCustomerId(customer.id);
+      })
+      .catch(() => {
+        if (!active) return;
+        setCustomerId(null);
+      })
+      .finally(() => {
+        if (active) setCustomerLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const addItem = useCallback((item: Item) => {
     setLines((prev) => {
@@ -57,20 +77,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setLines([]);
   }, []);
 
-  const handleSetChannel = useCallback((c: SalesChannel) => {
-    setChannel(c);
-    if (c === "walk_in") {
-      setCustomerLabel("Walk-in Customer");
-    } else {
-      setCustomerId(null);
-      setCustomerLabel("");
-    }
-  }, []);
-
   const value = useMemo(
     () => ({
       channel,
-      setChannel: handleSetChannel,
+      setChannel,
       lines,
       addItem,
       increase,
@@ -78,11 +88,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       removeItem,
       clear,
       customerId,
-      setCustomerId,
-      customerLabel,
-      setCustomerLabel,
+      customerLoading,
     }),
-    [channel, lines, addItem, increase, decrease, removeItem, clear, customerId, customerLabel, handleSetChannel]
+    [channel, lines, addItem, increase, decrease, removeItem, clear, customerId, customerLoading]
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

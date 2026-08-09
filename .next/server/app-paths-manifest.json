@@ -1,5 +1,13 @@
 {
-  "/_not-found/page": "app/_not-found/page.js",
+  "/(dashboard)/dashboard/customers/page": "app/(dashboard)/dashboard/customers/page.js",
+  "/(dashboard)/dashboard/page": "app/(dashboard)/dashboard/page.js",
+  "/(dashboard)/dashboard/estimates/page": "app/(dashboard)/dashboard/estimates/page.js",
+  "/(dashboard)/dashboard/brands/page": "app/(dashboard)/dashboard/brands/page.js",
+  "/(dashboard)/dashboard/vendors/page": "app/(dashboard)/dashboard/vendors/page.js",
   "/(dashboard)/dashboard/invoices/page": "app/(dashboard)/dashboard/invoices/page.js",
-  "/(dashboard)/dashboard/page": "app/(dashboard)/dashboard/page.js"
+  "/(dashboard)/dashboard/invoices/new/page": "app/(dashboard)/dashboard/invoices/new/page.js",
+  "/(dashboard)/dashboard/pos/page": "app/(dashboard)/dashboard/pos/page.js",
+  "/(dashboard)/dashboard/pos/items/page": "app/(dashboard)/dashboard/pos/items/page.js",
+  "/(dashboard)/dashboard/pos/invoices/page": "app/(dashboard)/dashboard/pos/invoices/page.js",
+  "/(dashboard)/dashboard/pos/reports/page": "app/(dashboard)/dashboard/pos/reports/page.js"
 }

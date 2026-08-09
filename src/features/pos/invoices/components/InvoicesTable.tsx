@@ -1,17 +1,65 @@
 "use client";
 import Link from "next/link";
-import { Receipt, Store, Truck } from "lucide-react";
-import { Table, THead, TBody, TR, TH, TD } from "@/features/pos/ui/table";
+import { ChevronRight, Receipt, Store, Truck } from "lucide-react";
 import { Badge } from "@/features/pos/ui/badge";
 import { Skeleton } from "@/features/pos/ui/skeleton";
 import { money } from "@/features/pos/lib/money";
-import { formatDateTime } from "@/features/pos/lib/utils";
-import { Invoice } from "@/features/invoices/types";
+import { formatDate, formatTime } from "@/features/pos/lib/utils";
+import type { Invoice } from "@/features/invoices/types";
+import "./InvoicesTable.css";
+
+function ChannelBadge({ channel }: { channel?: Invoice["sales_channel"] }) {
+  if (channel === "cloud_kitchen") {
+    return (
+      <Badge variant="neutral" className="invoice-channel-badge">
+        <Truck size={11} /> Cloud kitchen
+      </Badge>
+    );
+  }
+  return (
+    <Badge variant="outline" className="invoice-channel-badge">
+      <Store size={11} /> Walk-in
+    </Badge>
+  );
+}
+
+function InvoiceRow({ invoice }: { invoice: Invoice }) {
+  const when = invoice.invoice_date || invoice.created_at;
+  const time = formatTime(when);
+
+  return (
+    <Link href={`/dashboard/pos/invoices/${invoice.id}`} className="invoice-card">
+      <div className="invoice-card-top">
+        <div className="invoice-card-main">
+          <div className="invoice-card-number mono">{invoice.invoice_number}</div>
+          <div className="invoice-card-meta">
+            <ChannelBadge channel={invoice.sales_channel} />
+            <span className="invoice-card-date">
+              {formatDate(when)}
+              {time ? ` · ${time}` : ""}
+            </span>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="invoice-card-total amount">{money(invoice.grand_total)}</span>
+          <ChevronRight size={16} className="text-faint invoice-card-chevron" aria-hidden />
+        </div>
+      </div>
+    </Link>
+  );
+}
 
 export function InvoicesTable({ invoices, loading }: { invoices: Invoice[]; loading: boolean }) {
   if (loading) {
-    return <div className="flex flex-col gap-2">{[...Array(6)].map((_, i) => <Skeleton key={i} style={{ height: 50, borderRadius: 10 }} />)}</div>;
+    return (
+      <div className="invoices-list">
+        {[...Array(5)].map((_, i) => (
+          <Skeleton key={i} className="invoice-skeleton" />
+        ))}
+      </div>
+    );
   }
+
   if (invoices.length === 0) {
     return (
       <div className="empty-state">
@@ -21,38 +69,12 @@ export function InvoicesTable({ invoices, loading }: { invoices: Invoice[]; load
       </div>
     );
   }
+
   return (
-    <Table>
-      <THead>
-        <TR>
-          <TH>Invoice</TH>
-          <TH>Customer</TH>
-          <TH>Channel</TH>
-          <TH>Date</TH>
-          <TH className="text-right">Total</TH>
-        </TR>
-      </THead>
-      <TBody>
-        {invoices.map((inv) => (
-          <TR key={inv.id}>
-            <TD>
-              <Link href={`/dashboard/pos/invoices/${inv.id}`} className="font-medium mono" style={{ textDecoration: "underline" }}>
-                {inv.invoice_number}
-              </Link>
-            </TD>
-            <TD className="text-sm">{inv.customer_name || "—"}</TD>
-            <TD>
-              {inv.sales_channel === "cloud_kitchen" ? (
-                <Badge variant="neutral"><Truck size={11} /> Cloud kitchen</Badge>
-              ) : (
-                <Badge variant="outline"><Store size={11} /> Walk-in</Badge>
-              )}
-            </TD>
-            <TD className="text-sm text-muted">{formatDateTime(inv.invoice_date || inv.created_at)}</TD>
-            <TD className="text-right amount">{money(inv.grand_total)}</TD>
-          </TR>
-        ))}
-      </TBody>
-    </Table>
+    <div className="invoices-list">
+      {invoices.map((invoice) => (
+        <InvoiceRow key={invoice.id} invoice={invoice} />
+      ))}
+    </div>
   );
 }

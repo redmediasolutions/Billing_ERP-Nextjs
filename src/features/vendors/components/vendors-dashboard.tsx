@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   Edit3,
   Loader2,
@@ -20,6 +21,7 @@ import { VendorForm } from "./vendor-form";
 import styles from "../vendors.module.css";
 
 export function VendorsDashboard() {
+  const searchParams = useSearchParams();
   const { data: vendors = [], isLoading, error } = useVendors();
   const deleteVendor = useDeleteVendor();
 
@@ -44,6 +46,13 @@ export function VendorsDashboard() {
       )
     );
   }, [search, vendors]);
+
+  useEffect(() => {
+    if (searchParams.get("create") === "1") {
+      setSelectedVendor(null);
+      setShowForm(true);
+    }
+  }, [searchParams]);
 
   function openCreate() {
     setSelectedVendor(null);

@@ -1,14 +1,9 @@
 {
   "pages": {
-    "/(dashboard)/dashboard/page": [
+    "/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/(dashboard)/dashboard/page.js"
-    ],
-    "/(dashboard)/layout": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(dashboard)/layout.js"
+      "static/chunks/app/page.js"
     ],
     "/layout": [
       "static/chunks/webpack.js",
@@ -16,15 +11,111 @@
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
     ],
+    "/(auth)/login/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(auth)/login/page.js"
+    ],
+    "/(auth)/layout": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(auth)/layout.js"
+    ],
+    "/(dashboard)/dashboard/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/(dashboard)/dashboard/page.css",
+      "static/chunks/app/(dashboard)/dashboard/page.js"
+    ],
+    "/(dashboard)/layout": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/(dashboard)/layout.css",
+      "static/chunks/app/(dashboard)/layout.js"
+    ],
+    "/(dashboard)/dashboard/estimates/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(dashboard)/dashboard/estimates/page.js"
+    ],
+    "/(dashboard)/dashboard/estimates/new/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(dashboard)/dashboard/estimates/new/page.js"
+    ],
+    "/(dashboard)/dashboard/items/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(dashboard)/dashboard/items/page.js"
+    ],
+    "/(dashboard)/dashboard/customers/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(dashboard)/dashboard/customers/page.js"
+    ],
+    "/(dashboard)/dashboard/pos/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/(dashboard)/dashboard/pos/page.css",
+      "static/chunks/app/(dashboard)/dashboard/pos/page.js"
+    ],
+    "/(dashboard)/dashboard/pos/layout": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/(dashboard)/dashboard/pos/layout.css",
+      "static/chunks/app/(dashboard)/dashboard/pos/layout.js"
+    ],
+    "/(dashboard)/dashboard/pos/items/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/(dashboard)/dashboard/pos/items/page.css",
+      "static/chunks/app/(dashboard)/dashboard/pos/items/page.js"
+    ],
+    "/(dashboard)/dashboard/pos/invoices/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/(dashboard)/dashboard/pos/invoices/page.css",
+      "static/chunks/app/(dashboard)/dashboard/pos/invoices/page.js"
+    ],
+    "/(dashboard)/dashboard/pos/reports/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/(dashboard)/dashboard/pos/reports/page.css",
+      "static/chunks/app/(dashboard)/dashboard/pos/reports/page.js"
+    ],
+    "/(dashboard)/dashboard/products/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/(dashboard)/dashboard/products/page.css",
+      "static/chunks/app/(dashboard)/dashboard/products/page.js"
+    ],
+    "/(dashboard)/dashboard/stocks/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/(dashboard)/dashboard/stocks/page.css",
+      "static/chunks/app/(dashboard)/dashboard/stocks/page.js"
+    ],
+    "/(dashboard)/dashboard/brands/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/(dashboard)/dashboard/brands/page.css",
+      "static/chunks/app/(dashboard)/dashboard/brands/page.js"
+    ],
+    "/(dashboard)/dashboard/vendors/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/(dashboard)/dashboard/vendors/page.css",
+      "static/chunks/app/(dashboard)/dashboard/vendors/page.js"
+    ],
     "/(dashboard)/dashboard/invoices/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/(dashboard)/dashboard/invoices/page.js"
     ],
-    "/_not-found/page": [
+    "/(dashboard)/dashboard/invoices/new/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/_not-found/page.js"
+      "static/chunks/app/(dashboard)/dashboard/invoices/new/page.js"
     ]
   }
 }

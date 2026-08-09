@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   Edit3,
   Loader2,
@@ -19,6 +20,7 @@ import { ProductForm } from "./product-form";
 import styles from "../products.module.css";
 
 export function ProductsDashboard() {
+  const searchParams = useSearchParams();
   const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [selectedProduct, setSelectedProduct] =
@@ -26,6 +28,13 @@ export function ProductsDashboard() {
 
   const { data: products = [], isLoading, error } = useProducts(search);
   const deleteProduct = useDeleteProduct();
+
+  useEffect(() => {
+    if (searchParams.get("create") === "1") {
+      setSelectedProduct(null);
+      setShowForm(true);
+    }
+  }, [searchParams]);
 
   function openCreate() {
     setSelectedProduct(null);

@@ -18,7 +18,7 @@ export const customersRepository = {
       body: JSON.stringify(input),
     }),
 
-  remove: (id: number) =>
+  archive: (id: number) =>
     apiRequest<void>(`/customers/${id}`, {
       method: "DELETE",
     }),

@@ -1,12 +1,18 @@
 "use client";
-import { createContext, useCallback, useContext, useState } from "react";
+import { createContext, useCallback, useContext, useMemo, useState } from "react";
 import { CheckCircle2, XCircle, Info, X } from "lucide-react";
 import "./toast.css";
 
 type ToastKind = "success" | "error" | "info";
 interface ToastItem { id: number; kind: ToastKind; message: string; }
 
-const ToastContext = createContext<{ push: (kind: ToastKind, message: string) => void } | null>(null);
+interface ToastContextValue {
+  success: (message: string) => void;
+  error: (message: string) => void;
+  info: (message: string) => void;
+}
+
+const ToastContext = createContext<ToastContextValue | null>(null);
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<ToastItem[]>([]);
@@ -17,8 +23,17 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     setTimeout(() => setItems((prev) => prev.filter((t) => t.id !== id)), 4200);
   }, []);
 
+  const value = useMemo<ToastContextValue>(
+    () => ({
+      success: (message) => push("success", message),
+      error: (message) => push("error", message),
+      info: (message) => push("info", message),
+    }),
+    [push]
+  );
+
   return (
-    <ToastContext.Provider value={{ push }}>
+    <ToastContext.Provider value={value}>
       {children}
       <div className="toast-stack">
         {items.map((t) => (
@@ -40,9 +55,5 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 export function useToast() {
   const ctx = useContext(ToastContext);
   if (!ctx) throw new Error("useToast must be used within ToastProvider");
-  return {
-    success: (m: string) => ctx.push("success", m),
-    error: (m: string) => ctx.push("error", m),
-    info: (m: string) => ctx.push("info", m),
-  };
+  return ctx;
 }

@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   Edit3,
   Loader2,
@@ -10,6 +11,9 @@ import {
   Search,
   Trash2,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useDebounce } from "@/lib/use-debounce";
 import { ItemFormModal } from "../addform/item-form-modal";
 import { useItems } from "../hooks/use-items";
 import type { Item, ItemInput } from "../types";
@@ -21,28 +25,23 @@ const money = new Intl.NumberFormat("en-IN", {
 });
 
 export function ItemsDashboard() {
-  const { items, loading, error, refresh, create, update, remove } =
-    useItems();
-
+  const searchParams = useSearchParams();
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 300);
+
+  const { items, loading, error, refresh, create, update, remove } =
+    useItems(debouncedSearch);
+
   const [formOpen, setFormOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<Item | null>(null);
   const [actionError, setActionError] = useState("");
 
-  const filteredItems = useMemo(() => {
-    const term = search.trim().toLowerCase();
-
-    if (!term) return items;
-
-    return items.filter((item) =>
-      [
-        item.item_name,
-        item.item_code,
-        item.hsn_code || "",
-        item.item_description || "",
-      ].some((value) => value.toLowerCase().includes(term))
-    );
-  }, [items, search]);
+  useEffect(() => {
+    if (searchParams.get("create") === "1") {
+      setEditingItem(null);
+      setFormOpen(true);
+    }
+  }, [searchParams]);
 
   const trackedCount = items.filter(
     (item) => item.track_inventory
@@ -73,6 +72,7 @@ export function ItemsDashboard() {
       setActionError(
         err instanceof Error ? err.message : "Unable to save item."
       );
+      throw err;
     }
   }
 
@@ -99,7 +99,7 @@ export function ItemsDashboard() {
         <div className="items-dashboard__search">
           <Search className="items-dashboard__search-icon" />
 
-          <input
+          <Input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Search items, codes, or descriptions..."
@@ -107,7 +107,7 @@ export function ItemsDashboard() {
           />
         </div>
 
-        <button
+        <Button
           onClick={() => {
             setEditingItem(null);
             setFormOpen(true);
@@ -116,7 +116,7 @@ export function ItemsDashboard() {
         >
           <Plus size={16} />
           Add Item
-        </button>
+        </Button>
       </div>
 
       <div className="items-dashboard__kpis">
@@ -141,18 +141,19 @@ export function ItemsDashboard() {
           <div>
             <h1 className="items-dashboard__title">Item & Services Directory</h1>
             <p className="items-dashboard__count">
-              Listing {filteredItems.length} item
-              {filteredItems.length === 1 ? "" : "s"}
+              Listing {items.length} item
+              {items.length === 1 ? "" : "s"}
             </p>
           </div>
 
-          <button
+          <Button
+            variant="outline"
             onClick={() => void refresh()}
             className="items-dashboard__refresh"
           >
             <RefreshCw size={16} />
             Refresh
-          </button>
+          </Button>
         </div>
 
         {actionError && (
@@ -190,7 +191,7 @@ export function ItemsDashboard() {
                       {error}
                     </td>
                   </tr>
-                ) : filteredItems.length === 0 ? (
+                ) : items.length === 0 ? (
                   <tr>
                     <td
                       colSpan={5}
@@ -200,7 +201,7 @@ export function ItemsDashboard() {
                     </td>
                   </tr>
                 ) : (
-                  filteredItems.map((item) => (
+                  items.map((item) => (
                     <tr
                       key={item.id}
                       className="items-dashboard__row"
@@ -255,7 +256,9 @@ export function ItemsDashboard() {
                       </td>
 
                       <td><div className="items-dashboard__actions">
-                          <button
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             onClick={() => {
                               setEditingItem(item);
                               setFormOpen(true);
@@ -264,15 +267,17 @@ export function ItemsDashboard() {
                             title="Edit item"
                           >
                             <Edit3 size={16} />
-                          </button>
+                          </Button>
 
-                          <button
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             onClick={() => void deleteItem(item)}
                             className="items-dashboard__icon-action"
                             title="Archive item"
                           >
                             <Trash2 size={16} />
-                          </button>
+                          </Button>
                         </div>
                       </td>
                     </tr>
@@ -287,6 +292,7 @@ export function ItemsDashboard() {
       {formOpen && (
         <ItemFormModal
           item={editingItem}
+          open={formOpen}
           onClose={() => {
             setFormOpen(false);
             setEditingItem(null);

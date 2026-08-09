@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, FileText, Loader2, Trash2, UserRound } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -8,14 +8,17 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { CustomerPickerField } from "@/features/customers/components/customer-picker-field";
+import { useCustomers } from "@/features/customers/hooks/use-customers";
 import { ItemPickerDialog } from "./item-picker-dialog";
 import {
   useCreateEstimate,
-  useCustomers,
+  useEstimate,
+  useUpdateEstimate,
 } from "../hooks/use-estimates";
 import type {
   CatalogItem,
-  Customer,
+  Estimate,
   EstimateInput,
   EstimateLineItem,
 } from "../types";
@@ -48,6 +51,32 @@ function createLineItem(item: CatalogItem): EstimateLineItem {
   };
 }
 
+function mapLineItems(lines: EstimateLineItem[]): EstimateLineItem[] {
+  return lines.map((line) => ({
+    ...line,
+    id: String(line.id),
+  }));
+}
+
+function deriveDiscountPercent(estimate: Estimate): number {
+  const lines = estimate.line_items ?? [];
+  const subtotal = lines.reduce(
+    (sum, line) => sum + line.amount_before_tax,
+    0
+  );
+  const lineDiscount = lines.reduce(
+    (sum, line) =>
+      sum + (line.amount_before_tax * Number(line.line_discount || 0)) / 100,
+    0
+  );
+  const afterLine = subtotal - lineDiscount;
+  const docDiscount = estimate.total_discount - lineDiscount;
+
+  if (afterLine <= 0) return 0;
+
+  return Math.round((docDiscount / afterLine) * 10000) / 100;
+}
+
 function recalculateLine(
   line: EstimateLineItem,
   changes: Partial<EstimateLineItem>
@@ -73,11 +102,20 @@ function recalculateLine(
   };
 }
 
-export function EstimateForm() {
+interface EstimateFormProps {
+  estimateId?: number;
+}
+
+export function EstimateForm({ estimateId }: EstimateFormProps) {
   const router = useRouter();
+  const isEditing = Boolean(estimateId);
+
   const createEstimate = useCreateEstimate();
-  const { data: customers = [], isLoading: loadingCustomers } =
-    useCustomers();
+  const updateEstimate = useUpdateEstimate();
+  const { data: existing, isLoading: loadingExisting } = useEstimate(
+    estimateId ?? 0
+  );
+  const { data: customers = [] } = useCustomers();
 
   const [customerId, setCustomerId] = useState("");
   const [referenceNumber, setReferenceNumber] = useState("");
@@ -92,6 +130,25 @@ export function EstimateForm() {
   const [discountPercent, setDiscountPercent] = useState(0);
   const [lineItems, setLineItems] = useState<EstimateLineItem[]>([]);
   const [formError, setFormError] = useState("");
+  const [initializedForId, setInitializedForId] = useState<number | null>(
+    null
+  );
+
+  useEffect(() => {
+    if (!estimateId || !existing || initializedForId === estimateId) return;
+
+    setCustomerId(String(existing.customer_id));
+    setReferenceNumber(existing.reference_number || "");
+    setEstimateNumber(existing.estimate_number);
+    setEstimateDate(existing.estimate_date || localDate());
+    setValidUntil(existing.valid_until || "");
+    setPaymentTerms(existing.payment_terms || "");
+    setNotes(existing.notes || "");
+    setTransferInformation(existing.transfer_information || "");
+    setDiscountPercent(deriveDiscountPercent(existing));
+    setLineItems(mapLineItems(existing.line_items ?? []));
+    setInitializedForId(estimateId);
+  }, [estimateId, existing, initializedForId]);
 
   const selectedCustomer = customers.find(
     (customer) => customer.id === Number(customerId)
@@ -130,18 +187,20 @@ export function EstimateForm() {
     };
   }, [lineItems, discountPercent]);
 
+  const isPending = createEstimate.isPending || updateEstimate.isPending;
+
   function addCatalogItem(item: CatalogItem) {
     setLineItems((current) => {
-      const existing = current.find(
+      const existingLine = current.find(
         (line) => line.item_id === item.id
       );
 
-      if (existing) {
+      if (existingLine) {
         return current.map((line) =>
           line.item_id === item.id
             ? recalculateLine(line, {
-              quantity: line.quantity + 1,
-            })
+                quantity: line.quantity + 1,
+              })
             : line
         );
       }
@@ -208,7 +267,11 @@ export function EstimateForm() {
         line_items: lineItems,
       };
 
-      await createEstimate.mutateAsync(payload);
+      if (isEditing && estimateId) {
+        await updateEstimate.mutateAsync({ id: estimateId, input: payload });
+      } else {
+        await createEstimate.mutateAsync(payload);
+      }
 
       router.push("/dashboard/estimates");
     } catch (error) {
@@ -220,6 +283,23 @@ export function EstimateForm() {
     }
   }
 
+  if (isEditing && loadingExisting) {
+    return (
+      <div className="form-loading">
+        <Loader2 className="form-loading__spinner" />
+        Loading estimate...
+      </div>
+    );
+  }
+
+  if (isEditing && !existing && !loadingExisting) {
+    return (
+      <div className="form-loading form-loading--error">
+        Estimate not found.
+      </div>
+    );
+  }
+
   return (
     <section className="estimate-form">
       <div className="estimate-form__header">
@@ -229,17 +309,19 @@ export function EstimateForm() {
             onClick={() => router.push("/dashboard/estimates")}
             className="estimate-form__back"
           >
-            <ArrowLeft className="h-5 w-5" />
+            <ArrowLeft size={20} />
           </Button>
 
-          <h1 className="estimate-form__title">Create Estimate</h1>
+          <h1 className="estimate-form__title">
+            {isEditing ? "Edit Estimate" : "Create Estimate"}
+          </h1>
         </div>
 
         <div className="estimate-form__actions">
           <Button
             variant="outline"
             onClick={() => void saveEstimate(true)}
-            disabled={createEstimate.isPending}
+            disabled={isPending}
             className="estimate-form__secondary-action"
           >
             Save Draft
@@ -247,13 +329,13 @@ export function EstimateForm() {
 
           <Button
             onClick={() => void saveEstimate(false)}
-            disabled={createEstimate.isPending}
+            disabled={isPending}
             className="estimate-form__primary-action"
           >
-            {createEstimate.isPending && (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            {isPending && (
+              <Loader2 size={16} className="form-spinner" />
             )}
-            Finalize Estimate
+            {isEditing ? "Update Estimate" : "Finalize Estimate"}
           </Button>
         </div>
       </div>
@@ -266,28 +348,10 @@ export function EstimateForm() {
               Customer Info
             </h2>
 
-            <Field label="Select Customer *">
-              <select
-                value={customerId}
-                onChange={(event) => setCustomerId(event.target.value)}
-                className="employee-form__select"
-              >
-                <option value="">
-                  {loadingCustomers
-                    ? "Loading customers..."
-                    : "Select a customer"}
-                </option>
-
-                {customers.map((customer: Customer) => (
-                  <option key={customer.id} value={customer.id}>
-                    {customer.customer_name}
-                    {customer.customer_phone
-                      ? ` · ${customer.customer_phone}`
-                      : ""}
-                  </option>
-                ))}
-              </select>
-            </Field>
+            <CustomerPickerField
+              value={customerId}
+              onChange={setCustomerId}
+            />
 
             <div className="form-grid form-grid--2col" style={{ marginTop: 20 }}>
               <AddressCard
@@ -475,7 +539,7 @@ export function EstimateForm() {
                         onClick={() => removeLine(line.id)}
                         className="line-items__delete"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 size={16} />
                       </Button>
                     </td>
                   </tr>
