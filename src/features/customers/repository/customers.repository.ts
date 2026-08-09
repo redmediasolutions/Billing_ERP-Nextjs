@@ -4,6 +4,8 @@ import type { Customer, CustomerInput } from "../types";
 export const customersRepository = {
   list: () => apiRequest<Customer[]>("/customers"),
 
+  getWalkIn: () => apiRequest<Customer>("/customers/walk-in"),
+
   create: (input: CustomerInput) =>
     apiRequest<Customer>("/customers", {
       method: "POST",

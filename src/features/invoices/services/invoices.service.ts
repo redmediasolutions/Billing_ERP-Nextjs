@@ -10,6 +10,8 @@ function normalizeInvoice(invoice: Invoice): Invoice {
     grand_total: Number(invoice.grand_total || 0),
     rounded_total: Number(invoice.rounded_total || 0),
     is_draft: Number(invoice.is_draft) === 1,
+    sales_channel:
+      invoice.sales_channel === "cloud_kitchen" ? "cloud_kitchen" : "walk_in",
 
     line_items: invoice.line_items?.map((line) => ({
       ...line,

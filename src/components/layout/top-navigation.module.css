@@ -1,0 +1,190 @@
+.topNavigation {
+  position: sticky;
+  z-index: 50;
+  top: 0;
+  border-bottom: 1px solid var(--line);
+  background: rgb(255 255 255 / 96%);
+  backdrop-filter: blur(12px);
+}
+
+.inner {
+  display: flex;
+  min-height: 64px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 0 28px;
+}
+
+.left,
+.businessButton,
+.quickLinks,
+.posShortcut,
+.searchField,
+.moduleLink {
+  display: flex;
+  align-items: center;
+}
+
+.left {
+  min-width: 0;
+  gap: 28px;
+}
+
+.moduleMenu {
+  position: relative;
+}
+
+.businessButton {
+  gap: 9px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--ink);
+  padding: 8px 10px;
+  font-weight: 800;
+}
+
+.businessButton:hover {
+  background: var(--paper-muted);
+}
+
+.businessMark {
+  display: grid;
+  width: 26px;
+  height: 26px;
+  place-items: center;
+  border-radius: 7px;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 13px;
+}
+
+.businessName {
+  max-width: 210px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  width: min(350px, calc(100vw - 32px));
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--paper);
+  box-shadow: var(--shadow-md);
+}
+
+.searchField {
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  color: var(--ink-muted);
+  padding: 0 10px;
+}
+
+.searchField input {
+  width: 100%;
+  min-height: 38px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ink);
+}
+
+.dropdownLabel {
+  margin: 14px 8px 7px;
+  color: var(--ink-muted);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.moduleList {
+  display: grid;
+  max-height: min(540px, calc(100vh - 130px));
+  gap: 2px;
+  overflow-y: auto;
+}
+
+.moduleLink {
+  gap: 11px;
+  border-radius: 8px;
+  color: var(--ink);
+  padding: 10px;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.moduleLink:hover,
+.moduleLinkActive {
+  background: var(--paper-muted);
+}
+
+.moduleLinkActive {
+  font-weight: 800;
+}
+
+.noResults {
+  margin: 8px;
+  color: var(--ink-muted);
+  font-size: 14px;
+}
+
+.quickLinks {
+  gap: 20px;
+}
+
+.quickLinks a {
+  color: var(--ink-muted);
+  font-size: 14px;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.quickLinks a:hover {
+  color: var(--ink);
+}
+
+.posShortcut {
+  gap: 8px;
+  border-radius: 8px;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 10px 13px;
+  font-size: 14px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.posShortcut:hover {
+  background: #333333;
+}
+
+@media (max-width: 760px) {
+  .inner {
+    min-height: 58px;
+    padding: 0 16px;
+  }
+
+  .quickLinks {
+    display: none;
+  }
+
+  .posShortcut {
+    padding: 9px 11px;
+  }
+
+  .businessName {
+    max-width: 160px;
+  }
+}

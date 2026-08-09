@@ -1,0 +1,23 @@
+.picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+}
+.picker-card {
+  text-align: left; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  cursor: pointer; padding: 0; overflow: hidden; transition: border-color 120ms ease, box-shadow 120ms ease, transform 80ms ease;
+}
+.picker-card:hover { border-color: var(--border-strong); box-shadow: var(--shadow-md); }
+.picker-card:active { transform: scale(0.98); }
+.picker-thumb {
+  position: relative; height: 92px; background: var(--surface-sunken);
+  display: flex; align-items: center; justify-content: center; color: var(--text-faint);
+}
+.picker-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.picker-add {
+  position: absolute; right: 6px; bottom: 6px; width: 24px; height: 24px; border-radius: 50%;
+  background: var(--ink-0); color: var(--paper-0); display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--shadow-sm);
+}
+.picker-body { padding: 9px 10px 11px; }
+.picker-name { font-size: 13px; font-weight: 600; }

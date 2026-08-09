@@ -21,6 +21,8 @@ export interface Item {
   item_code: string;
   hsn_code: string | null;
   item_cost: number;
+  walk_in_price: number | null;
+  cloud_kitchen_price: number | null;
   tax_rate: number;
   unit: string | null;
   item_description: string | null;
@@ -36,6 +38,8 @@ export interface ItemInput {
   item_name: string;
   hsn_code: string;
   item_cost: number;
+  walk_in_price?: number | null;
+  cloud_kitchen_price?: number | null;
   tax_rate: number;
   item_cost_narration: string;
   item_description: string;
@@ -44,3 +48,15 @@ export interface ItemInput {
   track_inventory: boolean;
   is_batch_tracked: boolean;
 }
+
+/** Restaurant / POS unit options (item_cost_narration). */
+export const POS_UNIT_OPTIONS = [
+  "Piece",
+  "Plate",
+  "Portion",
+  "Glass",
+  "Bowl",
+  "KG",
+  "Litre",
+  "Pack",
+] as const;

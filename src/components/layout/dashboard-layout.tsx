@@ -1,18 +1,45 @@
-import { ReactNode } from "react";
-import { TopNavigation } from "./top-navigation";
+"use client";
 
-export default function DashboardLayout({
+import { useEffect } from "react";
+import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+
+import { useAuth } from "@/hooks/use-auth";
+import { TopNavigation } from "./top-navigation";
+import styles from "./dashboard-layout.module.css";
+
+export function DashboardLayout({
   children,
 }: {
-  children: ReactNode;
+  children: React.ReactNode;
 }) {
+  const router = useRouter();
+  const { user, loading } = useAuth();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.replace("/login");
+    }
+  }, [loading, user, router]);
+
+  if (loading) {
+    return (
+      <div className={styles.loading}>
+        <Loader2 size={26} className={styles.spin} />
+        <p>Loading dashboard...</p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
+
   return (
-    <div className="min-h-screen bg-neutral-50">
+    <div className={styles.shell}>
       <TopNavigation />
 
-      <main className="mx-auto max-w-7xl px-8 py-8">
-        {children}
-      </main>
+      <main className={styles.main}>{children}</main>
     </div>
   );
 }

@@ -5,6 +5,14 @@ function normalizeItem(item: Item): Item {
   return {
     ...item,
     item_cost: Number(item.item_cost || 0),
+    walk_in_price:
+      item.walk_in_price === null || item.walk_in_price === undefined
+        ? null
+        : Number(item.walk_in_price),
+    cloud_kitchen_price:
+      item.cloud_kitchen_price === null || item.cloud_kitchen_price === undefined
+        ? null
+        : Number(item.cloud_kitchen_price),
     tax_rate: Number(item.tax_rate || 0),
     total_stock: Number(item.total_stock || 0),
 
