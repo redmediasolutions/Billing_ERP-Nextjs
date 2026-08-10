@@ -22,6 +22,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import { matchesSearch } from "@/lib/erp-search";
+import { useUrlSearchParam } from "@/lib/use-url-search";
 import {
   useBrands,
   useDeleteBrand,
@@ -32,24 +34,15 @@ import { BrandForm } from "./brand-form";
 export function BrandsDashboard() {
   const { data: brands = [], isLoading, error } = useBrands();
   const deleteBrand = useDeleteBrand();
+  const { value: search, setSearch } = useUrlSearchParam();
 
-  const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null);
 
   const filteredBrands = useMemo(() => {
-    const query = search.trim().toLowerCase();
-
-    if (!query) return brands;
-
-    return brands.filter((brand) => {
-      return [
-        brand.name,
-        brand.description,
-      ].some((value) =>
-        String(value || "").toLowerCase().includes(query)
-      );
-    });
+    return brands.filter((brand) =>
+      matchesSearch(search, [brand.name, brand.description])
+    );
   }, [brands, search]);
 
   function openCreate() {

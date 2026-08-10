@@ -25,6 +25,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import { useDebouncedUrlSearchParam } from "@/lib/use-url-search";
 import {
   useDeleteStock,
   useStocks,
@@ -42,13 +43,14 @@ function money(value: string | number) {
 }
 
 export function StocksDashboard() {
-  const [search, setSearch] = useState("");
+  const { value: search, setValue: setSearch, query } =
+    useDebouncedUrlSearchParam();
   const [status, setStatus] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [editingStock, setEditingStock] = useState<Stock | null>(null);
   const [sellingStock, setSellingStock] = useState<Stock | null>(null);
 
-  const { data: stocks = [], isLoading, error } = useStocks(search, status);
+  const { data: stocks = [], isLoading, error } = useStocks(query, status);
   const deleteStock = useDeleteStock();
 
   const summary = useMemo(

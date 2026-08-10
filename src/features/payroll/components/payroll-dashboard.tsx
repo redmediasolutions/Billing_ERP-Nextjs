@@ -24,6 +24,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import { matchesSearch } from "@/lib/erp-search";
+import { useUrlSearchParam } from "@/lib/use-url-search";
 import { useEmployees } from "@/features/employees/hooks/use-employees";
 import {
   useAddDeduction,
@@ -45,11 +47,11 @@ function money(value: number) {
 export function PayrollDashboard() {
   const { data: payroll = [], isLoading, error } = usePayrollDashboard();
   const { data: employees = [] } = useEmployees();
+  const { value: search, setSearch } = useUrlSearchParam();
 
   const addLoan = useAddLoan();
   const addDeduction = useAddDeduction();
 
-  const [search, setSearch] = useState("");
   const [modalType, setModalType] = useState<"loan" | "deduction" | null>(null);
 
   const [selectedEmployee, setSelectedEmployee] =
@@ -58,12 +60,8 @@ export function PayrollDashboard() {
   const [actionError, setActionError] = useState("");
 
   const filteredPayroll = useMemo(() => {
-    const term = search.trim().toLowerCase();
-
-    if (!term) return payroll;
-
     return payroll.filter((row) =>
-      row.fullName.toLowerCase().includes(term)
+      matchesSearch(search, [row.fullName])
     );
   }, [payroll, search]);
 

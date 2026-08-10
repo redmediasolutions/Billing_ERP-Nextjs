@@ -23,6 +23,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import { useDebouncedUrlSearchParam } from "@/lib/use-url-search";
 import {
   useDeleteProduct,
   useProducts,
@@ -31,12 +32,13 @@ import type { Product } from "../types/product.types";
 import { ProductForm } from "./product-form";
 
 export function ProductsDashboard() {
-  const [search, setSearch] = useState("");
+  const { value: search, setValue: setSearch, query } =
+    useDebouncedUrlSearchParam();
   const [showForm, setShowForm] = useState(false);
   const [selectedProduct, setSelectedProduct] =
     useState<Product | null>(null);
 
-  const { data: products = [], isLoading, error } = useProducts(search);
+  const { data: products = [], isLoading, error } = useProducts(query);
   const deleteProduct = useDeleteProduct();
 
   function openCreate() {

@@ -26,6 +26,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import { matchesSearch } from "@/lib/erp-search";
+import { useUrlSearchParam } from "@/lib/use-url-search";
 import { RemunerationFormModal } from "@/features/payroll/components/remuneration-form-modal";
 
 import { EmployeeFormModal } from "../addform/employee-form-modal";
@@ -39,12 +41,12 @@ import type { Employee, EmployeeInput } from "../types";
 
 export function EmployeesDashboard() {
   const { data: employees = [], isLoading, error } = useEmployees();
+  const { value: search, setSearch } = useUrlSearchParam();
 
   const createEmployee = useCreateEmployee();
   const updateEmployee = useUpdateEmployee();
   const deleteEmployee = useDeleteEmployee();
 
-  const [search, setSearch] = useState("");
   const [formOpen, setFormOpen] = useState(false);
   const [editingEmployee, setEditingEmployee] =
     useState<Employee | null>(null);
@@ -53,19 +55,15 @@ export function EmployeesDashboard() {
   const [actionError, setActionError] = useState("");
 
   const filteredEmployees = useMemo(() => {
-    const term = search.trim().toLowerCase();
-
-    if (!term) return employees;
-
     return employees.filter((employee) =>
-      [
+      matchesSearch(search, [
         employee.full_name,
-        employee.empId || "",
-        employee.email || "",
-        employee.phone || "",
-        employee.nationality || "",
-        employee.department_name || "",
-      ].some((value) => value.toLowerCase().includes(term))
+        employee.empId,
+        employee.email,
+        employee.phone,
+        employee.nationality,
+        employee.department_name,
+      ])
     );
   }, [employees, search]);
 

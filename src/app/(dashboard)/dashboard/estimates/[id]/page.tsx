@@ -1,9 +1,11 @@
 import { EstimatePreview } from "@/features/estimates/document/estimate-preview";
 
-export default function EstimateDocumentPage({
+export default async function EstimateDocumentPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  return <EstimatePreview estimateId={Number(params.id)} />;
+  const { id } = await params;
+
+  return <EstimatePreview estimateId={Number(id)} />;
 }

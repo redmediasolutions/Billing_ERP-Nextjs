@@ -24,6 +24,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import { matchesSearch } from "@/lib/erp-search";
+import { useUrlSearchParam } from "@/lib/use-url-search";
 import {
   useDeleteVendor,
   useVendors,
@@ -34,25 +36,19 @@ import { VendorForm } from "./vendor-form";
 export function VendorsDashboard() {
   const { data: vendors = [], isLoading, error } = useVendors();
   const deleteVendor = useDeleteVendor();
+  const { value: search, setSearch } = useUrlSearchParam();
 
-  const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
 
   const filteredVendors = useMemo(() => {
-    const query = search.trim().toLowerCase();
-
-    if (!query) return vendors;
-
     return vendors.filter((vendor) =>
-      [
+      matchesSearch(search, [
         vendor.vendor_name,
         vendor.vendor_phone,
         vendor.vendor_email,
         vendor.vendor_address,
-      ].some((value) =>
-        String(value || "").toLowerCase().includes(query)
-      )
+      ])
     );
   }, [search, vendors]);
 

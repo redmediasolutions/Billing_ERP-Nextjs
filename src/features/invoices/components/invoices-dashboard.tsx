@@ -1,14 +1,19 @@
 "use client";
 
+import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
   Edit3,
   FileText,
   Loader2,
+  Search,
   Trash2,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { matchesSearch } from "@/lib/erp-search";
+import { useUrlParam, useUrlSearchParam } from "@/lib/use-url-search";
 import {
   Card,
   CardContent,
@@ -37,17 +42,47 @@ const money = new Intl.NumberFormat("en-IN", {
   maximumFractionDigits: 2,
 });
 
+function isOverdue(invoice: { due_date: string | null; is_draft: boolean }) {
+  if (invoice.is_draft || !invoice.due_date) return false;
+
+  const due = new Date(invoice.due_date);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  return due < today;
+}
+
 export function InvoicesDashboard() {
   const router = useRouter();
+  const { value: search, setSearch } = useUrlSearchParam();
+  const statusFilter = useUrlParam("status");
 
   const { data: invoices = [], isLoading, error } = useInvoices();
   const deleteInvoice = useDeleteInvoice();
+
+  const filteredInvoices = useMemo(() => {
+    return invoices.filter((invoice) => {
+      const matchesQuery = matchesSearch(search, [
+        invoice.invoice_number,
+        invoice.customer_name,
+        invoice.reference,
+      ]);
+
+      if (!matchesQuery) return false;
+
+      if (statusFilter === "draft") return invoice.is_draft;
+      if (statusFilter === "finalized") return !invoice.is_draft;
+      if (statusFilter === "overdue") return isOverdue(invoice);
+
+      return true;
+    });
+  }, [invoices, search, statusFilter]);
 
   const draftCount = invoices.filter(
     (invoice) => invoice.is_draft
   ).length;
 
-  const totalValue = invoices.reduce(
+  const totalValue = filteredInvoices.reduce(
     (sum, invoice) => sum + invoice.rounded_total,
     0
   );
@@ -83,9 +118,19 @@ export function InvoicesDashboard() {
 
       {/* KPI Cards Grid */}
       <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-        <Kpi label="Total Invoices" value={invoices.length} />
+        <Kpi label="Total Invoices" value={filteredInvoices.length} />
         <Kpi label="Draft Invoices" value={draftCount} />
         <Kpi label="Invoice Value" value={money.format(totalValue)} />
+      </div>
+
+      <div className="relative w-full sm:max-w-sm">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          placeholder="Search invoices, customers, or references..."
+          className="pl-9"
+        />
       </div>
 
       {/* Main Table Card */}
@@ -93,7 +138,9 @@ export function InvoicesDashboard() {
         <CardHeader>
           <CardTitle>Invoice Directory</CardTitle>
           <CardDescription>
-            All invoices created in the system.
+            {statusFilter
+              ? `Showing ${statusFilter} invoices.`
+              : "All invoices created in the system."}
           </CardDescription>
         </CardHeader>
 
@@ -137,19 +184,21 @@ export function InvoicesDashboard() {
                   </TableRow>
                 )}
 
-                {!isLoading && !error && invoices.length === 0 && (
+                {!isLoading && !error && filteredInvoices.length === 0 && (
                   <TableRow>
                     <TableCell
                       colSpan={6}
                       className="h-32 text-left text-muted-foreground"
                     >
-                      No invoices created yet.
+                      {search || statusFilter
+                        ? "No invoices match your search or filters."
+                        : "No invoices created yet."}
                     </TableCell>
                   </TableRow>
                 )}
 
                 {!isLoading &&
-                  invoices.map((invoice) => (
+                  filteredInvoices.map((invoice) => (
                     <TableRow
                       key={invoice.id}
                       className="cursor-pointer transition-colors hover:bg-muted/50"

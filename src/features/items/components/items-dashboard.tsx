@@ -23,7 +23,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import { useDebounce } from "@/lib/use-debounce";
+import { useDebouncedUrlSearchParam } from "@/lib/use-url-search";
 import { ItemFormModal } from "../addform/item-form-modal";
 import { useItems } from "../hooks/use-items";
 import type { Item, ItemInput } from "../types";
@@ -36,11 +36,11 @@ const money = new Intl.NumberFormat("en-IN", {
 
 export function ItemsDashboard() {
   const searchParams = useSearchParams();
-  const [search, setSearch] = useState("");
-  const debouncedSearch = useDebounce(search, 300);
+  const { value: search, setValue: setSearch, query } =
+    useDebouncedUrlSearchParam();
 
   const { items, loading, error, refresh, create, update, remove } =
-    useItems(debouncedSearch);
+    useItems(query);
 
   const [formOpen, setFormOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<Item | null>(null);

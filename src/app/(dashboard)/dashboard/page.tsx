@@ -4,6 +4,7 @@ import Link from "next/link";
 import {
   ArrowRight,
   FileText,
+  Loader2,
   Package,
   ReceiptText,
   Store,
@@ -14,29 +15,15 @@ import {
 } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
+import { useCustomers } from "@/features/customers/hooks/use-customers";
+import { useInvoices } from "@/features/invoices/hooks/use-invoices";
+import { useProducts } from "@/features/products/hooks/use-products";
 
-const stats = [
-  {
-    title: "Revenue",
-    value: "₹0",
-    icon: DollarSign,
-  },
-  {
-    title: "Invoices",
-    value: "0",
-    icon: ReceiptText,
-  },
-  {
-    title: "Customers",
-    value: "0",
-    icon: Users,
-  },
-  {
-    title: "Products",
-    value: "0",
-    icon: ShoppingCart,
-  },
-];
+const money = new Intl.NumberFormat("en-IN", {
+  style: "currency",
+  currency: "INR",
+  maximumFractionDigits: 0,
+});
 
 const cards = [
   {
@@ -77,6 +64,41 @@ const cards = [
 ];
 
 export default function DashboardPage() {
+  const { data: invoices = [], isLoading: invoicesLoading } = useInvoices();
+  const { data: customers = [], isLoading: customersLoading } = useCustomers();
+  const { data: products = [], isLoading: productsLoading } = useProducts();
+
+  const finalizedInvoices = invoices.filter((invoice) => !invoice.is_draft);
+  const revenue = finalizedInvoices.reduce(
+    (sum, invoice) => sum + invoice.rounded_total,
+    0
+  );
+
+  const statsLoading = invoicesLoading || customersLoading || productsLoading;
+
+  const stats = [
+    {
+      title: "Revenue",
+      value: statsLoading ? "—" : money.format(revenue),
+      icon: DollarSign,
+    },
+    {
+      title: "Invoices",
+      value: statsLoading ? "—" : String(invoices.length),
+      icon: ReceiptText,
+    },
+    {
+      title: "Customers",
+      value: statsLoading ? "—" : String(customers.length),
+      icon: Users,
+    },
+    {
+      title: "Products",
+      value: statsLoading ? "—" : String(products.length),
+      icon: ShoppingCart,
+    },
+  ];
+
   return (
     <div className="w-full space-y-10 text-left">
 
@@ -111,7 +133,16 @@ export default function DashboardPage() {
               </p>
 
               <h3 className="text-lg font-semibold">
-                Ready to start
+                {statsLoading ? (
+                  <span className="inline-flex items-center gap-2 text-muted-foreground">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Loading...
+                  </span>
+                ) : invoices.length > 0 ? (
+                  `${finalizedInvoices.length} finalized invoice${finalizedInvoices.length === 1 ? "" : "s"}`
+                ) : (
+                  "Ready to start"
+                )}
               </h3>
             </div>
           </CardContent>

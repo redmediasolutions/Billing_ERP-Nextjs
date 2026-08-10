@@ -1,9 +1,11 @@
 import { EstimateForm } from "@/features/estimates/addform/estimate-form";
 
-export default function EditEstimatePage({
+export default async function EditEstimatePage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  return <EstimateForm estimateId={Number(params.id)} />;
+  const { id } = await params;
+
+  return <EstimateForm estimateId={Number(id)} />;
 }

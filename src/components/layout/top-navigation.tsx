@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { usePathname } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   ChevronDown,
   ClipboardList,
@@ -29,6 +29,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ProfileMenu } from "@/components/profile-menu";
+import { buildSearchUrl, isNavLinkActive } from "@/lib/erp-search";
 
 const modules = [
   {
@@ -100,10 +101,34 @@ const modules = [
 
 export function TopNavigation() {
   const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [open, setOpen] = useState(false);
+  const [moduleSearch, setModuleSearch] = useState("");
+  const [globalSearch, setGlobalSearch] = useState("");
 
   const currentModule = getCurrentModule(pathname);
   const topMenu = moduleMenus[currentModule] ?? [];
+
+  useEffect(() => {
+    setGlobalSearch(searchParams.get("search") ?? "");
+  }, [pathname, searchParams]);
+
+  const filteredModules = useMemo(() => {
+    const term = moduleSearch.trim().toLowerCase();
+
+    if (!term) return modules;
+
+    return modules.filter((item) =>
+      item.label.toLowerCase().includes(term)
+    );
+  }, [moduleSearch]);
+
+  function submitGlobalSearch(event: React.FormEvent) {
+    event.preventDefault();
+    router.push(buildSearchUrl(pathname, globalSearch));
+  }
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/70">
@@ -140,6 +165,8 @@ export function TopNavigation() {
                   />
 
                   <Input
+                    value={moduleSearch}
+                    onChange={(event) => setModuleSearch(event.target.value)}
                     placeholder="Search modules..."
                     className="pl-10"
                   />
@@ -151,31 +178,40 @@ export function TopNavigation() {
                 </p>
 
                 <div className="space-y-1">
-                  {modules.map((item) => {
-                    const Icon = item.icon;
+                  {filteredModules.length === 0 ? (
+                    <p className="px-3 py-2 text-sm text-muted-foreground">
+                      No modules match your search.
+                    </p>
+                  ) : (
+                    filteredModules.map((item) => {
+                      const Icon = item.icon;
 
-                    const active =
-                      item.href === "/dashboard"
-                        ? pathname === "/dashboard"
-                        : pathname === item.href ||
-                          pathname.startsWith(item.href + "/");
+                      const active =
+                        item.href === "/dashboard"
+                          ? pathname === "/dashboard"
+                          : pathname === item.href ||
+                            pathname.startsWith(item.href + "/");
 
-                    return (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        onClick={() => setOpen(false)}
-                        className={`flex items-center gap-3 rounded-xl px-3 py-2 transition-colors ${
-                          active
-                            ? "bg-primary text-primary-foreground"
-                            : "hover:bg-accent hover:text-accent-foreground"
-                        }`}
-                      >
-                        <Icon size={18} />
-                        <span>{item.label}</span>
-                      </Link>
-                    );
-                  })}
+                      return (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          onClick={() => {
+                            setOpen(false);
+                            setModuleSearch("");
+                          }}
+                          className={`flex items-center gap-3 rounded-xl px-3 py-2 transition-colors ${
+                            active
+                              ? "bg-primary text-primary-foreground"
+                              : "hover:bg-accent hover:text-accent-foreground"
+                          }`}
+                        >
+                          <Icon size={18} />
+                          <span>{item.label}</span>
+                        </Link>
+                      );
+                    })
+                  )}
                 </div>
 
               </div>
@@ -187,11 +223,7 @@ export function TopNavigation() {
 
           <nav className="hidden items-center gap-8 lg:flex">
             {topMenu.map((item) => {
-              const active =
-                item.href === "/dashboard"
-                  ? pathname === "/dashboard"
-                  : pathname === item.href ||
-                    pathname.startsWith(item.href + "/");
+              const active = isNavLinkActive(pathname, searchParams, item.href);
 
               return (
                 <Link
@@ -215,19 +247,23 @@ export function TopNavigation() {
 
         <div className="flex items-center gap-3">
 
-          <div className="relative hidden md:block">
-
+          <form
+            onSubmit={submitGlobalSearch}
+            className="relative hidden md:block"
+          >
             <Search
               size={18}
               className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
             />
 
             <Input
+              value={globalSearch}
+              onChange={(event) => setGlobalSearch(event.target.value)}
               placeholder="Search..."
               className="w-64 pl-10"
             />
 
-          </div>
+          </form>
 
           <ThemeToggle />
 

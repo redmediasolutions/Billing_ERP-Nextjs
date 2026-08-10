@@ -1,9 +1,11 @@
 import { InvoiceForm } from "@/features/invoices/addform/invoice-form";
 
-export default function EditInvoicePage({
+export default async function EditInvoicePage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  return <InvoiceForm invoiceId={Number(params.id)} />;
+  const { id } = await params;
+
+  return <InvoiceForm invoiceId={Number(id)} />;
 }

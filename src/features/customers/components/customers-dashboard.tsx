@@ -24,6 +24,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { CustomerFormSheet } from "../addform/customer-form-sheet";
+import { matchesSearch } from "@/lib/erp-search";
+import { useUrlParam, useUrlSearchParam } from "@/lib/use-url-search";
 import {
   useArchiveCustomer,
   useCreateCustomer,
@@ -35,12 +37,13 @@ import type { Customer, CustomerInput } from "../types";
 export function CustomersDashboard() {
   const searchParams = useSearchParams();
   const { data: customers = [], isLoading, error } = useCustomers();
+  const { value: search, setSearch } = useUrlSearchParam();
+  const gstFilter = useUrlParam("gst");
 
   const createCustomer = useCreateCustomer();
   const updateCustomer = useUpdateCustomer();
   const archiveCustomer = useArchiveCustomer();
 
-  const [search, setSearch] = useState("");
   const [formOpen, setFormOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const [actionError, setActionError] = useState("");
@@ -54,20 +57,24 @@ export function CustomersDashboard() {
   }, [searchParams]);
 
   const filteredCustomers = useMemo(() => {
-    const term = search.trim().toLowerCase();
-
-    if (!term) return customers;
-
-    return customers.filter((customer) =>
-      [
+    return customers.filter((customer) => {
+      const matchesQuery = matchesSearch(search, [
         customer.customer_name,
-        customer.customer_business_name || "",
-        customer.customer_phone || "",
-        customer.customer_email || "",
-        customer.customer_gst || "",
-      ].some((value) => value.toLowerCase().includes(term))
-    );
-  }, [customers, search]);
+        customer.customer_business_name,
+        customer.customer_phone,
+        customer.customer_email,
+        customer.customer_gst,
+      ]);
+
+      if (!matchesQuery) return false;
+
+      if (gstFilter === "yes") {
+        return Boolean(customer.customer_gst);
+      }
+
+      return true;
+    });
+  }, [customers, search, gstFilter]);
 
   const gstRegistered = customers.filter((customer) => customer.customer_gst).length;
   const emailAvailable = customers.filter((customer) => customer.customer_email).length;
@@ -149,6 +156,7 @@ export function CustomersDashboard() {
               <p className="text-xs text-muted-foreground">
                 {filteredCustomers.length} customer
                 {filteredCustomers.length === 1 ? "" : "s"} shown
+                {gstFilter === "yes" ? " (GST registered)" : ""}
               </p>
             </div>
 
@@ -202,7 +210,9 @@ export function CustomersDashboard() {
                 ) : filteredCustomers.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={5} className="h-32 text-left text-muted-foreground">
-                      No customers found. Use &ldquo;Add Customer&rdquo; in the top navigation.
+                      {search || gstFilter
+                        ? "No customers match your search or filters."
+                        : "No customers found. Use &ldquo;Add Customer&rdquo; in the top navigation."}
                     </TableCell>
                   </TableRow>
                 ) : (

@@ -1,14 +1,19 @@
 "use client";
 
+import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
   Edit3,
   FileText,
   Loader2,
+  Search,
   Trash2,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { matchesSearch } from "@/lib/erp-search";
+import { useUrlSearchParam } from "@/lib/use-url-search";
 import {
   Card,
   CardContent,
@@ -39,8 +44,20 @@ const money = new Intl.NumberFormat("en-IN", {
 
 export function EstimatesDashboard() {
   const router = useRouter();
+  const { value: search, setSearch } = useUrlSearchParam();
   const { data: estimates = [], isLoading, error } = useEstimates();
   const deleteEstimate = useDeleteEstimate();
+
+  const filteredEstimates = useMemo(() => {
+    return estimates.filter((estimate) =>
+      matchesSearch(search, [
+        estimate.estimate_number,
+        estimate.customer_name,
+        estimate.reference,
+        estimate.reference_number,
+      ])
+    );
+  }, [estimates, search]);
 
   const draftCount = estimates.filter(
     (estimate) => estimate.is_draft
@@ -81,9 +98,19 @@ export function EstimatesDashboard() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-        <Kpi label="Total Estimates" value={estimates.length} />
+        <Kpi label="Total Estimates" value={filteredEstimates.length} />
         <Kpi label="Draft Estimates" value={draftCount} />
         <Kpi label="Expiring Soon" value={expiringSoon} danger />
+      </div>
+
+      <div className="relative w-full sm:max-w-sm">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          placeholder="Search estimates, customers, or references..."
+          className="pl-9"
+        />
       </div>
 
       <Card>
@@ -134,19 +161,21 @@ export function EstimatesDashboard() {
                   </TableRow>
                 )}
 
-                {!isLoading && !error && estimates.length === 0 && (
+                {!isLoading && !error && filteredEstimates.length === 0 && (
                   <TableRow>
                     <TableCell
                       colSpan={6}
                       className="h-32 text-left text-muted-foreground"
                     >
-                      No estimates created yet.
+                      {search
+                        ? "No estimates match your search."
+                        : "No estimates created yet."}
                     </TableCell>
                   </TableRow>
                 )}
 
                 {!isLoading &&
-                  estimates.map((estimate) => (
+                  filteredEstimates.map((estimate) => (
                     <TableRow
                       key={estimate.id}
                       className="cursor-pointer transition-colors hover:bg-muted/50"
