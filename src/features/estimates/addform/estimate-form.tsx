@@ -1,21 +1,34 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, FileText, Loader2, Trash2, UserRound } from "lucide-react";
 import { useRouter } from "next/navigation";
+
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
+import { CustomerPickerField } from "@/features/customers/components/customer-picker-field";
+import { useCustomers } from "@/features/customers/hooks/use-customers";
 import { ItemPickerDialog } from "./item-picker-dialog";
 import {
   useCreateEstimate,
-  useCustomers,
+  useEstimate,
+  useUpdateEstimate,
 } from "../hooks/use-estimates";
 import type {
   CatalogItem,
-  Customer,
+  Estimate,
   EstimateInput,
   EstimateLineItem,
 } from "../types";
@@ -48,6 +61,32 @@ function createLineItem(item: CatalogItem): EstimateLineItem {
   };
 }
 
+function mapLineItems(lines: EstimateLineItem[]): EstimateLineItem[] {
+  return lines.map((line) => ({
+    ...line,
+    id: String(line.id),
+  }));
+}
+
+function deriveDiscountPercent(estimate: Estimate): number {
+  const lines = estimate.line_items ?? [];
+  const subtotal = lines.reduce(
+    (sum, line) => sum + line.amount_before_tax,
+    0
+  );
+  const lineDiscount = lines.reduce(
+    (sum, line) =>
+      sum + (line.amount_before_tax * Number(line.line_discount || 0)) / 100,
+    0
+  );
+  const afterLine = subtotal - lineDiscount;
+  const docDiscount = estimate.total_discount - lineDiscount;
+
+  if (afterLine <= 0) return 0;
+
+  return Math.round((docDiscount / afterLine) * 10000) / 100;
+}
+
 function recalculateLine(
   line: EstimateLineItem,
   changes: Partial<EstimateLineItem>
@@ -73,11 +112,20 @@ function recalculateLine(
   };
 }
 
-export function EstimateForm() {
+interface EstimateFormProps {
+  estimateId?: number;
+}
+
+export function EstimateForm({ estimateId }: EstimateFormProps) {
   const router = useRouter();
+  const isEditing = Boolean(estimateId);
+
   const createEstimate = useCreateEstimate();
-  const { data: customers = [], isLoading: loadingCustomers } =
-    useCustomers();
+  const updateEstimate = useUpdateEstimate();
+  const { data: existing, isLoading: loadingExisting } = useEstimate(
+    estimateId ?? 0
+  );
+  const { data: customers = [] } = useCustomers();
 
   const [customerId, setCustomerId] = useState("");
   const [referenceNumber, setReferenceNumber] = useState("");
@@ -92,6 +140,25 @@ export function EstimateForm() {
   const [discountPercent, setDiscountPercent] = useState(0);
   const [lineItems, setLineItems] = useState<EstimateLineItem[]>([]);
   const [formError, setFormError] = useState("");
+  const [initializedForId, setInitializedForId] = useState<number | null>(
+    null
+  );
+
+  useEffect(() => {
+    if (!estimateId || !existing || initializedForId === estimateId) return;
+
+    setCustomerId(String(existing.customer_id));
+    setReferenceNumber(existing.reference_number || "");
+    setEstimateNumber(existing.estimate_number);
+    setEstimateDate(existing.estimate_date || localDate());
+    setValidUntil(existing.valid_until || "");
+    setPaymentTerms(existing.payment_terms || "");
+    setNotes(existing.notes || "");
+    setTransferInformation(existing.transfer_information || "");
+    setDiscountPercent(deriveDiscountPercent(existing));
+    setLineItems(mapLineItems(existing.line_items ?? []));
+    setInitializedForId(estimateId);
+  }, [estimateId, existing, initializedForId]);
 
   const selectedCustomer = customers.find(
     (customer) => customer.id === Number(customerId)
@@ -130,18 +197,20 @@ export function EstimateForm() {
     };
   }, [lineItems, discountPercent]);
 
+  const isPending = createEstimate.isPending || updateEstimate.isPending;
+
   function addCatalogItem(item: CatalogItem) {
     setLineItems((current) => {
-      const existing = current.find(
+      const existingLine = current.find(
         (line) => line.item_id === item.id
       );
 
-      if (existing) {
+      if (existingLine) {
         return current.map((line) =>
           line.item_id === item.id
             ? recalculateLine(line, {
-              quantity: line.quantity + 1,
-            })
+                quantity: line.quantity + 1,
+              })
             : line
         );
       }
@@ -208,7 +277,11 @@ export function EstimateForm() {
         line_items: lineItems,
       };
 
-      await createEstimate.mutateAsync(payload);
+      if (isEditing && estimateId) {
+        await updateEstimate.mutateAsync({ id: estimateId, input: payload });
+      } else {
+        await createEstimate.mutateAsync(payload);
+      }
 
       router.push("/dashboard/estimates");
     } catch (error) {
@@ -220,37 +293,63 @@ export function EstimateForm() {
     }
   }
 
+  if (isEditing && loadingExisting) {
+    return (
+      <div className="flex h-48 items-center justify-center gap-2 text-muted-foreground">
+        <Loader2 className="h-5 w-5 animate-spin" />
+        Loading estimate...
+      </div>
+    );
+  }
+
+  if (isEditing && !existing && !loadingExisting) {
+    return (
+      <div className="space-y-4">
+        <p className="text-sm font-medium text-destructive">
+          Estimate not found.
+        </p>
+        <Button
+          variant="outline"
+          onClick={() => router.push("/dashboard/estimates")}
+        >
+          Back to estimates
+        </Button>
+      </div>
+    );
+  }
+
   return (
-    <section className="estimate-form">
-      <div className="estimate-form__header">
-        <div className="estimate-form__title-group">
+    <section className="w-full space-y-6 text-left">
+      <div className="flex w-full flex-col items-start gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex items-center gap-2">
           <Button
             variant="ghost"
+            size="icon"
             onClick={() => router.push("/dashboard/estimates")}
-            className="estimate-form__back"
           >
             <ArrowLeft className="h-5 w-5" />
+            <span className="sr-only">Back</span>
           </Button>
 
-          <h1 className="estimate-form__title">Create Estimate</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+            {isEditing ? "Edit Estimate" : "Create Estimate"}
+          </h1>
         </div>
 
-        <div className="estimate-form__actions">
+        <div className="flex items-center gap-2">
           <Button
             variant="outline"
+            disabled={isPending}
             onClick={() => void saveEstimate(true)}
-            disabled={createEstimate.isPending}
-            className="estimate-form__secondary-action"
           >
             Save Draft
           </Button>
 
           <Button
+            disabled={isPending}
             onClick={() => void saveEstimate(false)}
-            disabled={createEstimate.isPending}
-            className="estimate-form__primary-action"
           >
-            {createEstimate.isPending && (
+            {isPending && (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             )}
             Finalize Estimate
@@ -258,38 +357,21 @@ export function EstimateForm() {
         </div>
       </div>
 
-      <div className="estimate-form__grid">
-        <Card className="estimate-form__section">
-          <CardContent>
-            <h2 className="estimate-form__section-title">
-              <UserRound />
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <UserRound className="h-5 w-5 text-muted-foreground" />
               Customer Info
-            </h2>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            <CustomerPickerField
+              value={customerId}
+              onChange={setCustomerId}
+            />
 
-            <Field label="Select Customer *">
-              <select
-                value={customerId}
-                onChange={(event) => setCustomerId(event.target.value)}
-                className="employee-form__select"
-              >
-                <option value="">
-                  {loadingCustomers
-                    ? "Loading customers..."
-                    : "Select a customer"}
-                </option>
-
-                {customers.map((customer: Customer) => (
-                  <option key={customer.id} value={customer.id}>
-                    {customer.customer_name}
-                    {customer.customer_phone
-                      ? ` · ${customer.customer_phone}`
-                      : ""}
-                  </option>
-                ))}
-              </select>
-            </Field>
-
-            <div className="form-grid form-grid--2col" style={{ marginTop: 20 }}>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <AddressCard
                 title="Billing Address"
                 value={selectedCustomer?.customer_billing_address}
@@ -303,14 +385,15 @@ export function EstimateForm() {
           </CardContent>
         </Card>
 
-        <Card className="estimate-form__section">
-          <CardContent>
-            <h2 className="estimate-form__section-title">
-              <FileText />
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <FileText className="h-5 w-5 text-muted-foreground" />
               Estimate Details
-            </h2>
-
-            <div className="form-grid form-grid--2col">
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <Field label="Estimate Number *">
                 <Input
                   value={estimateNumber}
@@ -351,144 +434,151 @@ export function EstimateForm() {
               </Field>
             </div>
 
-            <div style={{ marginTop: 20 }}>
-              <Field label="Project Notes">
-                <Textarea
-                  value={notes}
-                  onChange={(event) => setNotes(event.target.value)}
-                  placeholder="Internal notes or project brief..."
-                />
-              </Field>
-            </div>
+            <Field label="Project Notes">
+              <Textarea
+                value={notes}
+                onChange={(event) => setNotes(event.target.value)}
+                placeholder="Internal notes or project brief..."
+                rows={3}
+              />
+            </Field>
           </CardContent>
         </Card>
       </div>
 
-      <div className="line-items">
-        <div className="line-items__header">
-          <h2 className="line-items__title">Line Items</h2>
-
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+          <CardTitle className="text-lg">Line Items</CardTitle>
           <ItemPickerDialog onSelect={addCatalogItem} />
-        </div>
+        </CardHeader>
+        <CardContent>
+          <div className="rounded-md border overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="min-w-[200px]">Item Details</TableHead>
+                  <TableHead className="w-[100px]">Quantity</TableHead>
+                  <TableHead className="w-[120px]">Rate</TableHead>
+                  <TableHead className="w-[100px]">Tax (%)</TableHead>
+                  <TableHead className="w-[100px]">Discount (%)</TableHead>
+                  <TableHead className="w-[120px] text-right">Amount</TableHead>
+                  <TableHead className="w-[50px]"></TableHead>
+                </TableRow>
+              </TableHeader>
 
-        <div className="line-items__table-scroll">
-          <table className="line-items__table">
-            <thead>
-              <tr>
-                <th>Item Details</th>
-                <th>Quantity</th>
-                <th>Rate</th>
-                <th>Tax</th>
-                <th>Discount</th>
-                <th>Amount</th>
-                <th />
-              </tr>
-            </thead>
+              <TableBody>
+                {lineItems.length === 0 ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={7}
+                      className="h-24 text-center text-muted-foreground"
+                    >
+                      Click &ldquo;Add Items&rdquo; to choose catalogue items.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  lineItems.map((line) => (
+                    <TableRow key={line.id}>
+                      <TableCell>
+                        <p className="font-medium text-foreground">
+                          {line.item_name}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {line.unit} · HSN: {line.hsn_code || "—"}
+                        </p>
+                      </TableCell>
 
-            <tbody>
-              {lineItems.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="line-items__empty">
-                    Click &ldquo;Add Items&rdquo; to select an item from your catalogue.
-                  </td>
-                </tr>
-              ) : (
-                lineItems.map((line) => (
-                  <tr key={line.id} className="line-items__row">
-                    <td>
-                      <p className="line-items__name">{line.item_name}</p>
-                      <p className="line-items__meta">
-                        {line.unit} · HSN: {line.hsn_code || "—"}
-                      </p>
-                    </td>
+                      <TableCell>
+                        <Input
+                          type="number"
+                          min="1"
+                          value={line.quantity}
+                          onChange={(event) =>
+                            updateLine(line.id, {
+                              quantity: Math.max(
+                                1,
+                                Number(event.target.value)
+                              ),
+                            })
+                          }
+                          className="w-20"
+                        />
+                      </TableCell>
 
-                    <td>
-                      <Input
-                        type="number"
-                        min="1"
-                        value={line.quantity}
-                        onChange={(event) =>
-                          updateLine(line.id, {
-                            quantity: Math.max(
-                              1,
-                              Number(event.target.value)
-                            ),
-                          })
-                        }
-                        className="line-items__input--qty"
-                      />
-                    </td>
+                      <TableCell>
+                        <Input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={line.unit_price}
+                          onChange={(event) =>
+                            updateLine(line.id, {
+                              unit_price: Number(event.target.value),
+                            })
+                          }
+                          className="w-24"
+                        />
+                      </TableCell>
 
-                    <td>
-                      <Input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={line.unit_price}
-                        onChange={(event) =>
-                          updateLine(line.id, {
-                            unit_price: Number(event.target.value),
-                          })
-                        }
-                        className="line-items__input--rate"
-                      />
-                    </td>
+                      <TableCell>
+                        <Input
+                          type="number"
+                          min="0"
+                          value={line.tax_rate}
+                          onChange={(event) =>
+                            updateLine(line.id, {
+                              tax_rate: Number(event.target.value),
+                            })
+                          }
+                          className="w-20"
+                        />
+                      </TableCell>
 
-                    <td>
-                      <Input
-                        type="number"
-                        min="0"
-                        value={line.tax_rate}
-                        onChange={(event) =>
-                          updateLine(line.id, {
-                            tax_rate: Number(event.target.value),
-                          })
-                        }
-                        className="line-items__input--tax"
-                      />
-                    </td>
+                      <TableCell>
+                        <Input
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={line.line_discount}
+                          onChange={(event) =>
+                            updateLine(line.id, {
+                              line_discount: Number(event.target.value),
+                            })
+                          }
+                          className="w-20"
+                        />
+                      </TableCell>
 
-                    <td>
-                      <Input
-                        type="number"
-                        min="0"
-                        max="100"
-                        value={line.line_discount}
-                        onChange={(event) =>
-                          updateLine(line.id, {
-                            line_discount: Number(event.target.value),
-                          })
-                        }
-                        className="line-items__input--discount"
-                      />
-                    </td>
+                      <TableCell className="text-right font-medium">
+                        ₹{line.line_total.toFixed(2)}
+                      </TableCell>
 
-                    <td className="line-items__amount">
-                      ₹{line.line_total.toFixed(2)}
-                    </td>
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => removeLine(line.id)}
+                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          <span className="sr-only">Delete line item</span>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
 
-                    <td>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => removeLine(line.id)}
-                        className="line-items__delete"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div className="estimate-form__grid" style={{ marginTop: 24 }}>
-        <Card className="estimate-form__section">
-          <CardContent>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Payment & Transfer</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
             <Field label="Payment Terms">
               <Textarea
                 value={paymentTerms}
@@ -496,42 +586,30 @@ export function EstimateForm() {
                   setPaymentTerms(event.target.value)
                 }
                 placeholder="e.g. Payment due within 15 days"
+                rows={3}
               />
             </Field>
 
-            <div style={{ marginTop: 20 }}>
-              <Field label="Transfer Information">
-                <Textarea
-                  value={transferInformation}
-                  onChange={(event) =>
-                    setTransferInformation(event.target.value)
-                  }
-                  placeholder="Bank details or transfer instructions..."
-                />
-              </Field>
-            </div>
+            <Field label="Transfer Information">
+              <Textarea
+                value={transferInformation}
+                onChange={(event) =>
+                  setTransferInformation(event.target.value)
+                }
+                placeholder="Bank details or transfer instructions..."
+                rows={3}
+              />
+            </Field>
           </CardContent>
         </Card>
 
-        <Card className="estimate-form__section">
-          <CardContent style={{ display: "grid", gap: 16 }}>
-            <div className="summary-panel__row">
-              <span className="summary-panel__label">Subtotal</span>
-              <span className="summary-panel__value">
-                ₹{totals.subtotal.toFixed(2)}
-              </span>
-            </div>
+        <Card>
+          <CardContent className="space-y-3 pt-6">
+            <Summary label="Subtotal" value={totals.subtotal} />
+            <Summary label="Total Tax" value={totals.totalTax} />
 
-            <div className="summary-panel__row">
-              <span className="summary-panel__label">Total Tax</span>
-              <span className="summary-panel__value">
-                ₹{totals.totalTax.toFixed(2)}
-              </span>
-            </div>
-
-            <div className="summary-panel__row">
-              <span className="summary-panel__label">Discount %</span>
-
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Discount %</span>
               <Input
                 type="number"
                 min="0"
@@ -540,20 +618,18 @@ export function EstimateForm() {
                 onChange={(event) =>
                   setDiscountPercent(Number(event.target.value))
                 }
-                className="summary-panel__discount-input"
+                className="w-20 text-right"
               />
             </div>
 
-            <div className="summary-panel__row">
-              <span className="summary-panel__label">Total Discount</span>
-              <span className="summary-panel__value">
-                ₹{totals.totalDiscount.toFixed(2)}
-              </span>
-            </div>
+            <Summary
+              label="Total Discount"
+              value={totals.totalDiscount}
+            />
 
-            <div className="summary-panel__total">
-              <span className="summary-panel__total-label">Grand Total</span>
-              <span className="summary-panel__total-value">
+            <div className="flex items-center justify-between border-t pt-3 font-semibold text-foreground">
+              <span className="text-base">Grand Total</span>
+              <span className="text-xl text-primary">
                 ₹{totals.roundedTotal.toFixed(2)}
               </span>
             </div>
@@ -562,7 +638,7 @@ export function EstimateForm() {
       </div>
 
       {formError && (
-        <p className="form-error" style={{ marginTop: 24 }}>
+        <p className="text-sm font-medium text-destructive">
           {formError}
         </p>
       )}
@@ -578,8 +654,8 @@ function Field({
   children: React.ReactNode;
 }) {
   return (
-    <div className="form-field">
-      <Label className="form-field__label">{label}</Label>
+    <div className="space-y-1.5">
+      <Label>{label}</Label>
       {children}
     </div>
   );
@@ -593,11 +669,30 @@ function AddressCard({
   value?: string | null;
 }) {
   return (
-    <div className="address-card">
-      <p className="address-card__title">{title}</p>
-      <p className="address-card__value">
+    <div className="rounded-md border bg-muted/40 p-3 space-y-1">
+      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+        {title}
+      </p>
+      <p className="text-xs text-foreground leading-relaxed">
         {value || "Select a customer to populate address"}
       </p>
+    </div>
+  );
+}
+
+function Summary({
+  label,
+  value,
+}: {
+  label: string;
+  value: number;
+}) {
+  return (
+    <div className="flex items-center justify-between text-sm">
+      <span className="text-muted-foreground">{label}</span>
+      <span className="font-medium text-foreground">
+        ₹{value.toFixed(2)}
+      </span>
     </div>
   );
 }

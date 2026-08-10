@@ -1,0 +1,121 @@
+.invoices-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.invoice-card {
+  display: block;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 120ms ease, box-shadow 120ms ease, background-color 120ms ease;
+}
+
+.invoice-card:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-sunken);
+  box-shadow: var(--shadow-sm);
+}
+
+.invoice-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.invoice-card-main {
+  min-width: 0;
+  flex: 1;
+}
+
+.invoice-card-number {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.invoice-card-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.invoice-card-date {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.invoice-card-total {
+  font-size: 16px;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.invoice-card-chevron {
+  flex-shrink: 0;
+}
+
+.invoice-channel-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+}
+
+.invoice-skeleton {
+  height: 72px;
+  border-radius: var(--radius-lg);
+}
+
+@media (min-width: 720px) {
+  .invoices-list {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    overflow: hidden;
+    gap: 0;
+  }
+
+  .invoice-card {
+    border: none;
+    border-radius: 0;
+    border-bottom: 1px solid var(--border);
+    padding: 14px 20px;
+    box-shadow: none;
+  }
+
+  .invoice-card:last-child {
+    border-bottom: none;
+  }
+
+  .invoice-card:hover {
+    box-shadow: none;
+  }
+
+  .invoice-card-top {
+    align-items: center;
+  }
+
+  .invoice-card-main {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .invoice-card-number {
+    min-width: 148px;
+  }
+
+  .invoice-card-meta {
+    margin-top: 0;
+    flex: 1;
+  }
+}

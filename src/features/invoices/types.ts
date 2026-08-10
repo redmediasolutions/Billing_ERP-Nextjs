@@ -1,3 +1,5 @@
+export type SalesChannel = "walk_in" | "cloud_kitchen";
+
 export interface InvoiceLineItem {
   id: string;
   item_id: number | null;
@@ -35,6 +37,7 @@ export interface Invoice {
   order_type: string | null;
   table_name: string | null;
   is_draft: boolean;
+  sales_channel?: SalesChannel;
   created_at: string;
   line_items?: InvoiceLineItem[];
 }
@@ -56,5 +59,6 @@ export interface InvoiceInput {
   order_type: string;
   table_name: string;
   is_draft: boolean;
+  sales_channel?: SalesChannel;
   line_items: InvoiceLineItem[];
 }

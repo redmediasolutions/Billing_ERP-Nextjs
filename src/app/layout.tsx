@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
+import { cookies } from "next/headers";
 
 import "./globals.css";
 
 import { QueryProvider } from "@/components/providers/query-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { cn } from "@/lib/utils";
+import { parseTheme, THEME_COOKIE } from "@/lib/theme";
 
 const geist = Geist({
   subsets: ["latin"],
@@ -20,20 +22,27 @@ export const metadata: Metadata = {
   description: "Enterprise Billing ERP",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const initialTheme = parseTheme(cookieStore.get(THEME_COOKIE)?.value);
+
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={initialTheme === "dark" ? "dark" : undefined}
+    >
       <body
         className={cn(
           geist.variable,
           "min-h-screen bg-background font-sans text-foreground antialiased"
         )}
       >
-        <ThemeProvider>
+        <ThemeProvider initialTheme={initialTheme}>
           <QueryProvider>{children}</QueryProvider>
         </ThemeProvider>
       </body>

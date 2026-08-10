@@ -1,11 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   Edit3,
   Loader2,
   Package,
-  Plus,
   RefreshCw,
   Search,
   Trash2,
@@ -23,6 +23,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import { useDebounce } from "@/lib/use-debounce";
 import { ItemFormModal } from "../addform/item-form-modal";
 import { useItems } from "../hooks/use-items";
 import type { Item, ItemInput } from "../types";
@@ -34,28 +35,23 @@ const money = new Intl.NumberFormat("en-IN", {
 });
 
 export function ItemsDashboard() {
-  const { items, loading, error, refresh, create, update, remove } =
-    useItems();
-
+  const searchParams = useSearchParams();
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 300);
+
+  const { items, loading, error, refresh, create, update, remove } =
+    useItems(debouncedSearch);
+
   const [formOpen, setFormOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<Item | null>(null);
   const [actionError, setActionError] = useState("");
 
-  const filteredItems = useMemo(() => {
-    const term = search.trim().toLowerCase();
-
-    if (!term) return items;
-
-    return items.filter((item) =>
-      [
-        item.item_name,
-        item.item_code,
-        item.hsn_code || "",
-        item.item_description || "",
-      ].some((value) => value.toLowerCase().includes(term))
-    );
-  }, [items, search]);
+  useEffect(() => {
+    if (searchParams.get("create") === "1") {
+      setEditingItem(null);
+      setFormOpen(true);
+    }
+  }, [searchParams]);
 
   const trackedCount = items.filter(
     (item) => item.track_inventory
@@ -107,29 +103,16 @@ export function ItemsDashboard() {
   }
 
   return (
-    <section className="space-y-6">
-      {/* Search Bar & Primary Actions */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative w-full sm:w-80">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search items, codes, or descriptions..."
-            className="pl-9"
-          />
-        </div>
-
-        <Button
-          onClick={() => {
-            setEditingItem(null);
-            setFormOpen(true);
-          }}
-          className="gap-2 self-start sm:self-auto"
-        >
-          <Plus className="h-4 w-4" />
-          Add Item
-        </Button>
+    <section className="w-full space-y-6 text-left">
+      {/* Search */}
+      <div className="relative w-full sm:max-w-sm">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          placeholder="Search items, codes, or descriptions..."
+          className="pl-9"
+        />
       </div>
 
       {/* KPI Section */}
@@ -152,14 +135,14 @@ export function ItemsDashboard() {
 
       {/* Item Directory Section */}
       <div className="space-y-4">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex w-full flex-col items-start gap-2 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-foreground">
               Item & Services Directory
             </h1>
             <p className="text-xs text-muted-foreground">
-              Listing {filteredItems.length} item
-              {filteredItems.length === 1 ? "" : "s"}
+              Listing {items.length} item
+              {items.length === 1 ? "" : "s"}
             </p>
           </div>
 
@@ -200,9 +183,9 @@ export function ItemsDashboard() {
                     <TableRow>
                       <TableCell
                         colSpan={5}
-                        className="h-32 text-center text-muted-foreground"
+                        className="h-32 text-left text-muted-foreground"
                       >
-                        <div className="flex items-center justify-center gap-2">
+                        <div className="flex items-center gap-2">
                           <Loader2 className="h-4 w-4 animate-spin text-primary" />
                           <span>Loading items...</span>
                         </div>
@@ -212,22 +195,22 @@ export function ItemsDashboard() {
                     <TableRow>
                       <TableCell
                         colSpan={5}
-                        className="h-32 text-center text-destructive"
+                        className="h-32 text-left text-destructive"
                       >
                         {error}
                       </TableCell>
                     </TableRow>
-                  ) : filteredItems.length === 0 ? (
+                  ) : items.length === 0 ? (
                     <TableRow>
                       <TableCell
                         colSpan={5}
-                        className="h-32 text-center text-muted-foreground"
+                        className="h-32 text-left text-muted-foreground"
                       >
-                        No items found. Click &ldquo;Add Item&rdquo; to create one.
+                        No items found. Use &ldquo;Add Item&rdquo; in the top navigation to create one.
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredItems.map((item) => (
+                    items.map((item) => (
                       <TableRow key={item.id}>
                         {/* Item Name & Code */}
                         <TableCell>
@@ -326,16 +309,15 @@ export function ItemsDashboard() {
         </Card>
       </div>
 
-      {formOpen && (
-        <ItemFormModal
-          item={editingItem}
-          onClose={() => {
-            setFormOpen(false);
-            setEditingItem(null);
-          }}
-          onSave={saveItem}
-        />
-      )}
+      <ItemFormModal
+        item={editingItem}
+        open={formOpen}
+        onClose={() => {
+          setFormOpen(false);
+          setEditingItem(null);
+        }}
+        onSave={saveItem}
+      />
     </section>
   );
 }

@@ -1,0 +1,136 @@
+.item-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.item-form-row {
+  display: grid;
+  grid-template-columns: 1fr 100px;
+  gap: 12px;
+}
+
+.item-form-pricing-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.item-form-prices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.item-form-image-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.item-form-photo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 132px;
+  padding: 16px;
+  border: 1.5px dashed var(--border-strong);
+  border-radius: 14px;
+  background: var(--surface-sunken);
+  cursor: pointer;
+  transition: border-color 140ms ease, background-color 140ms ease;
+  font: inherit;
+  color: inherit;
+  text-align: center;
+}
+
+.item-form-photo:hover {
+  border-color: var(--ink-3);
+  background: var(--paper-2);
+}
+
+.item-form-photo:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.item-form-photo-preview {
+  width: 88px;
+  height: 88px;
+  border-radius: 14px;
+  object-fit: cover;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.item-form-photo-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+
+.item-form-photo-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  text-align: center;
+}
+
+.item-form-photo-hint {
+  font-size: 11.5px;
+  color: var(--text-faint);
+  text-align: center;
+  margin: 0;
+}
+
+.item-form-photo-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.item-form-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 16px;
+  margin-top: 4px;
+  border-top: 1px solid var(--border);
+}
+
+@media (max-width: 520px) {
+  .item-form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .item-form-prices {
+    grid-template-columns: 1fr;
+  }
+
+  .item-form-footer {
+    flex-direction: column-reverse;
+  }
+
+  .item-form-footer .btn {
+    width: 100%;
+    height: 44px;
+  }
+}

@@ -44,6 +44,29 @@ export function useCreateInvoice() {
   });
 }
 
+export function useUpdateInvoice() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      id,
+      input,
+    }: {
+      id: number;
+      input: InvoiceInput;
+    }) => invoicesService.update(id, input),
+
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: invoiceKeys.all,
+      });
+      queryClient.invalidateQueries({
+        queryKey: invoiceKeys.detail(variables.id),
+      });
+    },
+  });
+}
+
 export function useDeleteInvoice() {
   const queryClient = useQueryClient();
 

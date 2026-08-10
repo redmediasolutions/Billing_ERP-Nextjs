@@ -5,6 +5,7 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import {
   ChevronDown,
+  ClipboardList,
   LayoutDashboard,
   ReceiptText,
   Users,
@@ -16,6 +17,7 @@ import {
   Wallet,
   FileText,
   Search,
+  Store,
 } from "lucide-react";
 
 import {
@@ -35,14 +37,29 @@ const modules = [
     icon: LayoutDashboard,
   },
   {
+    label: "POS Billing",
+    href: "/dashboard/pos",
+    icon: Store,
+  },
+  {
     label: "Invoices",
     href: "/dashboard/invoices",
     icon: ReceiptText,
   },
   {
+    label: "Estimates",
+    href: "/dashboard/estimates",
+    icon: ClipboardList,
+  },
+  {
     label: "Customers",
     href: "/dashboard/customers",
     icon: Users,
+  },
+  {
+    label: "Items",
+    href: "/dashboard/items",
+    icon: Package,
   },
   {
     label: "Products",
@@ -76,7 +93,7 @@ const modules = [
   },
   {
     label: "Reports",
-    href: "/dashboard/reports",
+    href: "/dashboard/pos/reports",
     icon: FileText,
   },
 ];

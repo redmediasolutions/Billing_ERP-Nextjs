@@ -1,11 +1,31 @@
 export const moduleMenus = {
   dashboard: [
     { label: "Dashboard", href: "/dashboard" },
+    { label: "POS Billing", href: "/dashboard/pos" },
     { label: "Invoices", href: "/dashboard/invoices" },
+    { label: "Estimates", href: "/dashboard/estimates" },
     { label: "Customers", href: "/dashboard/customers" },
+    { label: "Items", href: "/dashboard/items" },
     { label: "Products", href: "/dashboard/products" },
     { label: "Stocks", href: "/dashboard/stocks" },
-    { label: "Reports", href: "/dashboard/reports" },
+    { label: "Reports", href: "/dashboard/pos/reports" },
+  ],
+
+  pos: [
+    { label: "Billing", href: "/dashboard/pos" },
+    { label: "POS Items", href: "/dashboard/pos/items" },
+    { label: "POS Invoices", href: "/dashboard/pos/invoices" },
+    { label: "Reports", href: "/dashboard/pos/reports" },
+  ],
+
+  items: [
+    { label: "All Items", href: "/dashboard/items" },
+    { label: "Add Item", href: "/dashboard/items?create=1" },
+  ],
+
+  estimates: [
+    { label: "All Estimates", href: "/dashboard/estimates" },
+    { label: "New Estimate", href: "/dashboard/estimates/new" },
   ],
 
   invoices: [
@@ -19,7 +39,7 @@ export const moduleMenus = {
 
   customers: [
     { label: "All Customers", href: "/dashboard/customers" },
-    { label: "Add Customer", href: "/dashboard/customers/new" },
+    { label: "Add Customer", href: "/dashboard/customers?create=1" },
     { label: "GST Customers", href: "/dashboard/customers?gst=yes" },
     { label: "Outstanding", href: "/dashboard/customers?balance=1" },
     { label: "Reports", href: "/dashboard/reports/customers" },
@@ -85,6 +105,9 @@ export const moduleMenus = {
 } as const;
 
 export function getCurrentModule(pathname: string): keyof typeof moduleMenus {
+  if (pathname.startsWith("/dashboard/pos")) return "pos";
+  if (pathname.startsWith("/dashboard/items")) return "items";
+  if (pathname.startsWith("/dashboard/estimates")) return "estimates";
   if (pathname.startsWith("/dashboard/invoices")) return "invoices";
   if (pathname.startsWith("/dashboard/customers")) return "customers";
   if (pathname.startsWith("/dashboard/products")) return "products";

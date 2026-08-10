@@ -94,3 +94,9 @@
 
   --radius: var(--radius);
 }
+
+@layer base {
+  main {
+    text-align: left;
+  }
+}

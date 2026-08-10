@@ -1,12 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   Edit3,
   Loader2,
   Mail,
   Phone,
-  Plus,
   Search,
   Trash2,
   Users,
@@ -25,24 +25,33 @@ import {
 } from "@/components/ui/table";
 import { CustomerFormSheet } from "../addform/customer-form-sheet";
 import {
+  useArchiveCustomer,
   useCreateCustomer,
   useCustomers,
-  useDeleteCustomer,
   useUpdateCustomer,
 } from "../hooks/use-customers";
 import type { Customer, CustomerInput } from "../types";
 
 export function CustomersDashboard() {
+  const searchParams = useSearchParams();
   const { data: customers = [], isLoading, error } = useCustomers();
 
   const createCustomer = useCreateCustomer();
   const updateCustomer = useUpdateCustomer();
-  const deleteCustomer = useDeleteCustomer();
+  const archiveCustomer = useArchiveCustomer();
 
   const [search, setSearch] = useState("");
   const [formOpen, setFormOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const [actionError, setActionError] = useState("");
+
+  useEffect(() => {
+    if (searchParams.get("create") === "1") {
+      setEditingCustomer(null);
+      setActionError("");
+      setFormOpen(true);
+    }
+  }, [searchParams]);
 
   const filteredCustomers = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -62,12 +71,6 @@ export function CustomersDashboard() {
 
   const gstRegistered = customers.filter((customer) => customer.customer_gst).length;
   const emailAvailable = customers.filter((customer) => customer.customer_email).length;
-
-  function openCreate() {
-    setEditingCustomer(null);
-    setActionError("");
-    setFormOpen(true);
-  }
 
   function openEdit(customer: Customer) {
     setEditingCustomer(customer);
@@ -103,7 +106,7 @@ export function CustomersDashboard() {
 
     try {
       setActionError("");
-      await deleteCustomer.mutateAsync(customer.id);
+      await archiveCustomer.mutateAsync(customer.id);
     } catch (err) {
       setActionError(
         err instanceof Error ? err.message : "Unable to delete customer."
@@ -112,9 +115,9 @@ export function CustomersDashboard() {
   }
 
   return (
-    <section className="space-y-6">
+    <section className="w-full space-y-6 text-left">
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex w-full flex-col items-start gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Contacts
@@ -126,11 +129,6 @@ export function CustomersDashboard() {
             Manage customer contacts, addresses, and GST details.
           </p>
         </div>
-
-        <Button onClick={openCreate} className="gap-2 self-start sm:self-auto">
-          <Plus className="h-4 w-4" />
-          Add Customer
-        </Button>
       </div>
 
       {/* KPI Cards */}
@@ -143,7 +141,7 @@ export function CustomersDashboard() {
       {/* Main Content Card */}
       <Card>
         <CardContent className="p-6">
-          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mb-6 flex w-full flex-col items-start gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <h2 className="text-lg font-semibold text-foreground">
                 Customer Directory
@@ -188,8 +186,8 @@ export function CustomersDashboard() {
               <TableBody>
                 {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="h-32 text-center text-muted-foreground">
-                      <div className="flex items-center justify-center gap-2">
+                    <TableCell colSpan={5} className="h-32 text-left text-muted-foreground">
+                      <div className="flex items-center gap-2">
                         <Loader2 className="h-4 w-4 animate-spin text-primary" />
                         <span>Loading customers...</span>
                       </div>
@@ -197,14 +195,14 @@ export function CustomersDashboard() {
                   </TableRow>
                 ) : error ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="h-32 text-center text-destructive">
+                    <TableCell colSpan={5} className="h-32 text-left text-destructive">
                       Unable to load customers.
                     </TableCell>
                   </TableRow>
                 ) : filteredCustomers.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="h-32 text-center text-muted-foreground">
-                      No customers found. Add your first customer.
+                    <TableCell colSpan={5} className="h-32 text-left text-muted-foreground">
+                      No customers found. Use &ldquo;Add Customer&rdquo; in the top navigation.
                     </TableCell>
                   </TableRow>
                 ) : (

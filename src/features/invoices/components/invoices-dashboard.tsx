@@ -1,11 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
+  Edit3,
   FileText,
   Loader2,
-  Plus,
   Trash2,
 } from "lucide-react";
 
@@ -66,9 +65,9 @@ export function InvoicesDashboard() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="w-full space-y-8 text-left">
       {/* Page Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex w-full flex-col items-start gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Sales
@@ -80,13 +79,6 @@ export function InvoicesDashboard() {
             Create invoices and manage billing records.
           </p>
         </div>
-
-        <Button asChild className="gap-2 self-start sm:self-auto">
-          <Link href="/dashboard/invoices/new">
-            <Plus className="h-4 w-4" />
-            New Invoice
-          </Link>
-        </Button>
       </div>
 
       {/* KPI Cards Grid */}
@@ -124,9 +116,9 @@ export function InvoicesDashboard() {
                   <TableRow>
                     <TableCell
                       colSpan={6}
-                      className="h-32 text-center text-muted-foreground"
+                      className="h-32 text-left text-muted-foreground"
                     >
-                      <div className="flex items-center justify-center gap-2">
+                      <div className="flex items-center gap-2">
                         <Loader2 className="h-5 w-5 animate-spin text-primary" />
                         <span>Loading invoices...</span>
                       </div>
@@ -138,7 +130,7 @@ export function InvoicesDashboard() {
                   <TableRow>
                     <TableCell
                       colSpan={6}
-                      className="h-32 text-center text-destructive"
+                      className="h-32 text-left text-destructive"
                     >
                       Unable to load invoices.
                     </TableCell>
@@ -149,7 +141,7 @@ export function InvoicesDashboard() {
                   <TableRow>
                     <TableCell
                       colSpan={6}
-                      className="h-32 text-center text-muted-foreground"
+                      className="h-32 text-left text-muted-foreground"
                     >
                       No invoices created yet.
                     </TableCell>
@@ -202,16 +194,33 @@ export function InvoicesDashboard() {
                         className="text-right"
                         onClick={(e) => e.stopPropagation()}
                       >
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          disabled={deleteInvoice.isPending}
-                          onClick={() => removeInvoice(invoice.id)}
-                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                          <span className="sr-only">Delete invoice</span>
-                        </Button>
+                        <div className="flex items-center justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() =>
+                              router.push(
+                                `/dashboard/invoices/${invoice.id}/edit`
+                              )
+                            }
+                            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                            title="Edit invoice"
+                          >
+                            <Edit3 className="h-4 w-4" />
+                            <span className="sr-only">Edit invoice</span>
+                          </Button>
+
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            disabled={deleteInvoice.isPending}
+                            onClick={() => removeInvoice(invoice.id)}
+                            className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            <span className="sr-only">Archive invoice</span>
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}

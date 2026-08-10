@@ -1,21 +1,35 @@
 "use client";
 
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
+  Edit3,
   FileText,
   Loader2,
-  Plus,
   Trash2,
 } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
 import {
   useDeleteEstimate,
   useEstimates,
 } from "../hooks/use-estimates";
-
-import { useRouter } from "next/navigation";
 
 const money = new Intl.NumberFormat("en-IN", {
   style: "currency",
@@ -24,13 +38,11 @@ const money = new Intl.NumberFormat("en-IN", {
 });
 
 export function EstimatesDashboard() {
-  const { data: estimates = [], isLoading, error } =
-    useEstimates();
-
   const router = useRouter();
+  const { data: estimates = [], isLoading, error } = useEstimates();
   const deleteEstimate = useDeleteEstimate();
 
-  const drafts = estimates.filter(
+  const draftCount = estimates.filter(
     (estimate) => estimate.is_draft
   ).length;
 
@@ -46,135 +58,175 @@ export function EstimatesDashboard() {
     return expiry >= today && expiry <= inSevenDays;
   }).length;
 
-  async function handleDelete(id: number) {
+  async function removeEstimate(id: number) {
     if (!window.confirm("Archive this estimate?")) return;
 
     await deleteEstimate.mutateAsync(id);
   }
 
   return (
-    <section className="estimates-dashboard">
-      <div className="estimates-dashboard__header">
-        <div>
-          <p className="estimates-dashboard__eyebrow">
+    <div className="w-full space-y-8 text-left">
+      <div className="flex w-full flex-col items-start gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="space-y-1">
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Sales
           </p>
-          <h1 className="estimates-dashboard__title">Estimates</h1>
-          <p className="estimates-dashboard__intro">
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+            Estimates
+          </h1>
+          <p className="text-sm text-muted-foreground">
             View and manage your recent quotes.
           </p>
         </div>
-
-        <Button
-          asChild
-          className="estimates-dashboard__primary-action"
-        >
-          <Link href="/dashboard/estimates/new">
-            <Plus size={16} />
-            New Estimate
-          </Link>
-        </Button>
       </div>
 
-      <div className="estimates-dashboard__kpis">
+      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
         <Kpi label="Total Estimates" value={estimates.length} />
-        <Kpi label="Draft Estimates" value={drafts} />
+        <Kpi label="Draft Estimates" value={draftCount} />
         <Kpi label="Expiring Soon" value={expiringSoon} danger />
       </div>
 
-      <Card className="estimates-dashboard__directory">
-        <CardContent className="estimates-dashboard__directory-content">
-          <div className="estimates-dashboard__directory-head">
-            <h2 className="estimates-dashboard__directory-title">Estimate Directory</h2>
-          </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Estimate Directory</CardTitle>
+          <CardDescription>
+            All estimates created in the system.
+          </CardDescription>
+        </CardHeader>
 
-          <div className="estimates-dashboard__table-scroll">
-            <table className="estimates-dashboard__table">
-              <thead>
-                <tr>
-                  <th>Estimate #</th><th>Customer</th><th>Date</th><th>Amount</th><th>Status</th><th>Actions</th>
-                </tr>
-              </thead>
+        <CardContent>
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Estimate #</TableHead>
+                  <TableHead>Customer</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
 
-              <tbody>
-                {isLoading ? (
-                  <tr>
-                    <td colSpan={6} className="estimates-dashboard__state">
-                      <Loader2 className="estimates-dashboard__spinner" />
-                      Loading estimates...
-                    </td>
-                  </tr>
-                ) : error ? (
-                  <tr>
-                    <td colSpan={6} className="estimates-dashboard__state estimates-dashboard__state--error">
+              <TableBody>
+                {isLoading && (
+                  <TableRow>
+                    <TableCell
+                      colSpan={6}
+                      className="h-32 text-left text-muted-foreground"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                        <span>Loading estimates...</span>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+
+                {!isLoading && error && (
+                  <TableRow>
+                    <TableCell
+                      colSpan={6}
+                      className="h-32 text-left text-destructive"
+                    >
                       Unable to load estimates.
-                    </td>
-                  </tr>
-                ) : estimates.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="estimates-dashboard__state">
+                    </TableCell>
+                  </TableRow>
+                )}
+
+                {!isLoading && !error && estimates.length === 0 && (
+                  <TableRow>
+                    <TableCell
+                      colSpan={6}
+                      className="h-32 text-left text-muted-foreground"
+                    >
                       No estimates created yet.
-                    </td>
-                  </tr>
-                ) : (
+                    </TableCell>
+                  </TableRow>
+                )}
+
+                {!isLoading &&
                   estimates.map((estimate) => (
-                    <tr
+                    <TableRow
                       key={estimate.id}
+                      className="cursor-pointer transition-colors hover:bg-muted/50"
                       onClick={() =>
                         router.push(`/dashboard/estimates/${estimate.id}`)
                       }
-                      className="estimates-dashboard__row"
                     >
-                      <td className="estimates-dashboard__number">
+                      <TableCell className="font-medium text-foreground">
                         {estimate.estimate_number}
-                      </td>
+                      </TableCell>
 
-                      <td className="estimates-dashboard__customer">
-                        {estimate.customer_name || "Unknown customer"}
-                      </td>
+                      <TableCell className="text-foreground">
+                        {estimate.customer_name ?? "Unknown customer"}
+                      </TableCell>
 
-                      <td className="estimates-dashboard__date">
+                      <TableCell className="text-muted-foreground">
                         {estimate.estimate_date
-                          ? new Date(
-                            estimate.estimate_date
-                          ).toLocaleDateString("en-IN")
+                          ? new Date(estimate.estimate_date).toLocaleDateString(
+                              "en-IN"
+                            )
                           : "—"}
-                      </td>
+                      </TableCell>
 
-                      <td className="estimates-dashboard__amount">
+                      <TableCell className="font-semibold text-foreground">
                         {money.format(estimate.rounded_total)}
-                      </td>
+                      </TableCell>
 
-                      <td>
-                        <Badge className="estimates-dashboard__badge">
+                      <TableCell>
+                        <Badge
+                          variant={estimate.is_draft ? "secondary" : "default"}
+                          className={
+                            estimate.is_draft
+                              ? ""
+                              : "bg-emerald-600 hover:bg-emerald-700 text-white dark:bg-emerald-600 dark:hover:bg-emerald-700"
+                          }
+                        >
                           {estimate.is_draft ? "Draft" : "Finalized"}
                         </Badge>
-                      </td>
+                      </TableCell>
 
-                      <td>
-                        <div className="estimates-dashboard__actions">
+                      <TableCell
+                        className="text-right"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <div className="flex items-center justify-end gap-1">
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              void handleDelete(estimate.id);
-                            }}
-                            className="estimates-dashboard__delete"
+                            onClick={() =>
+                              router.push(
+                                `/dashboard/estimates/${estimate.id}/edit`
+                              )
+                            }
+                            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                            title="Edit estimate"
+                          >
+                            <Edit3 className="h-4 w-4" />
+                            <span className="sr-only">Edit estimate</span>
+                          </Button>
+
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            disabled={deleteEstimate.isPending}
+                            onClick={() => removeEstimate(estimate.id)}
+                            className="h-8 w-8 text-muted-foreground hover:text-destructive"
                           >
                             <Trash2 className="h-4 w-4" />
+                            <span className="sr-only">Archive estimate</span>
                           </Button>
                         </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+              </TableBody>
+            </Table>
           </div>
         </CardContent>
       </Card>
-    </section>
+    </div>
   );
 }
 
@@ -184,19 +236,28 @@ function Kpi({
   danger = false,
 }: {
   label: string;
-  value: number;
+  value: string | number;
   danger?: boolean;
 }) {
   return (
-    <Card className="estimates-kpi">
-      <CardContent>
-        <FileText className="estimates-kpi__icon" />
-        <p className="estimates-kpi__label">
-          {label}
-        </p>
-        <p className={`estimates-kpi__value${danger ? " estimates-kpi__value--danger" : ""}`}>
-          {value}
-        </p>
+    <Card>
+      <CardContent className="flex items-center justify-between p-6">
+        <div className="space-y-1">
+          <p className="text-xs font-medium text-muted-foreground">
+            {label}
+          </p>
+          <p
+            className={`text-2xl font-bold tracking-tight ${
+              danger ? "text-destructive" : "text-foreground"
+            }`}
+          >
+            {value}
+          </p>
+        </div>
+
+        <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <FileText className="h-6 w-6" />
+        </div>
       </CardContent>
     </Card>
   );

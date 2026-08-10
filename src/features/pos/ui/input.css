@@ -1,0 +1,30 @@
+.field-group { display: flex; flex-direction: column; gap: 6px; }
+.field-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.field {
+  height: 36px;
+  width: 100%;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  padding: 0 11px;
+  font-size: 13.5px;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+.field::placeholder { color: var(--text-faint); }
+.field:hover { border-color: var(--border-strong); }
+.field:focus {
+  outline: none;
+  border-color: var(--ink-0);
+  box-shadow: 0 0 0 3px rgba(10, 10, 11, 0.08);
+}
+.field:disabled { background: var(--surface-sunken); color: var(--text-faint); cursor: not-allowed; }
+.field-textarea { height: auto; min-height: 80px; padding: 9px 11px; resize: vertical; }
+.field-select { appearance: none; cursor: pointer;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M0 0l5 6 5-6z' fill='%236b6e74'/></svg>");
+  background-repeat: no-repeat; background-position: right 12px center; padding-right: 30px;
+}

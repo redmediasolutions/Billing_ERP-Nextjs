@@ -6,6 +6,7 @@ import {
   FileText,
   Package,
   ReceiptText,
+  Store,
   Users,
   TrendingUp,
   DollarSign,
@@ -39,6 +40,13 @@ const stats = [
 
 const cards = [
   {
+    title: "POS Billing",
+    description:
+      "Fast checkout, cart billing, and point-of-sale invoices.",
+    href: "/dashboard/pos",
+    icon: Store,
+  },
+  {
     title: "Manage Items",
     description:
       "Create and organize products and services used in invoices.",
@@ -70,13 +78,13 @@ const cards = [
 
 export default function DashboardPage() {
   return (
-    <div className="space-y-10">
+    <div className="w-full space-y-10 text-left">
 
       {/* Header */}
 
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex w-full flex-col items-start gap-6 lg:flex-row lg:items-start lg:justify-between">
 
-        <div>
+        <div className="w-full text-left">
           <p className="text-sm font-semibold uppercase tracking-[0.25em] text-muted-foreground">
             Dashboard
           </p>
@@ -91,7 +99,7 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        <Card className="w-full max-w-sm">
+        <Card className="w-full max-w-sm self-start">
           <CardContent className="flex items-center gap-4 p-6">
             <div className="rounded-2xl bg-primary/10 p-3">
               <TrendingUp className="h-7 w-7 text-primary" />

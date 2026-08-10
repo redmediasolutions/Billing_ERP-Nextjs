@@ -61,6 +61,29 @@ export function useCreateEstimate() {
   });
 }
 
+export function useUpdateEstimate() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      id,
+      input,
+    }: {
+      id: number;
+      input: EstimateInput;
+    }) => estimatesService.update(id, input),
+
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: estimateKeys.all,
+      });
+      queryClient.invalidateQueries({
+        queryKey: estimateKeys.detail(variables.id),
+      });
+    },
+  });
+}
+
 export function useDeleteEstimate() {
   const queryClient = useQueryClient();
 

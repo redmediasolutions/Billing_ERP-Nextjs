@@ -139,9 +139,9 @@ export function EmployeesDashboard() {
   }
 
   return (
-    <section className="space-y-6">
+    <section className="w-full space-y-6 text-left">
       {/* Page Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex w-full flex-col items-start gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Workforce
@@ -172,7 +172,7 @@ export function EmployeesDashboard() {
       {/* Main Directory Table */}
       <Card>
         <CardContent className="p-6 space-y-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex w-full flex-col items-start gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <h2 className="text-lg font-semibold text-foreground">
                 Employee Directory
@@ -219,9 +219,9 @@ export function EmployeesDashboard() {
                   <TableRow>
                     <TableCell
                       colSpan={6}
-                      className="h-32 text-center text-muted-foreground"
+                      className="h-32 text-left text-muted-foreground"
                     >
-                      <div className="flex items-center justify-center gap-2">
+                      <div className="flex items-center gap-2">
                         <Loader2 className="h-4 w-4 animate-spin text-primary" />
                         <span>Loading employees...</span>
                       </div>
@@ -231,7 +231,7 @@ export function EmployeesDashboard() {
                   <TableRow>
                     <TableCell
                       colSpan={6}
-                      className="h-32 text-center text-destructive"
+                      className="h-32 text-left text-destructive"
                     >
                       Unable to load employees.
                     </TableCell>
@@ -240,7 +240,7 @@ export function EmployeesDashboard() {
                   <TableRow>
                     <TableCell
                       colSpan={6}
-                      className="h-32 text-center text-muted-foreground"
+                      className="h-32 text-left text-muted-foreground"
                     >
                       No employees found. Add your first employee.
                     </TableCell>

@@ -10,7 +10,7 @@ export default function DashboardLayout({
     <div className="min-h-screen bg-background text-foreground">
       <TopNavigation />
 
-      <main className="w-full px-6 py-8 lg:px-8 xl:px-10">
+      <main className="w-full px-6 py-8 text-left lg:px-8 xl:px-10">
         {children}
       </main>
     </div>

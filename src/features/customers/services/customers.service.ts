@@ -14,6 +14,11 @@ export const customersService = {
     return customers.map(normalizeCustomer);
   },
 
+  async getWalkIn() {
+    const customer = await customersRepository.getWalkIn();
+    return normalizeCustomer(customer);
+  },
+
   async create(input: CustomerInput) {
     const customer = await customersRepository.create(input);
     return normalizeCustomer(customer);
@@ -24,5 +29,5 @@ export const customersService = {
     return normalizeCustomer(customer);
   },
 
-  remove: (id: number) => customersRepository.remove(id),
+  archive: (id: number) => customersRepository.archive(id),
 };

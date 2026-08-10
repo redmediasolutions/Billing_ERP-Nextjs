@@ -4,6 +4,8 @@ import type { Customer, CustomerInput } from "../types";
 export const customersRepository = {
   list: () => apiRequest<Customer[]>("/customers"),
 
+  getWalkIn: () => apiRequest<Customer>("/customers/walk-in"),
+
   create: (input: CustomerInput) =>
     apiRequest<Customer>("/customers", {
       method: "POST",
@@ -16,7 +18,7 @@ export const customersRepository = {
       body: JSON.stringify(input),
     }),
 
-  remove: (id: number) =>
+  archive: (id: number) =>
     apiRequest<void>(`/customers/${id}`, {
       method: "DELETE",
     }),

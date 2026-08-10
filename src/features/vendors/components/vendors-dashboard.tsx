@@ -85,9 +85,9 @@ export function VendorsDashboard() {
   }
 
   return (
-    <section className="space-y-6">
+    <section className="w-full space-y-6 text-left">
       {/* Page Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex w-full flex-col items-start gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Purchase management
@@ -142,7 +142,7 @@ export function VendorsDashboard() {
       </div>
 
       {/* Toolbar & Search */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex w-full flex-col items-start gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="relative w-full sm:w-80">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -168,11 +168,11 @@ export function VendorsDashboard() {
               <span>Loading vendors...</span>
             </div>
           ) : error ? (
-            <div className="flex h-64 items-center justify-center p-6 text-center text-sm font-medium text-destructive">
+            <div className="flex h-64 items-center justify-start p-6 text-left text-sm font-medium text-destructive">
               Unable to load vendors. Please refresh and try again.
             </div>
           ) : filteredVendors.length === 0 ? (
-            <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+            <div className="flex flex-col items-start justify-center gap-3 py-16 text-left">
               <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
                 <Truck className="h-6 w-6" />
               </div>
