@@ -1,4 +1,5 @@
 import { auth } from "@/firebase/config";
+import { waitForAuthUser } from "@/lib/wait-for-auth";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -26,7 +27,7 @@ export async function apiRequest<T>(
     throw new Error("NEXT_PUBLIC_API_BASE_URL is missing in .env.local");
   }
 
-  const user = auth.currentUser;
+  const user = (await waitForAuthUser()) ?? auth.currentUser;
 
   if (!user) {
     throw new ApiError("Please sign in again.", 401);

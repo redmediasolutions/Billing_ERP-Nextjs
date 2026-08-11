@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { User, onAuthStateChanged, signOut } from "firebase/auth";
 import { LogOut, Mail, UserCircle } from "lucide-react";
 
@@ -20,6 +21,7 @@ import { Button } from "@/components/ui/button";
 
 export function ProfileMenu() {
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const [mounted, setMounted] = useState(false);
   const [user, setUser] = useState<User | null>(null);
@@ -35,6 +37,7 @@ export function ProfileMenu() {
   }, []);
 
   async function logout() {
+    queryClient.clear();
     await signOut(auth);
     router.replace("/login");
   }

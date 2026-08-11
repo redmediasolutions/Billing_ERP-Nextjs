@@ -1,10 +1,11 @@
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { auth, storage } from "@/firebase/config";
+import { waitForAuthUser } from "@/lib/wait-for-auth";
 
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 
 export async function uploadItemImage(file: File): Promise<string> {
-  const user = auth.currentUser;
+  const user = (await waitForAuthUser()) ?? auth.currentUser;
   if (!user) {
     throw new Error("Please sign in to upload images.");
   }

@@ -3,6 +3,8 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 
+import { AuthQueryGuard } from "./auth-query-guard";
+
 export function QueryProvider({
   children,
 }: {
@@ -23,7 +25,7 @@ export function QueryProvider({
 
   return (
     <QueryClientProvider client={queryClient}>
-      {children}
+      <AuthQueryGuard>{children}</AuthQueryGuard>
     </QueryClientProvider>
   );
 }

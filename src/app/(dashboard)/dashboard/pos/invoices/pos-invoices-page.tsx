@@ -1,29 +1,20 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import { Tabs } from "@/features/pos/ui/tabs";
 import { Input } from "@/features/pos/ui/input";
 import { InvoicesTable } from "@/features/pos/invoices/components/InvoicesTable";
-import { invoicesService } from "@/features/invoices/services/invoices.service";
-import type { Invoice } from "@/features/invoices/types";
+import { useInvoices } from "@/features/invoices/hooks/use-invoices";
 import { matchesSearch } from "@/lib/erp-search";
 import { useUrlSearchParam } from "@/lib/use-url-search";
 import { money } from "@/features/pos/lib/money";
 import "./invoices-page.css";
 
 export function PosInvoicesPageContent() {
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: invoices = [], isLoading, error } = useInvoices();
   const [filter, setFilter] = useState("all");
   const { value: search, setSearch } = useUrlSearchParam();
-
-  useEffect(() => {
-    invoicesService
-      .list()
-      .then(setInvoices)
-      .finally(() => setLoading(false));
-  }, []);
 
   const filtered = useMemo(() => {
     return invoices.filter((invoice) => {
@@ -41,7 +32,11 @@ export function PosInvoicesPageContent() {
   }, [invoices, filter, search]);
 
   const totalSales = useMemo(
-    () => filtered.reduce((sum, invoice) => sum + Number(invoice.grand_total || 0), 0),
+    () =>
+      filtered.reduce(
+        (sum, invoice) => sum + Number(invoice.grand_total || 0),
+        0
+      ),
     [filtered]
   );
 
@@ -52,8 +47,19 @@ export function PosInvoicesPageContent() {
           <div className="eyebrow">Sales</div>
           <h1 className="page-title">Invoices</h1>
           <p className="page-subtitle">
-            {filtered.length} bill{filtered.length === 1 ? "" : "s"} · {money(totalSales)} total
+            {filtered.length} bill{filtered.length === 1 ? "" : "s"} ·{" "}
+            {money(totalSales)} total
           </p>
+          {error && (
+            <p
+              className="text-sm"
+              style={{ color: "var(--destructive, #dc2626)", marginTop: 8 }}
+            >
+              {error instanceof Error
+                ? error.message
+                : "Unable to load invoices."}
+            </p>
+          )}
         </div>
         <Tabs
           className="invoices-page-tabs"
@@ -77,7 +83,7 @@ export function PosInvoicesPageContent() {
         />
       </div>
 
-      <InvoicesTable invoices={filtered} loading={loading} />
+      <InvoicesTable invoices={filtered} loading={isLoading} />
     </div>
   );
 }

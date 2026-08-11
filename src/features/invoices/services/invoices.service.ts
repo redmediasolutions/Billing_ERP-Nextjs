@@ -1,26 +1,72 @@
 import { invoicesRepository } from "../repository/invoices.repository";
-import type { Invoice, InvoiceInput } from "../types";
+import type { Invoice, InvoiceInput, InvoiceLineItem } from "../types";
+
+function toNum(value: unknown, fallback = 0) {
+  if (value === null || value === undefined || value === "") return fallback;
+  const num = Number(value);
+  return Number.isFinite(num) ? num : fallback;
+}
+
+function normalizeLineItem(
+  line: InvoiceLineItem & { qty?: unknown }
+): InvoiceLineItem {
+  const unitPrice = toNum(line.unit_price);
+  const amountBeforeTax = toNum(line.amount_before_tax);
+  const lineTotal = toNum(line.line_total);
+
+  // Some rows were saved with line totals but a missing/zero quantity.
+  // Prefer the DB quantity; otherwise derive from amount ÷ rate.
+  let quantity = toNum(line.quantity ?? line.qty);
+
+  if (quantity <= 0 && unitPrice > 0) {
+    const basis = amountBeforeTax > 0 ? amountBeforeTax : lineTotal;
+    if (basis > 0) {
+      quantity = Number((basis / unitPrice).toFixed(2));
+    }
+  }
+
+  return {
+    ...line,
+    id: String(line.id),
+    quantity,
+    unit_price: unitPrice,
+    amount_before_tax: amountBeforeTax,
+    tax_rate: toNum(line.tax_rate),
+    tax_amount: toNum(line.tax_amount),
+    line_discount: toNum(line.line_discount),
+    line_total: lineTotal,
+  };
+}
 
 function normalizeInvoice(invoice: Invoice): Invoice {
+  const lineItems = invoice.line_items?.map(normalizeLineItem);
+
+  // If header totals were saved as 0 but lines have amounts, rebuild for display.
+  const linesSubtotal =
+    lineItems?.reduce(
+      (sum, line) => sum + toNum(line.amount_before_tax || line.line_total),
+      0
+    ) ?? 0;
+  const linesTax =
+    lineItems?.reduce((sum, line) => sum + toNum(line.tax_amount), 0) ?? 0;
+  const linesTotal =
+    lineItems?.reduce((sum, line) => sum + toNum(line.line_total), 0) ?? 0;
+
+  const subtotal = toNum(invoice.subtotal) || linesSubtotal;
+  const taxAmount = toNum(invoice.tax_amount) || linesTax;
+  const grandTotal = toNum(invoice.grand_total) || linesTotal;
+  const roundedTotal =
+    toNum(invoice.rounded_total) || Math.round(grandTotal);
+
   return {
     ...invoice,
-    subtotal: Number(invoice.subtotal || 0),
-    discount_amount: Number(invoice.discount_amount || 0),
-    tax_amount: Number(invoice.tax_amount || 0),
-    grand_total: Number(invoice.grand_total || 0),
-    rounded_total: Number(invoice.rounded_total || 0),
+    subtotal,
+    discount_amount: toNum(invoice.discount_amount),
+    tax_amount: taxAmount,
+    grand_total: grandTotal,
+    rounded_total: roundedTotal,
     is_draft: Number(invoice.is_draft) === 1,
-
-    line_items: invoice.line_items?.map((line) => ({
-      ...line,
-      quantity: Number(line.quantity || 0),
-      unit_price: Number(line.unit_price || 0),
-      amount_before_tax: Number(line.amount_before_tax || 0),
-      tax_rate: Number(line.tax_rate || 0),
-      tax_amount: Number(line.tax_amount || 0),
-      line_discount: Number(line.line_discount || 0),
-      line_total: Number(line.line_total || 0),
-    })),
+    line_items: lineItems,
   };
 }
 

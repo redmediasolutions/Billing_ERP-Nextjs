@@ -37,6 +37,7 @@ export default async function RootLayout({
       className={initialTheme === "dark" ? "dark" : undefined}
     >
       <body
+        suppressHydrationWarning
         className={cn(
           geist.variable,
           "min-h-screen bg-background font-sans text-foreground antialiased"
