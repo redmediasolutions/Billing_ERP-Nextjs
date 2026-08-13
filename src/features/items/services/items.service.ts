@@ -58,6 +58,11 @@ export const itemsService = {
     return items.map(normalizeItem);
   },
 
+  async getById(id: number) {
+    const item = await itemsRepository.getById(id);
+    return normalizeItem(item);
+  },
+
   async create(input: ItemInput) {
     const item = await itemsRepository.create(serializeItemInput(input));
     return normalizeItem(item);

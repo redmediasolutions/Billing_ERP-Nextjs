@@ -199,8 +199,7 @@ export function EmployeesDashboard() {
             </p>
           ) : null}
 
-          <div className="rounded-md border">
-            <Table>
+          <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[280px]">Employee</TableHead>
@@ -356,7 +355,6 @@ export function EmployeesDashboard() {
                 )}
               </TableBody>
             </Table>
-          </div>
         </CardContent>
       </Card>
 

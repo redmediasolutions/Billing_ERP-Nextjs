@@ -140,8 +140,23 @@ export function BrandsDashboard() {
               <span>Loading brands...</span>
             </div>
           ) : error ? (
-            <div className="flex h-64 items-center justify-start p-6 text-left text-sm font-medium text-destructive">
-              Unable to load brands. Please refresh and try again.
+            <div className="flex h-64 flex-col items-start justify-center gap-2 p-6 text-left text-sm">
+              <p className="font-medium text-destructive">
+                Unable to load brands.
+              </p>
+              <p className="text-muted-foreground">
+                {error instanceof Error
+                  ? error.message
+                  : "Please refresh and try again."}
+              </p>
+              {error instanceof Error &&
+              error.message.toLowerCase().includes("route not found") ? (
+                <p className="text-xs text-muted-foreground">
+                  Your API server is missing the <code>/brands</code> route.
+                  Mount <code>Modules/brands.js</code> in your Express app, then
+                  restart PM2.
+                </p>
+              ) : null}
             </div>
           ) : filteredBrands.length === 0 ? (
             <div className="flex flex-col items-start justify-center gap-3 py-16 text-left">
@@ -162,8 +177,7 @@ export function BrandsDashboard() {
               </Button>
             </div>
           ) : (
-            <div className="rounded-md border">
-              <Table>
+            <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-[280px]">Brand</TableHead>
@@ -241,7 +255,6 @@ export function BrandsDashboard() {
                   ))}
                 </TableBody>
               </Table>
-            </div>
           )}
         </CardContent>
       </Card>

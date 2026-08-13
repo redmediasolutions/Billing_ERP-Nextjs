@@ -3,6 +3,7 @@ import { ImageOff } from "lucide-react";
 import type { Item } from "@/features/items/types";
 import { money } from "@/features/pos/lib/money";
 import { useCart, priceFor } from "../hooks/useCart";
+import { useToast } from "@/features/pos/ui/toast";
 import "./ItemPickerGrid.css";
 
 function ItemVisual({ item }: { item: Item }) {
@@ -22,6 +23,12 @@ function ItemVisual({ item }: { item: Item }) {
 
 export function ItemPickerGrid({ items }: { items: Item[] }) {
   const { addItem, channel } = useCart();
+  const toast = useToast();
+
+  function handleAddItem(item: Item) {
+    const result = addItem(item);
+    if (!result.ok) toast.error(result.message);
+  }
 
   if (items.length === 0) {
     return (
@@ -37,7 +44,7 @@ export function ItemPickerGrid({ items }: { items: Item[] }) {
       {items.map((item) => {
         const price = priceFor(item, channel);
         return (
-          <button key={item.id} type="button" className="picker-card" onClick={() => addItem(item)}>
+          <button key={item.id} type="button" className="picker-card" onClick={() => handleAddItem(item)}>
             <div className="picker-visual">
               <ItemVisual item={item} />
             </div>

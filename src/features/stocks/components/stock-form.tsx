@@ -1,10 +1,15 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import { Loader2, RefreshCw, X } from "lucide-react";
+import { Loader2, Plus, RefreshCw, X } from "lucide-react";
 
+import { CreatableSelect } from "@/components/forms/creatable-select";
+import { ProductForm } from "@/features/products/components/product-form";
 import { useProducts } from "@/features/products/hooks/use-products";
-import { useVendors } from "@/features/vendors/hooks/use-vendors";
+import {
+  useCreateVendor,
+  useVendors,
+} from "@/features/vendors/hooks/use-vendors";
 import { stockService } from "../services/stock-service";
 import {
   useCreateStock,
@@ -39,6 +44,7 @@ export function StockForm({
 }) {
   const { data: products = [] } = useProducts();
   const { data: vendors = [] } = useVendors();
+  const createVendor = useCreateVendor();
 
   const createStock = useCreateStock();
   const updateStock = useUpdateStock();
@@ -46,9 +52,33 @@ export function StockForm({
   const [form, setForm] = useState<StockInput>(emptyForm);
   const [error, setError] = useState("");
   const [generating, setGenerating] = useState(false);
+  const [showProductForm, setShowProductForm] = useState(false);
 
   const isEditing = Boolean(stock);
-  const isSaving = createStock.isPending || updateStock.isPending;
+  const isSaving =
+    createStock.isPending || updateStock.isPending || createVendor.isPending;
+
+  const productOptions = products.map((product) => ({
+    value: product.id,
+    label: `${product.product_name} — ${product.product_code}`,
+  }));
+
+  const vendorOptions = vendors.map((vendor) => ({
+    value: vendor.id,
+    label: vendor.vendor_name,
+  }));
+
+  async function handleCreateVendor(name: string) {
+    const result = await createVendor.mutateAsync({
+      vendor_name: name,
+      vendor_phone: "",
+      vendor_email: "",
+      vendor_logo: "",
+      vendor_address: "",
+      is_local_vendor: true,
+    });
+    return { value: result.id, label: name };
+  }
 
   useEffect(() => {
     if (!stock) {
@@ -184,47 +214,46 @@ export function StockForm({
         <div className={styles.formGrid}>
           <label className={`${styles.field} ${styles.fullWidth}`}>
             <span>Product *</span>
-            <select
-              value={form.product_id ?? ""}
-              disabled={isEditing}
-              onChange={(event) =>
+            <CreatableSelect
+              value={form.product_id}
+              options={productOptions}
+              onChange={(value) =>
                 setField(
                   "product_id",
-                  event.target.value
-                    ? Number(event.target.value)
-                    : null
+                  value === null ? null : Number(value)
                 )
               }
-            >
-              <option value="">Select product</option>
-              {products.map((product) => (
-                <option key={product.id} value={product.id}>
-                  {product.product_name} — {product.product_code}
-                </option>
-              ))}
-            </select>
+              placeholder="Select product"
+              disabled={isEditing}
+              emptyLabel="No products yet"
+            />
+            {!isEditing ? (
+              <button
+                type="button"
+                className={styles.textButton}
+                onClick={() => setShowProductForm(true)}
+              >
+                <Plus size={15} />
+                Create new product
+              </button>
+            ) : null}
           </label>
 
           <label className={styles.field}>
             <span>Vendor</span>
-            <select
-              value={form.vendor_id ?? ""}
-              onChange={(event) =>
+            <CreatableSelect
+              value={form.vendor_id}
+              options={vendorOptions}
+              onChange={(value) =>
                 setField(
                   "vendor_id",
-                  event.target.value
-                    ? Number(event.target.value)
-                    : null
+                  value === null ? null : Number(value)
                 )
               }
-            >
-              <option value="">No vendor selected</option>
-              {vendors.map((vendor) => (
-                <option key={vendor.id} value={vendor.id}>
-                  {vendor.vendor_name}
-                </option>
-              ))}
-            </select>
+              onCreate={handleCreateVendor}
+              placeholder="No vendor selected"
+              emptyLabel="No vendors yet — create one below"
+            />
           </label>
 
           <label className={styles.field}>
@@ -378,6 +407,16 @@ export function StockForm({
           </button>
         </div>
       </form>
+
+      {showProductForm ? (
+        <ProductForm
+          onClose={() => setShowProductForm(false)}
+          onCreated={(id) => {
+            setField("product_id", id);
+            setShowProductForm(false);
+          }}
+        />
+      ) : null}
     </div>
   );
 }

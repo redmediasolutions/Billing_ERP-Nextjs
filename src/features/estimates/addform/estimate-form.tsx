@@ -452,8 +452,7 @@ export function EstimateForm({ estimateId }: EstimateFormProps) {
           <ItemPickerDialog onSelect={addCatalogItem} />
         </CardHeader>
         <CardContent>
-          <div className="rounded-md border overflow-x-auto">
-            <Table>
+          <Table frameless>
               <TableHeader>
                 <TableRow>
                   <TableHead className="min-w-[200px]">Item Details</TableHead>
@@ -569,7 +568,6 @@ export function EstimateForm({ estimateId }: EstimateFormProps) {
                 )}
               </TableBody>
             </Table>
-          </div>
         </CardContent>
       </Card>
 

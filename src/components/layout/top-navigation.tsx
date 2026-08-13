@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   ChevronDown,
@@ -11,7 +11,6 @@ import {
   Users,
   Package,
   Warehouse,
-  Tags,
   Truck,
   UserCog,
   Wallet,
@@ -30,6 +29,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ProfileMenu } from "@/components/profile-menu";
 import { buildSearchUrl, isNavLinkActive } from "@/lib/erp-search";
+import { BusinessLogo } from "@/features/tenant/components/business-logo";
+import { useTenant } from "@/features/tenant/hooks/use-tenant";
 
 const modules = [
   {
@@ -63,19 +64,9 @@ const modules = [
     icon: Package,
   },
   {
-    label: "Products",
-    href: "/dashboard/products",
-    icon: Package,
-  },
-  {
-    label: "Stocks",
-    href: "/dashboard/stocks",
+    label: "Inventory",
+    href: "/dashboard/inventory",
     icon: Warehouse,
-  },
-  {
-    label: "Brands",
-    href: "/dashboard/brands",
-    icon: Tags,
   },
   {
     label: "Vendors",
@@ -107,13 +98,55 @@ export function TopNavigation() {
   const [open, setOpen] = useState(false);
   const [moduleSearch, setModuleSearch] = useState("");
   const [globalSearch, setGlobalSearch] = useState("");
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const currentModule = getCurrentModule(pathname);
   const topMenu = moduleMenus[currentModule] ?? [];
+  const isDashboardHome = pathname === "/dashboard";
+  const { data: tenant } = useTenant();
+  const businessName = tenant?.business_name || "Billing ERP";
+
+  const activeModule = useMemo(() => {
+    const match = modules.find((item) => {
+      if (item.href === "/dashboard") {
+        return pathname === "/dashboard";
+      }
+
+      return (
+        pathname === item.href || pathname.startsWith(`${item.href}/`)
+      );
+    });
+
+    return match ?? modules[0];
+  }, [pathname]);
+
+  const ActiveModuleIcon = activeModule.icon;
 
   useEffect(() => {
     setGlobalSearch(searchParams.get("search") ?? "");
   }, [pathname, searchParams]);
+
+  useEffect(() => {
+    setOpen(false);
+    setModuleSearch("");
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    function handlePointerDown(event: MouseEvent) {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(event.target as Node)
+      ) {
+        setOpen(false);
+        setModuleSearch("");
+      }
+    }
+
+    document.addEventListener("mousedown", handlePointerDown);
+    return () => document.removeEventListener("mousedown", handlePointerDown);
+  }, [open]);
 
   const filteredModules = useMemo(() => {
     const term = moduleSearch.trim().toLowerCase();
@@ -138,20 +171,29 @@ export function TopNavigation() {
 
         <div className="flex items-center gap-10">
 
-          <div className="relative">
+          <div className="relative" ref={menuRef}>
 
             <Button
               variant="ghost"
               onClick={() => setOpen((v) => !v)}
               className="flex items-center gap-2"
+              aria-expanded={open}
+              aria-haspopup="menu"
             >
-              <span className="text-xl">🏢</span>
+              {isDashboardHome ? (
+                <BusinessLogo tenant={tenant} size="sm" />
+              ) : (
+                <ActiveModuleIcon size={18} />
+              )}
 
-              <span className="font-semibold">
-                Billing ERP
+              <span className="max-w-[200px] truncate font-semibold">
+                {isDashboardHome ? businessName : activeModule.label}
               </span>
 
-              <ChevronDown size={18} />
+              <ChevronDown
+                size={18}
+                className={`transition-transform ${open ? "rotate-180" : ""}`}
+              />
             </Button>
 
             {open && (

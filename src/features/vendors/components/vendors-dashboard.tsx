@@ -186,8 +186,7 @@ export function VendorsDashboard() {
               </Button>
             </div>
           ) : (
-            <div className="rounded-md border">
-              <Table>
+            <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-[280px]">Vendor</TableHead>
@@ -291,7 +290,6 @@ export function VendorsDashboard() {
                   ))}
                 </TableBody>
               </Table>
-            </div>
           )}
         </CardContent>
       </Card>

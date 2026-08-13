@@ -2,6 +2,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { Item } from "@/features/items/types";
 import { customersService } from "@/features/customers/services/customers.service";
+import { checkStockAvailability } from "@/features/inventory/lib/stock-validation";
+import type { StockCheckResult } from "@/features/inventory/lib/stock-validation";
 import type { CartLine, SalesChannel } from "@/features/pos/types";
 import { priceFor } from "@/features/pos/lib/pricing";
 
@@ -9,8 +11,8 @@ interface CartContextValue {
   channel: SalesChannel;
   setChannel: (c: SalesChannel) => void;
   lines: CartLine[];
-  addItem: (item: Item) => void;
-  increase: (itemId: number) => void;
+  addItem: (item: Item) => StockCheckResult;
+  increase: (itemId: number) => StockCheckResult;
   decrease: (itemId: number) => void;
   removeItem: (itemId: number) => void;
   clear: () => void;
@@ -47,18 +49,50 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const addItem = useCallback((item: Item) => {
+  const addItem = useCallback((item: Item): StockCheckResult => {
+    let result: StockCheckResult = { ok: true };
+
     setLines((prev) => {
       const existing = prev.find((l) => l.item.id === item.id);
-      if (existing) {
-        return prev.map((l) => (l.item.id === item.id ? { ...l, quantity: l.quantity + 1 } : l));
+      const nextQty = existing ? existing.quantity + 1 : 1;
+      const check = checkStockAvailability(item, nextQty);
+
+      if (!check.ok) {
+        result = check;
+        return prev;
       }
+
+      if (existing) {
+        return prev.map((l) =>
+          l.item.id === item.id ? { ...l, quantity: l.quantity + 1 } : l
+        );
+      }
+
       return [...prev, { item, quantity: 1 }];
     });
+
+    return result;
   }, []);
 
-  const increase = useCallback((itemId: number) => {
-    setLines((prev) => prev.map((l) => (l.item.id === itemId ? { ...l, quantity: l.quantity + 1 } : l)));
+  const increase = useCallback((itemId: number): StockCheckResult => {
+    let result: StockCheckResult = { ok: true };
+
+    setLines((prev) => {
+      const line = prev.find((l) => l.item.id === itemId);
+      if (!line) return prev;
+
+      const check = checkStockAvailability(line.item, line.quantity + 1);
+      if (!check.ok) {
+        result = check;
+        return prev;
+      }
+
+      return prev.map((l) =>
+        l.item.id === itemId ? { ...l, quantity: l.quantity + 1 } : l
+      );
+    });
+
+    return result;
   }, []);
 
   const decrease = useCallback((itemId: number) => {

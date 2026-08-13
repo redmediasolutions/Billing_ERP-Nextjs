@@ -40,6 +40,9 @@ export function useCreateInvoice() {
       queryClient.invalidateQueries({
         queryKey: invoiceKeys.all,
       });
+      queryClient.invalidateQueries({
+        queryKey: ["inventory"],
+      });
     },
   });
 }

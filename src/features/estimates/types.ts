@@ -26,6 +26,8 @@ export interface CatalogItem {
   tax_rate: number;
   unit: string | null;
   item_description: string | null;
+  track_inventory?: boolean;
+  total_stock?: number;
 }
 
 export interface EstimateLineItem {

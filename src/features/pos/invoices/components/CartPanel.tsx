@@ -119,7 +119,16 @@ export function CartContents({ onClose }: { onClose?: () => void }) {
               <div className="cart-line-qty">
                 <button type="button" onClick={() => decrease(r.item.id)} aria-label="Decrease"><Minus size={13} /></button>
                 <span className="mono">{r.quantity}</span>
-                <button type="button" onClick={() => increase(r.item.id)} aria-label="Increase"><Plus size={13} /></button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const result = increase(r.item.id);
+                    if (!result.ok) toast.error(result.message);
+                  }}
+                  aria-label="Increase"
+                >
+                  <Plus size={13} />
+                </button>
               </div>
               <div className="cart-line-total amount">{money(r.total)}</div>
               <button type="button" className="cart-line-remove" onClick={() => removeItem(r.item.id)} aria-label="Remove">

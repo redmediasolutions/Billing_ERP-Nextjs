@@ -195,8 +195,7 @@ export function InvoicesDashboard() {
             </CardHeader>
 
             <CardContent>
-              <div className="rounded-md border">
-                <Table>
+              <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Invoice #</TableHead>
@@ -327,7 +326,6 @@ export function InvoicesDashboard() {
                       ))}
                   </TableBody>
                 </Table>
-              </div>
             </CardContent>
           </Card>
         </div>

@@ -176,8 +176,7 @@ export function EstimatesDashboard() {
             </CardHeader>
 
             <CardContent>
-              <div className="rounded-md border">
-                <Table>
+              <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Estimate #</TableHead>
@@ -308,7 +307,6 @@ export function EstimatesDashboard() {
                       ))}
                   </TableBody>
                 </Table>
-              </div>
             </CardContent>
           </Card>
         </div>

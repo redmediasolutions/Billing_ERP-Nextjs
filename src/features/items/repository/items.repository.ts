@@ -25,6 +25,8 @@ export const itemsRepository = {
     return apiRequest<Item[]>(`/items${query}`);
   },
 
+  getById: (id: number) => apiRequest<Item>(`/items/${id}`),
+
   create: (input: ItemApiPayload) =>
     apiRequest<Item>("/items", {
       method: "POST",

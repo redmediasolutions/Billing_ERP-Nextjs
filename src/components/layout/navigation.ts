@@ -6,8 +6,8 @@ export const moduleMenus = {
     { label: "Estimates", href: "/dashboard/estimates" },
     { label: "Customers", href: "/dashboard/customers" },
     { label: "Items", href: "/dashboard/items" },
-    { label: "Products", href: "/dashboard/products" },
-    { label: "Stocks", href: "/dashboard/stocks" },
+    { label: "Inventory", href: "/dashboard/inventory" },
+    { label: "Vendors", href: "/dashboard/vendors" },
     { label: "Reports", href: "/dashboard/pos/reports" },
   ],
 
@@ -18,9 +18,20 @@ export const moduleMenus = {
     { label: "Reports", href: "/dashboard/pos/reports" },
   ],
 
+  inventory: [
+    { label: "Overview", href: "/dashboard/inventory" },
+    { label: "Products", href: "/dashboard/products" },
+    { label: "Brands", href: "/dashboard/brands" },
+    { label: "Serial Stock", href: "/dashboard/stocks" },
+  ],
+
   items: [
     { label: "All Items", href: "/dashboard/items" },
     { label: "Add Item", href: "/dashboard/items?create=1" },
+  ],
+
+  vendors: [
+    { label: "All Vendors", href: "/dashboard/vendors" },
   ],
 
   estimates: [
@@ -41,29 +52,6 @@ export const moduleMenus = {
     { label: "All Customers", href: "/dashboard/customers" },
     { label: "Add Customer", href: "/dashboard/customers?create=1" },
     { label: "GST Customers", href: "/dashboard/customers?gst=yes" },
-    { label: "Reports", href: "/dashboard/pos/reports" },
-  ],
-
-  products: [
-    { label: "All Products", href: "/dashboard/products" },
-    { label: "Brands", href: "/dashboard/brands" },
-    { label: "Stock", href: "/dashboard/stocks" },
-    { label: "Reports", href: "/dashboard/pos/reports" },
-  ],
-
-  stocks: [
-    { label: "Stock Overview", href: "/dashboard/stocks" },
-    { label: "Products", href: "/dashboard/products" },
-    { label: "Reports", href: "/dashboard/pos/reports" },
-  ],
-
-  brands: [
-    { label: "All Brands", href: "/dashboard/brands" },
-    { label: "Products", href: "/dashboard/products" },
-  ],
-
-  vendors: [
-    { label: "All Vendors", href: "/dashboard/vendors" },
     { label: "Reports", href: "/dashboard/pos/reports" },
   ],
 
@@ -89,13 +77,18 @@ export const moduleMenus = {
 export function getCurrentModule(pathname: string): keyof typeof moduleMenus {
   if (pathname.startsWith("/dashboard/pos")) return "pos";
   if (pathname.startsWith("/dashboard/items")) return "items";
+  if (pathname.startsWith("/dashboard/vendors")) return "vendors";
+  if (
+    pathname.startsWith("/dashboard/inventory") ||
+    pathname.startsWith("/dashboard/products") ||
+    pathname.startsWith("/dashboard/stocks") ||
+    pathname.startsWith("/dashboard/brands")
+  ) {
+    return "inventory";
+  }
   if (pathname.startsWith("/dashboard/estimates")) return "estimates";
   if (pathname.startsWith("/dashboard/invoices")) return "invoices";
   if (pathname.startsWith("/dashboard/customers")) return "customers";
-  if (pathname.startsWith("/dashboard/products")) return "products";
-  if (pathname.startsWith("/dashboard/stocks")) return "stocks";
-  if (pathname.startsWith("/dashboard/brands")) return "brands";
-  if (pathname.startsWith("/dashboard/vendors")) return "vendors";
   if (pathname.startsWith("/dashboard/employees")) return "employees";
   if (pathname.startsWith("/dashboard/payroll")) return "payroll";
 

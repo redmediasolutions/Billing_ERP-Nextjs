@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import {
   Edit3,
+  Eye,
   Loader2,
   Package,
   RefreshCw,
@@ -166,8 +168,7 @@ export function ItemsDashboard() {
         {/* Directory Table Card */}
         <Card>
           <CardContent className="p-0">
-            <div className="rounded-md border">
-              <Table>
+            <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-[280px]">Item Name & Code</TableHead>
@@ -219,9 +220,12 @@ export function ItemsDashboard() {
                               <Package className="h-5 w-5" />
                             </div>
                             <div className="min-w-0">
-                              <p className="truncate font-medium text-foreground">
+                              <Link
+                                href={`/dashboard/items/${item.id}`}
+                                className="truncate font-medium text-foreground hover:text-primary hover:underline"
+                              >
                                 {item.item_name}
-                              </p>
+                              </Link>
                               <p className="truncate text-xs text-muted-foreground">
                                 {item.item_code}
                                 {item.hsn_code
@@ -276,6 +280,19 @@ export function ItemsDashboard() {
                             <Button
                               variant="ghost"
                               size="icon"
+                              asChild
+                              className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                              title="View item"
+                            >
+                              <Link href={`/dashboard/items/${item.id}`}>
+                                <Eye className="h-4 w-4" />
+                                <span className="sr-only">View item</span>
+                              </Link>
+                            </Button>
+
+                            <Button
+                              variant="ghost"
+                              size="icon"
                               onClick={() => {
                                 setEditingItem(item);
                                 setFormOpen(true);
@@ -304,7 +321,6 @@ export function ItemsDashboard() {
                   )}
                 </TableBody>
               </Table>
-            </div>
           </CardContent>
         </Card>
       </div>

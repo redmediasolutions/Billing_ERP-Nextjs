@@ -21,6 +21,7 @@ import {
 import { ItemPickerDialog } from "@/features/estimates/addform/item-picker-dialog";
 import { CustomerPickerField } from "@/features/customers/components/customer-picker-field";
 import { useCustomers } from "@/features/customers/hooks/use-customers";
+import { checkStockAvailability } from "@/features/inventory/lib/stock-validation";
 
 import {
   useCreateInvoice,
@@ -202,12 +203,31 @@ export function InvoiceForm({ invoiceId }: InvoiceFormProps) {
   const isPending = createInvoice.isPending || updateInvoice.isPending;
 
   function addItem(item: CatalogItem) {
-    setLineItems((current) => {
-      const existing = current.find(
-        (line) => line.item_id === item.id
+    const existing = lineItems.find((line) => line.item_id === item.id);
+    const nextQty = existing ? existing.quantity + 1 : 1;
+
+    if (item.track_inventory) {
+      const check = checkStockAvailability(
+        {
+          item_name: item.item_name,
+          track_inventory: true,
+          total_stock: Number(item.total_stock ?? 0),
+        },
+        nextQty
       );
 
-      if (existing) {
+      if (!check.ok) {
+        setFormError(check.message);
+        return;
+      }
+    }
+
+    setFormError("");
+
+    setLineItems((current) => {
+      const existingLine = current.find((line) => line.item_id === item.id);
+
+      if (existingLine) {
         return current.map((line) =>
           line.item_id === item.id
             ? calculateLine(line, {
@@ -465,8 +485,7 @@ export function InvoiceForm({ invoiceId }: InvoiceFormProps) {
           <ItemPickerDialog onSelect={addItem} />
         </CardHeader>
         <CardContent>
-          <div className="rounded-md border overflow-x-auto">
-            <Table>
+          <Table frameless>
               <TableHeader>
                 <TableRow>
                   <TableHead className="min-w-[200px]">Item Details</TableHead>
@@ -582,7 +601,6 @@ export function InvoiceForm({ invoiceId }: InvoiceFormProps) {
                 )}
               </TableBody>
             </Table>
-          </div>
         </CardContent>
       </Card>
 

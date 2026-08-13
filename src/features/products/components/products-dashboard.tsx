@@ -139,8 +139,7 @@ export function ProductsDashboard() {
               </Button>
             </div>
           ) : (
-            <div className="rounded-md border">
-              <Table>
+            <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-[300px]">Product</TableHead>
@@ -232,7 +231,6 @@ export function ProductsDashboard() {
                   ))}
                 </TableBody>
               </Table>
-            </div>
           )}
         </CardContent>
       </Card>

@@ -208,8 +208,7 @@ export function PayrollDashboard() {
             <p className="text-sm font-medium text-destructive">{actionError}</p>
           )}
 
-          <div className="rounded-md border">
-            <Table>
+          <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[280px]">Employee</TableHead>
@@ -292,7 +291,6 @@ export function PayrollDashboard() {
                 )}
               </TableBody>
             </Table>
-          </div>
         </CardContent>
       </Card>
 

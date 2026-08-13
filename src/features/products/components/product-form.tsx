@@ -3,9 +3,14 @@
 import { FormEvent, useEffect, useState } from "react";
 import { Loader2, X } from "lucide-react";
 
-import { useBrands } from "@/features/brands/hooks/use-brands";
+import { useBrands, useCreateBrand } from "@/features/brands/hooks/use-brands";
+import {
+  CreatableCombobox,
+  CreatableSelect,
+} from "@/components/forms/creatable-select";
 import {
   useCreateProduct,
+  useProducts,
   useUpdateProduct,
 } from "../hooks/use-products";
 import type {
@@ -29,11 +34,14 @@ const emptyProduct: ProductInput = {
 export function ProductForm({
   product,
   onClose,
+  onCreated,
 }: {
   product?: Product | null;
   onClose: () => void;
+  onCreated?: (id: number) => void;
 }) {
   const { data: brands = [], isLoading: isLoadingBrands } = useBrands();
+  const createBrand = useCreateBrand();
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct();
 
@@ -41,7 +49,34 @@ export function ProductForm({
   const [formError, setFormError] = useState("");
 
   const isEditing = Boolean(product);
-  const isSaving = createProduct.isPending || updateProduct.isPending;
+  const isSaving =
+    createProduct.isPending ||
+    updateProduct.isPending ||
+    createBrand.isPending;
+
+  const brandOptions = brands.map((brand) => ({
+    value: brand.id,
+    label: brand.name,
+  }));
+
+  const { data: allProducts = [] } = useProducts();
+  const productTypeSuggestions = Array.from(
+    new Set(
+      allProducts
+        .map((item) => item.product_type?.trim())
+        .filter((type): type is string => Boolean(type))
+    )
+  );
+
+  async function handleCreateBrand(name: string) {
+    const result = await createBrand.mutateAsync({
+      name,
+      description: "",
+      brand_logo: "",
+      cover_image: "",
+    });
+    return { value: result.id, label: name };
+  }
 
   useEffect(() => {
     if (!product) {
@@ -93,7 +128,8 @@ export function ProductForm({
           input: form,
         });
       } else {
-        await createProduct.mutateAsync(form);
+        const result = await createProduct.mutateAsync(form);
+        onCreated?.(result.id);
       }
 
       onClose();
@@ -130,49 +166,37 @@ export function ProductForm({
         <div className={styles.formGrid}>
           <label className={styles.field}>
             <span>Product Type *</span>
-            <select
+            <CreatableCombobox
               value={form.product_type}
-              onChange={(event) =>
-                updateField("product_type", event.target.value)
-              }
-            >
-              <option value="">Select product type</option>
-              <option value="Laptop">Laptop</option>
-              <option value="Desktop">Desktop</option>
-              <option value="All-in-One">All-in-One</option>
-              <option value="Monitor">Monitor</option>
-              <option value="Printer">Printer</option>
-              <option value="Accessory">Accessory</option>
-              <option value="Other">Other</option>
-            </select>
+              onChange={(value) => updateField("product_type", value)}
+              suggestions={productTypeSuggestions}
+              placeholder="Type or pick a product type"
+              inputClassName=""
+            />
+            <small className="text-xs text-muted-foreground">
+              Type a new category or pick from suggestions.
+            </small>
           </label>
 
           <label className={styles.field}>
             <span>Brand *</span>
-            <select
-              value={form.brand_id ?? ""}
-              onChange={(event) =>
+            <CreatableSelect
+              value={form.brand_id}
+              options={brandOptions}
+              onChange={(value) =>
                 updateField(
                   "brand_id",
-                  event.target.value
-                    ? Number(event.target.value)
-                    : null
+                  value === null ? null : Number(value)
                 )
               }
-              disabled={isLoadingBrands}
-            >
-              <option value="">
-                {isLoadingBrands
-                  ? "Loading brands..."
-                  : "Select brand"}
-              </option>
-
-              {brands.map((brand) => (
-                <option key={brand.id} value={brand.id}>
-                  {brand.name}
-                </option>
-              ))}
-            </select>
+              onCreate={handleCreateBrand}
+              loading={isLoadingBrands}
+              placeholder="Select brand"
+              emptyLabel="No brands yet — create one below"
+            />
+            <small className="text-xs text-muted-foreground">
+              Don&apos;t see your brand? Choose &quot;+ Create new...&quot;
+            </small>
           </label>
 
           <label className={styles.field}>
