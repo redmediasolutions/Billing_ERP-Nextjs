@@ -11,6 +11,7 @@ import {
   Trash2,
   Users,
 } from "lucide-react";
+import { EmptyState } from "@/components/empty-state";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -78,6 +79,12 @@ export function CustomersDashboard() {
 
   const gstRegistered = customers.filter((customer) => customer.customer_gst).length;
   const emailAvailable = customers.filter((customer) => customer.customer_email).length;
+
+  function openCreate() {
+    setEditingCustomer(null);
+    setActionError("");
+    setFormOpen(true);
+  }
 
   function openEdit(customer: Customer) {
     setEditingCustomer(customer);
@@ -208,10 +215,24 @@ export function CustomersDashboard() {
                   </TableRow>
                 ) : filteredCustomers.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="h-32 text-left text-muted-foreground">
-                      {search || gstFilter
-                        ? "No customers match your search or filters."
-                        : "No customers found. Use &ldquo;Add Customer&rdquo; in the top navigation."}
+                    <TableCell colSpan={5} className="p-0">
+                      <EmptyState
+                        icon={Users}
+                        title={
+                          search || gstFilter
+                            ? "No customers match your filters"
+                            : "No customers yet"
+                        }
+                        description={
+                          search || gstFilter
+                            ? "Try a different search or clear filters."
+                            : "Add customers to start creating invoices and estimates."
+                        }
+                        actionLabel={
+                          search || gstFilter ? undefined : "Add First Customer"
+                        }
+                        onAction={search || gstFilter ? undefined : openCreate}
+                      />
                     </TableCell>
                   </TableRow>
                 ) : (

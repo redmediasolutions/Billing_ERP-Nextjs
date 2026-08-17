@@ -11,6 +11,7 @@ import {
   Trash2,
 } from "lucide-react";
 
+import { EmptyState } from "@/components/empty-state";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CsvExportDialog } from "@/components/export/csv-export-dialog";
@@ -235,13 +236,30 @@ export function InvoicesDashboard() {
 
                     {!isLoading && !error && filteredInvoices.length === 0 && (
                       <TableRow>
-                        <TableCell
-                          colSpan={6}
-                          className="h-32 text-left text-muted-foreground"
-                        >
-                          {search || statusFilter
-                            ? "No invoices match your search or filters."
-                            : "No invoices created yet."}
+                        <TableCell colSpan={6} className="p-0">
+                          <EmptyState
+                            icon={FileText}
+                            title={
+                              search || statusFilter
+                                ? "No invoices match your filters"
+                                : "No invoices yet"
+                            }
+                            description={
+                              search || statusFilter
+                                ? "Try a different search or clear status filters."
+                                : "Create your first invoice to start tracking sales."
+                            }
+                            actionLabel={
+                              search || statusFilter
+                                ? undefined
+                                : "Create First Invoice"
+                            }
+                            onAction={
+                              search || statusFilter
+                                ? undefined
+                                : () => router.push("/dashboard/invoices/new")
+                            }
+                          />
                         </TableCell>
                       </TableRow>
                     )}

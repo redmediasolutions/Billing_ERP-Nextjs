@@ -14,6 +14,8 @@ import {
   Truck,
   UserCog,
   Wallet,
+  IndianRupee,
+  PhoneCall,
   FileText,
   Search,
   Store,
@@ -59,6 +61,11 @@ const modules = [
     icon: Users,
   },
   {
+    label: "Enquiries",
+    href: "/dashboard/enquiries",
+    icon: PhoneCall,
+  },
+  {
     label: "Items",
     href: "/dashboard/items",
     icon: Package,
@@ -72,6 +79,11 @@ const modules = [
     label: "Vendors",
     href: "/dashboard/vendors",
     icon: Truck,
+  },
+  {
+    label: "Expenses",
+    href: "/dashboard/expenses",
+    icon: IndianRupee,
   },
   {
     label: "Employees",

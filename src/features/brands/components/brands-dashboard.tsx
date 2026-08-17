@@ -10,6 +10,7 @@ import {
   Trash2,
 } from "lucide-react";
 
+import { EmptyState } from "@/components/empty-state";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -159,23 +160,17 @@ export function BrandsDashboard() {
               ) : null}
             </div>
           ) : filteredBrands.length === 0 ? (
-            <div className="flex flex-col items-start justify-center gap-3 py-16 text-left">
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <Tag className="h-6 w-6" />
-              </div>
-              <div className="space-y-1">
-                <h3 className="text-base font-semibold text-foreground">
-                  No brands found
-                </h3>
-                <p className="text-xs text-muted-foreground">
-                  Create a brand before adding products to your catalogue.
-                </p>
-              </div>
-              <Button onClick={openCreate} className="mt-2 gap-2" size="sm">
-                <Plus className="h-4 w-4" />
-                Add First Brand
-              </Button>
-            </div>
+            <EmptyState
+              icon={Tag}
+              title={search ? "No brands match your search" : "No brands yet"}
+              description={
+                search
+                  ? "Try a different brand name or description."
+                  : "Create a brand before adding products to your catalogue."
+              }
+              actionLabel={search ? undefined : "Add First Brand"}
+              onAction={search ? undefined : openCreate}
+            />
           ) : (
             <Table>
                 <TableHeader>

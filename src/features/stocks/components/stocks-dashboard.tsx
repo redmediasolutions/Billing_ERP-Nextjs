@@ -12,6 +12,7 @@ import {
   Trash2,
 } from "lucide-react";
 
+import { EmptyState } from "@/components/empty-state";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -200,23 +201,21 @@ export function StocksDashboard() {
               Unable to load stock. Please refresh and try again.
             </div>
           ) : stocks.length === 0 ? (
-            <div className="flex flex-col items-start justify-center gap-3 py-16 text-left">
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <PackagePlus className="h-6 w-6" />
-              </div>
-              <div className="space-y-1">
-                <h3 className="text-base font-semibold text-foreground">
-                  No stock found
-                </h3>
-                <p className="text-xs text-muted-foreground">
-                  Add products and vendors first, then add physical stock devices.
-                </p>
-              </div>
-              <Button onClick={openAdd} className="mt-2 gap-2" size="sm">
-                <Plus className="h-4 w-4" />
-                Add First Stock
-              </Button>
-            </div>
+            <EmptyState
+              icon={PackagePlus}
+              title={
+                query || status
+                  ? "No stock matches your filters"
+                  : "No stock yet"
+              }
+              description={
+                query || status
+                  ? "Try a different serial, product, or clear status filters."
+                  : "Add products and vendors first, then add physical stock devices."
+              }
+              actionLabel={query || status ? undefined : "Add First Stock"}
+              onAction={query || status ? undefined : openAdd}
+            />
           ) : (
             <Table>
                 <TableHeader>

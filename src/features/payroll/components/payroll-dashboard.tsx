@@ -11,6 +11,7 @@ import {
   Users,
 } from "lucide-react";
 
+import { EmptyState } from "@/components/empty-state";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -243,11 +244,24 @@ export function PayrollDashboard() {
                   </TableRow>
                 ) : filteredPayroll.length === 0 ? (
                   <TableRow>
-                    <TableCell
-                      colSpan={5}
-                      className="h-32 text-left text-muted-foreground"
-                    >
-                      No employee loans or deductions found.
+                    <TableCell colSpan={5} className="p-0">
+                      <EmptyState
+                        icon={HandCoins}
+                        title={
+                          search
+                            ? "No payroll records match your search"
+                            : "No loans or deductions yet"
+                        }
+                        description={
+                          search
+                            ? "Try a different employee name."
+                            : "Add a loan or deduction to start tracking employee payroll adjustments."
+                        }
+                        actionLabel={search ? undefined : "Add Loan"}
+                        onAction={
+                          search ? undefined : () => setModalType("loan")
+                        }
+                      />
                     </TableCell>
                   </TableRow>
                 ) : (

@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Billing ERP — Developer Handbook</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --background: #ffffff;
+      --foreground: #111827;
+      --muted: #f5f5f5;
+      --muted-foreground: #6b7280;
+      --border: #e5e7eb;
+      --primary: #111827;
+      --secondary: #f3f4f6;
+      --radius: 0.75rem;
+      --code-bg: #f8fafc;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
+      background: var(--background);
+      color: var(--foreground);
+      line-height: 1.55;
+      font-size: 15px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .shell {
+      display: grid;
+      grid-template-columns: 240px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    aside {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+      border-right: 1px solid var(--border);
+      background: #fafafa;
+      padding: 28px 18px;
+    }
+
+    aside .brand {
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing: -0.02em;
+      margin-bottom: 4px;
+    }
+
+    aside .meta {
+      color: var(--muted-foreground);
+      font-size: 12px;
+      margin-bottom: 28px;
+    }
+
+    aside nav a {
+      display: block;
+      padding: 7px 10px;
+      border-radius: 8px;
+      color: var(--muted-foreground);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    aside nav a:hover,
+    aside nav a:focus {
+      background: var(--secondary);
+      color: var(--foreground);
+    }
+
+    main {
+      max-width: 820px;
+      padding: 48px 56px 96px;
+    }
+
+    .eyebrow {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted-foreground);
+      margin: 0 0 10px;
+    }
+
+    h1 {
+      font-size: 34px;
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+      margin: 0 0 12px;
+      font-weight: 700;
+    }
+
+    h2 {
+      font-size: 22px;
+      letter-spacing: -0.02em;
+      margin: 56px 0 14px;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+      font-weight: 650;
+    }
+
+    h2:first-of-type { border-top: 0; margin-top: 40px; }
+
+    h3 {
+      font-size: 15px;
+      margin: 28px 0 8px;
+      font-weight: 650;
+    }
+
+    p { margin: 0 0 14px; color: #1f2937; }
+    .lede { font-size: 16px; color: var(--muted-foreground); max-width: 58ch; }
+
+    ul, ol { margin: 0 0 16px; padding-left: 1.2rem; }
+    li { margin-bottom: 6px; }
+
+    code, pre {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 12.5px;
+    }
+
+    code {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1px 6px;
+    }
+
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      overflow-x: auto;
+      margin: 0 0 18px;
+      line-height: 1.45;
+    }
+
+    pre code { border: 0; background: transparent; padding: 0; }
+
+    .card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      background: #fff;
+      margin: 0 0 16px;
+    }
+
+    .card strong { display: block; margin-bottom: 4px; }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0 0 18px;
+      font-size: 13.5px;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    th {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted-foreground);
+      font-weight: 600;
+      background: #fafafa;
+    }
+
+    .callout {
+      border-left: 3px solid var(--primary);
+      background: var(--muted);
+      padding: 12px 14px;
+      border-radius: 0 var(--radius) var(--radius) 0;
+      margin: 0 0 18px;
+      font-size: 14px;
+    }
+
+    .footer-note {
+      margin-top: 64px;
+      padding-top: 18px;
+      border-top: 1px solid var(--border);
+      color: var(--muted-foreground);
+      font-size: 12px;
+    }
+
+    @media (max-width: 900px) {
+      .shell { grid-template-columns: 1fr; }
+      aside { position: relative; height: auto; }
+      main { padding: 32px 20px 64px; }
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+
+    @media print {
+      aside { display: none; }
+      main { max-width: none; padding: 24px; }
+      h2 { break-before: page; }
+      h2:first-of-type { break-before: auto; }
+      a { color: inherit; text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside>
+      <div class="brand">Billing ERP</div>
+      <div class="meta">Developer handbook</div>
+      <nav>
+        <a href="#overview">Overview</a>
+        <a href="#stack">Stack</a>
+        <a href="#tree">Repository map</a>
+        <a href="#feature">Feature modules</a>
+        <a href="#flow">Request flow</a>
+        <a href="#auth">Auth &amp; API</a>
+        <a href="#routes">Routes &amp; nav</a>
+        <a href="#ui">UI conventions</a>
+        <a href="#modules">Module catalogue</a>
+        <a href="#add">Add a module</a>
+        <a href="#env">Environment</a>
+      </nav>
+    </aside>
+
+    <main>
+      <p class="eyebrow">Internal · Engineering</p>
+      <h1>How this codebase is put together</h1>
+      <p class="lede">
+        Billing ERP is a Next.js App Router frontend talking to a separate Express + MySQL API.
+        Features live in folders, not scattered pages. If you learn one module, you can ship the next.
+      </p>
+
+      <h2 id="overview">Overview</h2>
+      <p>
+        The UI in this repo is the product surface: dashboards, forms, POS, document preview, tenant branding.
+        Business data is owned by a backend API (not committed here). The browser authenticates with Firebase,
+        then every API call sends a Bearer token. Tenants are resolved on the server from that token.
+      </p>
+      <div class="callout">
+        Rule of thumb: <strong style="display:inline">pages are thin</strong>. Real logic sits under
+        <code>src/features/&lt;name&gt;/</code> — types → repository → service → hooks → UI.
+      </div>
+
+      <h2 id="stack">Stack</h2>
+      <table>
+        <thead>
+          <tr><th>Layer</th><th>Choice</th><th>Where</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Framework</td>
+            <td>Next.js 16 (App Router), React 19, TypeScript</td>
+            <td><code>package.json</code>, <code>src/app/</code></td>
+          </tr>
+          <tr>
+            <td>Styling</td>
+            <td>Tailwind CSS 4 + CSS variables (shadcn-style tokens)</td>
+            <td><code>src/app/globals.css</code></td>
+          </tr>
+          <tr>
+            <td>Components</td>
+            <td>shadcn/ui + Radix primitives, Lucide icons</td>
+            <td><code>src/components/ui/</code></td>
+          </tr>
+          <tr>
+            <td>Server state</td>
+            <td>TanStack React Query v5</td>
+            <td><code>QueryProvider</code>, feature hooks</td>
+          </tr>
+          <tr>
+            <td>Auth</td>
+            <td>Firebase Auth (ID token → API)</td>
+            <td><code>src/firebase/config.ts</code>, <code>src/lib/api.ts</code></td>
+          </tr>
+          <tr>
+            <td>Font / theme</td>
+            <td>Geist; light/dark via cookie + <code>.dark</code> class</td>
+            <td><code>src/app/layout.tsx</code>, <code>src/lib/theme.ts</code></td>
+          </tr>
+          <tr>
+            <td>PDF / export</td>
+            <td>jspdf, html2canvas, CSV helpers</td>
+            <td><code>src/lib/pdf-download.ts</code>, <code>src/lib/csv.ts</code></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2 id="tree">Repository map</h2>
+<pre><code>src/
+  app/                      # Next.js routes only
+    (auth)/                 # sign-in / register
+    (dashboard)/dashboard/  # one folder per screen
+    globals.css             # design tokens
+    layout.tsx              # font, theme, QueryProvider
+
+  components/
+    layout/                 # sidebar, top nav, module menus
+    ui/                     # shared shadcn primitives
+    empty-state.tsx         # centered empty placeholders
+    providers/              # theme + react-query
+
+  features/                 # domain modules (the real app)
+    expenses/
+    enquiries/
+    invoices/
+    pos/
+    tenant/
+    …
+
+  lib/                      # cross-cutting helpers
+    api.ts                  # authenticated fetch wrapper
+    erp-search.ts           # global module search
+    use-url-search.ts       # URL-synced filters
+    utils.ts                # cn()
+
+  firebase/
+    config.ts</code></pre>
+
+      <div class="grid-2">
+        <div class="card">
+          <strong><code>src/app</code></strong>
+          Route shells. Prefer importing a feature dashboard and rendering it.
+        </div>
+        <div class="card">
+          <strong><code>src/features</code></strong>
+          Domain ownership. Keep types, API, hooks, and UI for one entity together.
+        </div>
+      </div>
+
+      <h2 id="feature">Feature module anatomy</h2>
+      <p>
+        Most ERP modules follow the same shape. Expenses and Enquiries are the cleanest recent examples.
+      </p>
+<pre><code>src/features/expenses/
+  types.ts                         # domain types + constants
+  repository/expenses.repository.ts  # raw apiRequest paths
+  services/expenses.service.ts     # normalize MySQL quirks (0/1 → bool)
+  hooks/use-expenses.ts            # React Query keys + mutations
+  components/expenses-dashboard.tsx
+  addform/
+    expense-form-sheet.tsx
+    expense-categories-dialog.tsx</code></pre>
+
+      <h3>What each layer does</h3>
+      <table>
+        <thead>
+          <tr><th>File</th><th>Responsibility</th><th>Does not</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>types.ts</code></td>
+            <td>Shapes shared by UI and API contract</td>
+            <td>Fetch or render</td>
+          </tr>
+          <tr>
+            <td><code>*.repository.ts</code></td>
+            <td>HTTP only: path, method, JSON body via <code>apiRequest</code></td>
+            <td>UI state, caching</td>
+          </tr>
+          <tr>
+            <td><code>*.service.ts</code></td>
+            <td>Map/normalize API payloads (numbers, dates, booleans)</td>
+            <td>Call React hooks</td>
+          </tr>
+          <tr>
+            <td><code>hooks/use-*.ts</code></td>
+            <td>Query keys, <code>useQuery</code> / <code>useMutation</code>, invalidation</td>
+            <td>Own JSX</td>
+          </tr>
+          <tr>
+            <td><code>components/</code></td>
+            <td>Dashboards, tables, KPIs, empty states</td>
+            <td>Hardcode fetch URLs</td>
+          </tr>
+          <tr>
+            <td><code>addform/</code></td>
+            <td>Create/edit sheets, dialogs, pickers</td>
+            <td>Own the list page layout</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>
+        The matching page is usually one liner, e.g.
+        <code>src/app/(dashboard)/dashboard/expenses/page.tsx</code> → <code>&lt;ExpensesDashboard /&gt;</code>.
+      </p>
+
+      <h2 id="flow">Request flow</h2>
+<pre><code>UI (dashboard / form)
+  → hook (useCreateExpense)
+    → service (normalize in/out)
+      → repository (POST /expenses)
+        → apiRequest (Firebase token + NEXT_PUBLIC_API_BASE_URL)
+          → Express API (tenant_id from auth)
+            → MySQL</code></pre>
+      <p>
+        Mutations invalidate a feature query key namespace (e.g. <code>["expenses"]</code>) so lists and
+        summaries refresh together. Prefer that over manual refetch in every button handler.
+      </p>
+
+      <h2 id="auth">Auth &amp; API</h2>
+      <p>
+        <code>src/lib/api.ts</code> is the only place that should assemble API URLs and auth headers
+        for JSON endpoints.
+      </p>
+      <ul>
+        <li>Waits for Firebase user (<code>waitForAuthUser</code>)</li>
+        <li>Attaches <code>Authorization: Bearer &lt;idToken&gt;</code></li>
+        <li>Expects <code>{ success, message?, data }</code> envelopes</li>
+        <li>Throws <code>ApiError</code> with status + server message</li>
+      </ul>
+      <div class="callout">
+        Backend lives outside this repo (Express on your server). Mount routes like
+        <code>/expenses</code>, <code>/enquiries</code>, <code>/vendors</code> there. Frontend never talks to MySQL directly.
+      </div>
+
+      <h3>Tenant</h3>
+      <p>
+        <code>src/features/tenant/</code> loads business profile, logo, and document branding.
+        Rows from the API are scoped with <code>tenant_id</code> — never hardcode a business id in the UI.
+      </p>
+
+      <h2 id="routes">Routes &amp; navigation</h2>
+      <ul>
+        <li><code>src/components/layout/navigation.ts</code> — contextual side menus per module</li>
+        <li><code>src/components/layout/top-navigation.tsx</code> — primary module list + search</li>
+        <li><code>src/lib/erp-search.ts</code> — “Search modules…” destinations</li>
+        <li>URL params for filters: <code>useUrlSearchParam</code>, <code>useUrlParam("filter")</code>, <code>?create=1</code> to open forms</li>
+      </ul>
+      <p>
+        Deep links matter for sales demos and support. Prefer
+        <code>/dashboard/expenses?filter=unpaid</code> over local-only filter state when it is shareable.
+      </p>
+
+      <h2 id="ui">UI conventions</h2>
+      <ul>
+        <li><strong>Money:</strong> <code>en-IN</code> + <code>INR</code> / ₹ — not USD.</li>
+        <li><strong>Empty lists:</strong> shared <code>EmptyState</code> (centered icon, title, optional CTA).</li>
+        <li><strong>Forms:</strong> sheets for create/edit on list pages; full routes for long documents (<code>/invoices/new</code>).</li>
+        <li><strong>Theme:</strong> primary is near-black (<code>#111827</code>), muted gray text, 0.75rem radius. Avoid inventing a second visual system.</li>
+        <li><strong>POS:</strong> somewhat separate CSS under <code>src/features/pos/</code> — treat it as its own product surface.</li>
+      </ul>
+
+      <h2 id="modules">Module catalogue (frontend)</h2>
+      <table>
+        <thead>
+          <tr><th>Module</th><th>Feature folder</th><th>Primary route</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Dashboard</td><td>—</td><td><code>/dashboard</code></td></tr>
+          <tr><td>POS Billing</td><td><code>pos/</code></td><td><code>/dashboard/pos</code></td></tr>
+          <tr><td>Invoices</td><td><code>invoices/</code>, <code>documents/</code></td><td><code>/dashboard/invoices</code></td></tr>
+          <tr><td>Estimates</td><td><code>estimates/</code></td><td><code>/dashboard/estimates</code></td></tr>
+          <tr><td>Customers</td><td><code>customers/</code></td><td><code>/dashboard/customers</code></td></tr>
+          <tr><td>Enquiries</td><td><code>enquiries/</code></td><td><code>/dashboard/enquiries</code></td></tr>
+          <tr><td>Items</td><td><code>items/</code></td><td><code>/dashboard/items</code></td></tr>
+          <tr><td>Inventory overview</td><td><code>inventory/</code></td><td><code>/dashboard/inventory</code></td></tr>
+          <tr><td>Brands / Products / Serial stock</td><td><code>brands/</code>, <code>products/</code>, <code>stocks/</code></td><td><code>/dashboard/brands</code> etc.</td></tr>
+          <tr><td>Vendors</td><td><code>vendors/</code></td><td><code>/dashboard/vendors</code></td></tr>
+          <tr><td>Expenses</td><td><code>expenses/</code></td><td><code>/dashboard/expenses</code></td></tr>
+          <tr><td>Employees</td><td><code>employees/</code></td><td><code>/dashboard/employees</code></td></tr>
+          <tr><td>Payroll</td><td><code>payroll/</code></td><td><code>/dashboard/payroll</code></td></tr>
+          <tr><td>Reports</td><td><code>pos/reports/</code></td><td><code>/dashboard/pos/reports</code></td></tr>
+          <tr><td>Tenant branding</td><td><code>tenant/</code></td><td>layout / documents</td></tr>
+        </tbody>
+      </table>
+
+      <h2 id="add">Checklist: add a new module</h2>
+      <ol>
+        <li>Create <code>src/features/&lt;name&gt;/</code> with types, repository, service, hooks, dashboard, forms.</li>
+        <li>Add <code>src/app/(dashboard)/dashboard/&lt;name&gt;/page.tsx</code>.</li>
+        <li>Wire sidebar in <code>top-navigation.tsx</code> and menus in <code>navigation.ts</code>.</li>
+        <li>Register search target in <code>erp-search.ts</code>.</li>
+        <li>Optionally surface a KPI on the main dashboard page.</li>
+        <li>Implement matching Express routes + MySQL tables on the API server (tenant-scoped).</li>
+        <li>Use <code>EmptyState</code> for zero-data; keep INR / en-IN formatting.</li>
+      </ol>
+
+      <h2 id="env">Environment</h2>
+      <p>Local frontend expects at least:</p>
+<pre><code>NEXT_PUBLIC_API_BASE_URL=https://your-api.example.com
+# plus Firebase web config used by src/firebase/config.ts</code></pre>
+      <p>
+        Never commit secrets. <code>.env.local</code> stays on the machine.
+        API keys for Firebase Admin belong on the Express host, not in this Next app.
+      </p>
+
+      <div class="footer-note">
+        Billing ERP · Developer handbook · Internal · /onlyfordevelopers
+      </div>
+    </main>
+  </div>
+</body>
+</html>

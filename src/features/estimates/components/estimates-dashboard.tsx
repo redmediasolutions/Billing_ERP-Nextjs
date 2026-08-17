@@ -11,6 +11,7 @@ import {
   Trash2,
 } from "lucide-react";
 
+import { EmptyState } from "@/components/empty-state";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CsvExportDialog } from "@/components/export/csv-export-dialog";
@@ -216,13 +217,28 @@ export function EstimatesDashboard() {
 
                     {!isLoading && !error && filteredEstimates.length === 0 && (
                       <TableRow>
-                        <TableCell
-                          colSpan={6}
-                          className="h-32 text-left text-muted-foreground"
-                        >
-                          {search
-                            ? "No estimates match your search."
-                            : "No estimates created yet."}
+                        <TableCell colSpan={6} className="p-0">
+                          <EmptyState
+                            icon={FileText}
+                            title={
+                              search
+                                ? "No estimates match your search"
+                                : "No estimates yet"
+                            }
+                            description={
+                              search
+                                ? "Try a different customer name or reference."
+                                : "Create your first estimate to send quotes to customers."
+                            }
+                            actionLabel={
+                              search ? undefined : "Create First Estimate"
+                            }
+                            onAction={
+                              search
+                                ? undefined
+                                : () => router.push("/dashboard/estimates/new")
+                            }
+                          />
                         </TableCell>
                       </TableRow>
                     )}

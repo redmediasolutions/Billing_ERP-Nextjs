@@ -13,6 +13,7 @@ import {
   WalletCards,
 } from "lucide-react";
 
+import { EmptyState } from "@/components/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -235,11 +236,22 @@ export function EmployeesDashboard() {
                   </TableRow>
                 ) : filteredEmployees.length === 0 ? (
                   <TableRow>
-                    <TableCell
-                      colSpan={6}
-                      className="h-32 text-left text-muted-foreground"
-                    >
-                      No employees found. Add your first employee.
+                    <TableCell colSpan={6} className="p-0">
+                      <EmptyState
+                        icon={Users}
+                        title={
+                          search
+                            ? "No employees match your search"
+                            : "No employees yet"
+                        }
+                        description={
+                          search
+                            ? "Try a different name, phone, or employee ID."
+                            : "Add your first employee to manage payroll and assignments."
+                        }
+                        actionLabel={search ? undefined : "Add First Employee"}
+                        onAction={search ? undefined : openCreate}
+                      />
                     </TableCell>
                   </TableRow>
                 ) : (

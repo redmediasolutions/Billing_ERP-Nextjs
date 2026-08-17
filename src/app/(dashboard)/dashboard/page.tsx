@@ -9,7 +9,7 @@ import {
   ReceiptText,
   Users,
   TrendingUp,
-  DollarSign,
+  IndianRupee,
   ShoppingCart,
   Warehouse,
   Tags,
@@ -26,6 +26,8 @@ import { useItems } from "@/features/items/hooks/use-items";
 import { useReportSummary } from "@/features/pos/reports/hooks/useReports";
 import { useProducts } from "@/features/products/hooks/use-products";
 import { useStocks } from "@/features/stocks/hooks/use-stocks";
+import { useExpenseSummary } from "@/features/expenses/hooks/use-expenses";
+import { useEnquirySummary } from "@/features/enquiries/hooks/use-enquiries";
 
 const money = new Intl.NumberFormat("en-IN", {
   style: "currency",
@@ -41,6 +43,8 @@ export default function DashboardPage() {
   const { items, loading: itemsLoading } = useItems();
   const { data: stocks = [], isLoading: stocksLoading } = useStocks();
   const { data: brands = [], isLoading: brandsLoading } = useBrands();
+  const { data: expenseSummary } = useExpenseSummary();
+  const { data: enquirySummary } = useEnquirySummary();
   const { summary, loading: reportsLoading } = useReportSummary();
 
   const statsLoading =
@@ -91,7 +95,7 @@ export default function DashboardPage() {
       title: "Total Revenue",
       value: statsLoading ? "—" : money.format(metrics.revenue),
       hint: `${metrics.finalizedCount} finalized invoices`,
-      icon: DollarSign,
+      icon: IndianRupee,
     },
     {
       title: "Today's Sales",
@@ -313,7 +317,7 @@ export default function DashboardPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
             <SnapshotItem label="Brands" value={brands.length} href="/dashboard/brands" />
             <SnapshotItem label="Products" value={products.length} href="/dashboard/products" />
             <SnapshotItem
@@ -325,6 +329,16 @@ export default function DashboardPage() {
               label="Estimates"
               value={estimates.length}
               href="/dashboard/estimates"
+            />
+            <SnapshotItem
+              label="Expenses this month"
+              value={money.format(expenseSummary?.this_month ?? 0)}
+              href="/dashboard/expenses"
+            />
+            <SnapshotItem
+              label="Enquiries due today"
+              value={enquirySummary?.due_today ?? 0}
+              href="/dashboard/enquiries?filter=today"
             />
           </div>
         </CardContent>
@@ -402,7 +416,7 @@ function SnapshotItem({
   href,
 }: {
   label: string;
-  value: number;
+  value: number | string;
   href: string;
 }) {
   return (

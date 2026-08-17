@@ -11,6 +11,7 @@ import {
   Truck,
 } from "lucide-react";
 
+import { EmptyState } from "@/components/empty-state";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -168,23 +169,17 @@ export function VendorsDashboard() {
               Unable to load vendors. Please refresh and try again.
             </div>
           ) : filteredVendors.length === 0 ? (
-            <div className="flex flex-col items-start justify-center gap-3 py-16 text-left">
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <Truck className="h-6 w-6" />
-              </div>
-              <div className="space-y-1">
-                <h3 className="text-base font-semibold text-foreground">
-                  No vendors found
-                </h3>
-                <p className="text-xs text-muted-foreground">
-                  Add vendors before creating purchase and stock records.
-                </p>
-              </div>
-              <Button onClick={openCreate} className="mt-2 gap-2" size="sm">
-                <Plus className="h-4 w-4" />
-                Add First Vendor
-              </Button>
-            </div>
+            <EmptyState
+              icon={Truck}
+              title={search ? "No vendors match your search" : "No vendors yet"}
+              description={
+                search
+                  ? "Try a different name, phone, or email."
+                  : "Add vendors before creating purchase and stock records."
+              }
+              actionLabel={search ? undefined : "Add First Vendor"}
+              onAction={search ? undefined : openCreate}
+            />
           ) : (
             <Table>
                 <TableHeader>

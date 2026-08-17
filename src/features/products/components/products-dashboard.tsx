@@ -10,6 +10,7 @@ import {
   Trash2,
 } from "lucide-react";
 
+import { EmptyState } from "@/components/empty-state";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -121,23 +122,17 @@ export function ProductsDashboard() {
               Unable to load products. Please refresh and try again.
             </div>
           ) : products.length === 0 ? (
-            <div className="flex flex-col items-start justify-center gap-3 py-16 text-left">
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <PackagePlus className="h-6 w-6" />
-              </div>
-              <div className="space-y-1">
-                <h3 className="text-base font-semibold text-foreground">
-                  No products found
-                </h3>
-                <p className="text-xs text-muted-foreground">
-                  Add your first master product before entering serialised stock.
-                </p>
-              </div>
-              <Button onClick={openCreate} className="mt-2 gap-2" size="sm">
-                <Plus className="h-4 w-4" />
-                Add First Product
-              </Button>
-            </div>
+            <EmptyState
+              icon={PackagePlus}
+              title={query ? "No products match your search" : "No products yet"}
+              description={
+                query
+                  ? "Try a different product name or code."
+                  : "Add your first master product before entering serialised stock."
+              }
+              actionLabel={query ? undefined : "Add First Product"}
+              onAction={query ? undefined : openCreate}
+            />
           ) : (
             <Table>
                 <TableHeader>

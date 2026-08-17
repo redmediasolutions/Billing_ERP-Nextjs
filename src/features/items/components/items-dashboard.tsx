@@ -13,6 +13,7 @@ import {
   Trash2,
 } from "lucide-react";
 
+import { EmptyState } from "@/components/empty-state";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -67,6 +68,12 @@ export function ItemsDashboard() {
     (total, item) => total + item.total_stock,
     0
   );
+
+  function openCreate() {
+    setEditingItem(null);
+    setActionError("");
+    setFormOpen(true);
+  }
 
   async function saveItem(input: ItemInput) {
     try {
@@ -203,11 +210,22 @@ export function ItemsDashboard() {
                     </TableRow>
                   ) : items.length === 0 ? (
                     <TableRow>
-                      <TableCell
-                        colSpan={5}
-                        className="h-32 text-left text-muted-foreground"
-                      >
-                        No items found. Use &ldquo;Add Item&rdquo; in the top navigation to create one.
+                      <TableCell colSpan={5} className="p-0">
+                        <EmptyState
+                          icon={Package}
+                          title={
+                            query
+                              ? "No items match your search"
+                              : "No items yet"
+                          }
+                          description={
+                            query
+                              ? "Try a different item name or code."
+                              : "Add catalogue items to use them on invoices and estimates."
+                          }
+                          actionLabel={query ? undefined : "Add First Item"}
+                          onAction={query ? undefined : openCreate}
+                        />
                       </TableCell>
                     </TableRow>
                   ) : (

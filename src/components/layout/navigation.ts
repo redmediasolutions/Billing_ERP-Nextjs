@@ -5,9 +5,11 @@ export const moduleMenus = {
     { label: "Invoices", href: "/dashboard/invoices" },
     { label: "Estimates", href: "/dashboard/estimates" },
     { label: "Customers", href: "/dashboard/customers" },
+    { label: "Enquiries", href: "/dashboard/enquiries" },
     { label: "Items", href: "/dashboard/items" },
     { label: "Inventory", href: "/dashboard/inventory" },
     { label: "Vendors", href: "/dashboard/vendors" },
+    { label: "Expenses", href: "/dashboard/expenses" },
     { label: "Reports", href: "/dashboard/pos/reports" },
   ],
 
@@ -34,6 +36,14 @@ export const moduleMenus = {
     { label: "All Vendors", href: "/dashboard/vendors" },
   ],
 
+  expenses: [
+    { label: "All Expenses", href: "/dashboard/expenses" },
+    { label: "This Month", href: "/dashboard/expenses?filter=month" },
+    { label: "Unpaid", href: "/dashboard/expenses?filter=unpaid" },
+    { label: "Parts", href: "/dashboard/expenses?filter=parts" },
+    { label: "Parcel", href: "/dashboard/expenses?filter=parcel" },
+  ],
+
   estimates: [
     { label: "All Estimates", href: "/dashboard/estimates" },
     { label: "New Estimate", href: "/dashboard/estimates/new" },
@@ -53,6 +63,14 @@ export const moduleMenus = {
     { label: "Add Customer", href: "/dashboard/customers?create=1" },
     { label: "GST Customers", href: "/dashboard/customers?gst=yes" },
     { label: "Reports", href: "/dashboard/pos/reports" },
+  ],
+
+  enquiries: [
+    { label: "All Enquiries", href: "/dashboard/enquiries" },
+    { label: "Due Today", href: "/dashboard/enquiries?filter=today" },
+    { label: "Overdue", href: "/dashboard/enquiries?filter=overdue" },
+    { label: "New", href: "/dashboard/enquiries?filter=new" },
+    { label: "Won", href: "/dashboard/enquiries?filter=won" },
   ],
 
   employees: [
@@ -78,6 +96,7 @@ export function getCurrentModule(pathname: string): keyof typeof moduleMenus {
   if (pathname.startsWith("/dashboard/pos")) return "pos";
   if (pathname.startsWith("/dashboard/items")) return "items";
   if (pathname.startsWith("/dashboard/vendors")) return "vendors";
+  if (pathname.startsWith("/dashboard/expenses")) return "expenses";
   if (
     pathname.startsWith("/dashboard/inventory") ||
     pathname.startsWith("/dashboard/products") ||
@@ -89,6 +108,7 @@ export function getCurrentModule(pathname: string): keyof typeof moduleMenus {
   if (pathname.startsWith("/dashboard/estimates")) return "estimates";
   if (pathname.startsWith("/dashboard/invoices")) return "invoices";
   if (pathname.startsWith("/dashboard/customers")) return "customers";
+  if (pathname.startsWith("/dashboard/enquiries")) return "enquiries";
   if (pathname.startsWith("/dashboard/employees")) return "employees";
   if (pathname.startsWith("/dashboard/payroll")) return "payroll";
 
