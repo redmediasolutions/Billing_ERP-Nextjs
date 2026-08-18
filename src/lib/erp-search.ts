@@ -11,6 +11,7 @@ const MODULE_SEARCH_PATHS: Record<string, string> = {
   estimates: "/dashboard/estimates",
   customers: "/dashboard/customers",
   enquiries: "/dashboard/enquiries",
+  bookings: "/dashboard/bookings",
   employees: "/dashboard/employees",
   payroll: "/dashboard/payroll",
   reports: "/dashboard/pos/invoices",

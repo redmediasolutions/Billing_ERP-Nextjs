@@ -72,15 +72,27 @@ export function LoginForm() {
       });
 
       router.push("/dashboard");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Login error:", err);
 
       await auth.signOut();
 
+      const code =
+        err && typeof err === "object" && "code" in err
+          ? String((err as { code?: string }).code || "")
+          : "";
+      const message = err instanceof Error ? err.message : "";
+      const isNetworkFailure =
+        message === "Failed to fetch" ||
+        message.includes("NetworkError") ||
+        message.includes("Load failed");
+
       setError(
         getFriendlyError(
-          err.code,
-          err.message || "Unable to sign in. Please try again."
+          code,
+          isNetworkFailure
+            ? "Firebase signed you in, but the ERP API at api.bill-erp.rd-crm.in is down (502). Start or restart the Express/pm2 process behind nginx."
+            : message || "Unable to sign in. Please try again."
         )
       );
     } finally {

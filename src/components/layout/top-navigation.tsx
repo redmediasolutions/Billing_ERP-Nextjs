@@ -16,6 +16,7 @@ import {
   Wallet,
   IndianRupee,
   PhoneCall,
+  CalendarDays,
   FileText,
   Search,
   Store,
@@ -35,72 +36,23 @@ import { BusinessLogo } from "@/features/tenant/components/business-logo";
 import { useTenant } from "@/features/tenant/hooks/use-tenant";
 
 const modules = [
-  {
-    label: "Dashboard",
-    href: "/dashboard",
-    icon: LayoutDashboard,
-  },
-  {
-    label: "POS Billing",
-    href: "/dashboard/pos",
-    icon: Store,
-  },
-  {
-    label: "Invoices",
-    href: "/dashboard/invoices",
-    icon: ReceiptText,
-  },
-  {
-    label: "Estimates",
-    href: "/dashboard/estimates",
-    icon: ClipboardList,
-  },
-  {
-    label: "Customers",
-    href: "/dashboard/customers",
-    icon: Users,
-  },
-  {
-    label: "Enquiries",
-    href: "/dashboard/enquiries",
-    icon: PhoneCall,
-  },
-  {
-    label: "Items",
-    href: "/dashboard/items",
-    icon: Package,
-  },
-  {
-    label: "Inventory",
-    href: "/dashboard/inventory",
-    icon: Warehouse,
-  },
-  {
-    label: "Vendors",
-    href: "/dashboard/vendors",
-    icon: Truck,
-  },
-  {
-    label: "Expenses",
-    href: "/dashboard/expenses",
-    icon: IndianRupee,
-  },
-  {
-    label: "Employees",
-    href: "/dashboard/employees",
-    icon: UserCog,
-  },
-  {
-    label: "Payroll",
-    href: "/dashboard/payroll",
-    icon: Wallet,
-  },
-  {
-    label: "Reports",
-    href: "/dashboard/pos/reports",
-    icon: FileText,
-  },
+  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard, group: "Home" },
+  { label: "POS Billing", href: "/dashboard/pos", icon: Store, group: "Sales" },
+  { label: "Invoices", href: "/dashboard/invoices", icon: ReceiptText, group: "Sales" },
+  { label: "Estimates", href: "/dashboard/estimates", icon: ClipboardList, group: "Sales" },
+  { label: "Customers", href: "/dashboard/customers", icon: Users, group: "Sales" },
+  { label: "Enquiries", href: "/dashboard/enquiries", icon: PhoneCall, group: "Sales" },
+  { label: "Bookings", href: "/dashboard/bookings", icon: CalendarDays, group: "Sales" },
+  { label: "Items", href: "/dashboard/items", icon: Package, group: "Catalog" },
+  { label: "Inventory", href: "/dashboard/inventory", icon: Warehouse, group: "Catalog" },
+  { label: "Vendors", href: "/dashboard/vendors", icon: Truck, group: "Operations" },
+  { label: "Expenses", href: "/dashboard/expenses", icon: IndianRupee, group: "Operations" },
+  { label: "Employees", href: "/dashboard/employees", icon: UserCog, group: "People" },
+  { label: "Payroll", href: "/dashboard/payroll", icon: Wallet, group: "People" },
+  { label: "Reports", href: "/dashboard/pos/reports", icon: FileText, group: "Operations" },
 ];
+
+const MODULE_GROUPS = ["Home", "Sales", "Catalog", "Operations", "People"] as const;
 
 export function TopNavigation() {
   const pathname = usePathname();
@@ -162,13 +114,16 @@ export function TopNavigation() {
 
   const filteredModules = useMemo(() => {
     const term = moduleSearch.trim().toLowerCase();
-
     if (!term) return modules;
-
-    return modules.filter((item) =>
-      item.label.toLowerCase().includes(term)
-    );
+    return modules.filter((item) => item.label.toLowerCase().includes(term));
   }, [moduleSearch]);
+
+  const groupedModules = useMemo(() => {
+    return MODULE_GROUPS.map((group) => ({
+      group,
+      items: filteredModules.filter((item) => item.group === group),
+    })).filter((section) => section.items.length > 0);
+  }, [filteredModules]);
 
   function submitGlobalSearch(event: React.FormEvent) {
     event.preventDefault();
@@ -177,18 +132,13 @@ export function TopNavigation() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/70">
-      <div className="flex h-16 items-center justify-between px-6 lg:px-8 xl:px-10">
-
-        {/* Left */}
-
-        <div className="flex items-center gap-10">
-
-          <div className="relative" ref={menuRef}>
-
+      <div className="flex h-14 items-center gap-3 px-4 lg:px-6">
+        <div className="flex min-w-0 flex-1 items-center gap-3">
+          <div className="relative shrink-0" ref={menuRef}>
             <Button
               variant="ghost"
               onClick={() => setOpen((v) => !v)}
-              className="flex items-center gap-2"
+              className="flex max-w-[220px] items-center gap-2"
               aria-expanded={open}
               aria-haspopup="menu"
             >
@@ -198,84 +148,80 @@ export function TopNavigation() {
                 <ActiveModuleIcon size={18} />
               )}
 
-              <span className="max-w-[200px] truncate font-semibold">
+              <span className="truncate font-semibold">
                 {isDashboardHome ? businessName : activeModule.label}
               </span>
 
               <ChevronDown
-                size={18}
-                className={`transition-transform ${open ? "rotate-180" : ""}`}
+                size={16}
+                className={`shrink-0 transition-transform ${open ? "rotate-180" : ""}`}
               />
             </Button>
 
             {open && (
-              <div className="absolute mt-3 w-80 rounded-2xl border border-border bg-popover p-4 shadow-xl">
-
-                <div className="relative mb-4">
-
+              <div className="absolute mt-2 w-[22rem] rounded-2xl border border-border bg-popover p-3 shadow-xl">
+                <div className="relative mb-3">
                   <Search
-                    size={18}
+                    size={16}
                     className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
                   />
-
                   <Input
                     value={moduleSearch}
                     onChange={(event) => setModuleSearch(event.target.value)}
                     placeholder="Search modules..."
-                    className="pl-10"
+                    className="h-9 pl-9"
                   />
-
                 </div>
 
-                <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  Modules
-                </p>
+                {groupedModules.length === 0 ? (
+                  <p className="px-2 py-3 text-sm text-muted-foreground">
+                    No modules match your search.
+                  </p>
+                ) : (
+                  <div className="max-h-[min(28rem,70vh)] space-y-3 overflow-y-auto pr-1">
+                    {groupedModules.map((section) => (
+                      <div key={section.group}>
+                        <p className="mb-1 px-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                          {section.group}
+                        </p>
+                        <div className="grid grid-cols-2 gap-0.5">
+                          {section.items.map((item) => {
+                            const Icon = item.icon;
+                            const active =
+                              item.href === "/dashboard"
+                                ? pathname === "/dashboard"
+                                : pathname === item.href ||
+                                  pathname.startsWith(`${item.href}/`);
 
-                <div className="space-y-1">
-                  {filteredModules.length === 0 ? (
-                    <p className="px-3 py-2 text-sm text-muted-foreground">
-                      No modules match your search.
-                    </p>
-                  ) : (
-                    filteredModules.map((item) => {
-                      const Icon = item.icon;
-
-                      const active =
-                        item.href === "/dashboard"
-                          ? pathname === "/dashboard"
-                          : pathname === item.href ||
-                            pathname.startsWith(item.href + "/");
-
-                      return (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          onClick={() => {
-                            setOpen(false);
-                            setModuleSearch("");
-                          }}
-                          className={`flex items-center gap-3 rounded-xl px-3 py-2 transition-colors ${
-                            active
-                              ? "bg-primary text-primary-foreground"
-                              : "hover:bg-accent hover:text-accent-foreground"
-                          }`}
-                        >
-                          <Icon size={18} />
-                          <span>{item.label}</span>
-                        </Link>
-                      );
-                    })
-                  )}
-                </div>
-
+                            return (
+                              <Link
+                                key={item.href}
+                                href={item.href}
+                                onClick={() => {
+                                  setOpen(false);
+                                  setModuleSearch("");
+                                }}
+                                className={`flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm transition-colors ${
+                                  active
+                                    ? "bg-primary text-primary-foreground"
+                                    : "hover:bg-accent hover:text-accent-foreground"
+                                }`}
+                              >
+                                <Icon size={15} className="shrink-0" />
+                                <span className="truncate">{item.label}</span>
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
-
           </div>
 
-          {/* Dynamic Top Navigation */}
-
-          <nav className="hidden items-center gap-8 lg:flex">
+          <nav className="hidden min-w-0 items-center gap-1 overflow-x-auto md:flex">
             {topMenu.map((item) => {
               const active = isNavLinkActive(pathname, searchParams, item.href);
 
@@ -283,10 +229,10 @@ export function TopNavigation() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`text-sm font-medium transition-colors ${
+                  className={`shrink-0 rounded-md px-2.5 py-1.5 text-sm font-medium whitespace-nowrap transition-colors ${
                     active
-                      ? "text-primary"
-                      : "text-muted-foreground hover:text-primary"
+                      ? "bg-accent text-foreground"
+                      : "text-muted-foreground hover:bg-accent/60 hover:text-foreground"
                   }`}
                 >
                   {item.label}
@@ -294,37 +240,28 @@ export function TopNavigation() {
               );
             })}
           </nav>
-
         </div>
 
-        {/* Right */}
-
-        <div className="flex items-center gap-3">
-
+        <div className="flex shrink-0 items-center gap-2">
           <form
             onSubmit={submitGlobalSearch}
-            className="relative hidden md:block"
+            className="relative hidden lg:block"
           >
             <Search
-              size={18}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+              size={16}
+              className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
             />
-
             <Input
               value={globalSearch}
               onChange={(event) => setGlobalSearch(event.target.value)}
               placeholder="Search..."
-              className="w-64 pl-10"
+              className="h-9 w-44 pl-8 xl:w-56"
             />
-
           </form>
 
           <ThemeToggle />
-
           <ProfileMenu />
-
         </div>
-
       </div>
     </header>
   );

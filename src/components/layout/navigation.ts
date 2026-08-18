@@ -1,16 +1,9 @@
 export const moduleMenus = {
   dashboard: [
-    { label: "Dashboard", href: "/dashboard" },
-    { label: "POS Billing", href: "/dashboard/pos" },
+    { label: "Overview", href: "/dashboard" },
+    { label: "POS", href: "/dashboard/pos" },
     { label: "Invoices", href: "/dashboard/invoices" },
-    { label: "Estimates", href: "/dashboard/estimates" },
-    { label: "Customers", href: "/dashboard/customers" },
-    { label: "Enquiries", href: "/dashboard/enquiries" },
-    { label: "Items", href: "/dashboard/items" },
-    { label: "Inventory", href: "/dashboard/inventory" },
-    { label: "Vendors", href: "/dashboard/vendors" },
-    { label: "Expenses", href: "/dashboard/expenses" },
-    { label: "Reports", href: "/dashboard/pos/reports" },
+    { label: "Bookings", href: "/dashboard/bookings" },
   ],
 
   pos: [
@@ -73,6 +66,14 @@ export const moduleMenus = {
     { label: "Won", href: "/dashboard/enquiries?filter=won" },
   ],
 
+  bookings: [
+    { label: "All Bookings", href: "/dashboard/bookings" },
+    { label: "Calendar", href: "/dashboard/bookings?view=calendar" },
+    { label: "Today", href: "/dashboard/bookings?filter=today" },
+    { label: "In progress", href: "/dashboard/bookings?filter=in_progress" },
+    { label: "Resources", href: "/dashboard/bookings/resources" },
+  ],
+
   employees: [
     { label: "Employees", href: "/dashboard/employees" },
     { label: "Payroll", href: "/dashboard/payroll" },
@@ -109,6 +110,7 @@ export function getCurrentModule(pathname: string): keyof typeof moduleMenus {
   if (pathname.startsWith("/dashboard/invoices")) return "invoices";
   if (pathname.startsWith("/dashboard/customers")) return "customers";
   if (pathname.startsWith("/dashboard/enquiries")) return "enquiries";
+  if (pathname.startsWith("/dashboard/bookings")) return "bookings";
   if (pathname.startsWith("/dashboard/employees")) return "employees";
   if (pathname.startsWith("/dashboard/payroll")) return "payroll";
 
