@@ -20,6 +20,16 @@ export function useCustomers() {
   });
 }
 
+export function useCustomerSearch(query: string) {
+  const normalizedQuery = query.trim();
+
+  return useQuery({
+    queryKey: [...customerKeys.list(), "search", normalizedQuery],
+    queryFn: () => customersService.search(normalizedQuery),
+    enabled: normalizedQuery.length >= 2,
+  });
+}
+
 export function useCreateCustomer() {
   const queryClient = useQueryClient();
 

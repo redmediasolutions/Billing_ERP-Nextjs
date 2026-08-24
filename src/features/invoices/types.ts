@@ -23,6 +23,7 @@ export interface Invoice {
   invoice_number: string;
   customer_id: number;
   customer_name: string;
+  customer_display_name?: string | null;
   custom_billing_address: string | null;
   custom_delivery_address: string | null;
   invoice_date: string | null;

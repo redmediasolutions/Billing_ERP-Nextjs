@@ -34,6 +34,7 @@ import {
   useUpdateCustomer,
 } from "../hooks/use-customers";
 import type { Customer, CustomerInput } from "../types";
+import { customerContactName, customerDisplayName } from "../customer-display";
 
 export function CustomersDashboard() {
   const searchParams = useSearchParams();
@@ -61,6 +62,7 @@ export function CustomersDashboard() {
     return customers.filter((customer) => {
       const matchesQuery = matchesSearch(search, [
         customer.customer_name,
+        customer.customer_display_name,
         customer.customer_business_name,
         customer.customer_phone,
         customer.customer_email,
@@ -115,7 +117,7 @@ export function CustomersDashboard() {
   }
 
   async function removeCustomer(customer: Customer) {
-    const accepted = window.confirm(`Archive "${customer.customer_name}"?`);
+    const accepted = window.confirm(`Archive "${customerDisplayName(customer)}"?`);
     if (!accepted) return;
 
     try {
@@ -241,14 +243,14 @@ export function CustomersDashboard() {
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
-                            {customer.customer_name.slice(0, 2).toUpperCase()}
+                            {customerDisplayName(customer).slice(0, 2).toUpperCase()}
                           </div>
                           <div className="min-w-0">
                             <p className="truncate font-medium text-foreground">
-                              {customer.customer_name}
+                              {customerDisplayName(customer)}
                             </p>
                             <p className="truncate text-xs text-muted-foreground">
-                              {customer.customer_business_name || "Individual customer"}
+                              {customerContactName(customer)}{customer.customer_business_name ? ` · ${customer.customer_business_name}` : ""}
                             </p>
                           </div>
                         </div>

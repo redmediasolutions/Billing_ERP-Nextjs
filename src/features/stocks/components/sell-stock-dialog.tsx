@@ -13,6 +13,7 @@ import type {
   Stock,
 } from "../types/stock.types";
 import styles from "../stocks.module.css";
+import { customerDisplayName } from "@/features/customers/customer-display";
 
 export function SellStockDialog({
   stock,
@@ -124,7 +125,7 @@ export function SellStockDialog({
 
               {customers.map((customer) => (
                 <option key={customer.id} value={customer.id}>
-                  {customer.customer_name}
+                  {customerDisplayName(customer)}
                   {customer.customer_phone
                     ? ` — ${customer.customer_phone}`
                     : ""}

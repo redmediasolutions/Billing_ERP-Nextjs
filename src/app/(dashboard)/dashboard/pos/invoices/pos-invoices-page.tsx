@@ -23,7 +23,7 @@ export function PosInvoicesPageContent() {
 
       const matchesQuery = matchesSearch(search, [
         invoice.invoice_number,
-        invoice.customer_name,
+        invoice.customer_display_name || invoice.customer_name,
         invoice.reference,
       ]);
 

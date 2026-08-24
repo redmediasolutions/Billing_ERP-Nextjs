@@ -16,6 +16,7 @@ export function EstimatePreview({
 }) {
   const documentRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState("");
 
   const {
     data: estimate,
@@ -28,10 +29,15 @@ export function EstimatePreview({
 
     try {
       setDownloading(true);
+      setDownloadError("");
       await downloadElementAsPdf(
         documentRef.current,
         `${estimate.estimate_number}.pdf`,
         "a4"
+      );
+    } catch (error) {
+      setDownloadError(
+        error instanceof Error ? error.message : "Unable to download the PDF."
       );
     } finally {
       setDownloading(false);
@@ -83,6 +89,12 @@ export function EstimatePreview({
           </Button>
         </div>
       </div>
+
+      {downloadError && (
+        <p className="no-print text-sm text-destructive" role="alert">
+          {downloadError}
+        </p>
+      )}
 
       <EstimateDocumentSheet estimate={estimate} sheetRef={documentRef} />
 

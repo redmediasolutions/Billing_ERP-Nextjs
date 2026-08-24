@@ -2,6 +2,10 @@ export interface Customer {
   id: number;
   reference: string;
   customer_name: string;
+  /** Optional honorific, e.g. Mr. or Mrs. */
+  customer_title: string | null;
+  /** The name shown in sales-facing screens and documents. */
+  customer_display_name: string | null;
   customer_phone: string | null;
   customer_email: string | null;
   customer_gst: string | null;
@@ -16,6 +20,8 @@ export interface Customer {
 
 export interface CustomerInput {
   customer_name: string;
+  customer_title: string;
+  customer_display_name: string;
   customer_phone: string;
   customer_email: string;
   customer_gst: string;

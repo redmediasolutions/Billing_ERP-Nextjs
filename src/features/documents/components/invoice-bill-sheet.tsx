@@ -55,7 +55,7 @@ export function InvoiceBillSheet({
             Bill To
           </p>
           <h2 className="mt-1 text-base font-semibold">
-            {invoice.customer_name || "Customer"}
+            {invoice.customer_display_name || invoice.customer_name || "Customer"}
           </h2>
           <p className="mt-1 whitespace-pre-line text-sm leading-relaxed text-zinc-600">
             {invoice.custom_billing_address || "No billing address"}

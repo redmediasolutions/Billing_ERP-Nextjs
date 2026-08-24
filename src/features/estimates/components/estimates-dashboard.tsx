@@ -60,7 +60,7 @@ export function EstimatesDashboard() {
     return estimates.filter((estimate) =>
       matchesSearch(search, [
         estimate.estimate_number,
-        estimate.customer_name,
+        estimate.customer_display_name || estimate.customer_name,
         estimate.reference,
         estimate.reference_number,
       ])
@@ -257,7 +257,7 @@ export function EstimatesDashboard() {
                           </TableCell>
 
                           <TableCell className="text-foreground">
-                            {estimate.customer_name ?? "Unknown customer"}
+                            {estimate.customer_display_name || estimate.customer_name || "Unknown customer"}
                           </TableCell>
 
                           <TableCell className="text-muted-foreground">

@@ -26,6 +26,7 @@ import {
   useCreateCustomer,
   useCustomers,
 } from "@/features/customers/hooks/use-customers";
+import { customerDisplayName } from "@/features/customers/customer-display";
 import { useEmployees } from "@/features/employees/hooks/use-employees";
 import { useItems } from "@/features/items/hooks/use-items";
 
@@ -250,7 +251,7 @@ export function BookingFormSheet({
     setForm((current) => ({
       ...current,
       customer_ref: match.id,
-      customer_name: match.customer_name || current.customer_name,
+      customer_name: customerDisplayName(match) || current.customer_name,
       phone: match.customer_phone || current.phone,
       email: match.customer_email || current.email,
     }));
@@ -270,7 +271,7 @@ export function BookingFormSheet({
       phone,
       customer_ref: match ? match.id : current.customer_ref,
       customer_name: match
-        ? match.customer_name || current.customer_name
+        ? customerDisplayName(match) || current.customer_name
         : current.customer_name,
       email: match ? match.customer_email || current.email : current.email,
     }));
@@ -389,6 +390,8 @@ export function BookingFormSheet({
       if (saveAsCustomer && !customerRef && (form.customer_name || form.phone)) {
         const created = await createCustomer.mutateAsync({
           customer_name: form.customer_name.trim() || form.phone.trim(),
+          customer_title: "",
+          customer_display_name: form.customer_name.trim() || form.phone.trim(),
           customer_phone: form.phone.trim(),
           customer_email: form.email.trim(),
           customer_gst: "",
@@ -488,7 +491,7 @@ export function BookingFormSheet({
                   <SelectItem value="none">New / unlinked</SelectItem>
                   {customers.map((customer) => (
                     <SelectItem key={customer.id} value={String(customer.id)}>
-                      {customer.customer_name}
+                      {customerDisplayName(customer)}
                       {customer.customer_phone
                         ? ` · ${customer.customer_phone}`
                         : ""}

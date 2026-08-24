@@ -243,7 +243,7 @@ export default function DashboardPage() {
                         {invoice.invoice_number}
                       </Link>
                       <p className="truncate text-xs text-muted-foreground">
-                        {invoice.customer_name || "Customer"} ·{" "}
+                        {invoice.customer_display_name || invoice.customer_name || "Customer"} ·{" "}
                         {invoice.invoice_date
                           ? new Date(invoice.invoice_date).toLocaleDateString(
                               "en-IN"

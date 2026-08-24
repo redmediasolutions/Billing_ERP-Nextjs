@@ -71,7 +71,7 @@ export function InvoicesDashboard() {
     return invoices.filter((invoice) => {
       const matchesQuery = matchesSearch(search, [
         invoice.invoice_number,
-        invoice.customer_name,
+        invoice.customer_display_name || invoice.customer_name,
         invoice.reference,
       ]);
 
@@ -278,7 +278,7 @@ export function InvoicesDashboard() {
                           </TableCell>
 
                           <TableCell className="text-foreground">
-                            {invoice.customer_name ?? "Unknown customer"}
+                            {invoice.customer_display_name || invoice.customer_name || "Unknown customer"}
                           </TableCell>
 
                           <TableCell className="text-muted-foreground">

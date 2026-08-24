@@ -14,6 +14,11 @@ export const customersService = {
     return customers.map(normalizeCustomer);
   },
 
+  async search(query: string) {
+    const customers = await customersRepository.search(query);
+    return customers.map(normalizeCustomer);
+  },
+
   async getWalkIn() {
     const customer = await customersRepository.getWalkIn();
     return normalizeCustomer(customer);

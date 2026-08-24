@@ -39,7 +39,7 @@ export function InvoiceReceiptSheet({
         <div>
           <p className="text-zinc-500">Customer</p>
           <p className="font-sans font-semibold">
-            {invoice.customer_name || "Walk-in Customer"}
+            {invoice.customer_display_name || invoice.customer_name || "Walk-in Customer"}
           </p>
         </div>
         {invoice.table_name && (

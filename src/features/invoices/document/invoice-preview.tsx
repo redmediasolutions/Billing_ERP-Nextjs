@@ -19,6 +19,7 @@ export function InvoicePreview({
 }) {
   const invoiceRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState("");
 
   const {
     data: invoice,
@@ -33,12 +34,17 @@ export function InvoicePreview({
 
     try {
       setDownloading(true);
+      setDownloadError("");
       await downloadElementAsPdf(
         invoiceRef.current,
         format === "receipt"
           ? `${invoice.invoice_number}-receipt.pdf`
           : `${invoice.invoice_number}.pdf`,
         format === "receipt" ? "receipt" : "a4"
+      );
+    } catch (error) {
+      setDownloadError(
+        error instanceof Error ? error.message : "Unable to download the PDF."
       );
     } finally {
       setDownloading(false);
@@ -100,6 +106,12 @@ export function InvoicePreview({
           </Button>
         </div>
       </div>
+
+      {downloadError && (
+        <p className="no-print text-sm text-destructive" role="alert">
+          {downloadError}
+        </p>
+      )}
 
       {format === "receipt" ? (
         <InvoiceReceiptSheet invoice={invoice} sheetRef={invoiceRef} />

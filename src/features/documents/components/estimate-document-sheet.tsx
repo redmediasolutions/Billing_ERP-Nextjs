@@ -63,7 +63,7 @@ export function EstimateDocumentSheet({
             Bill To
           </p>
           <h2 className="mt-1 text-base font-semibold">
-            {estimate.customer_name || "Customer"}
+            {estimate.customer_display_name || estimate.customer_name || "Customer"}
           </h2>
           <p className="mt-1 whitespace-pre-line text-sm leading-relaxed text-zinc-600">
             {estimate.custom_billing_address || "No billing address"}

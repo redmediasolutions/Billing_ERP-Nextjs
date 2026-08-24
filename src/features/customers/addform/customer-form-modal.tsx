@@ -16,6 +16,8 @@ import type { Customer, CustomerInput } from "../types";
 
 const emptyCustomer: CustomerInput = {
   customer_name: "",
+  customer_title: "",
+  customer_display_name: "",
   customer_phone: "",
   customer_email: "",
   customer_gst: "",
@@ -41,6 +43,8 @@ export function CustomerFormModal({
     customer
       ? {
           customer_name: customer.customer_name || "",
+          customer_title: customer.customer_title || "",
+          customer_display_name: customer.customer_display_name || customer.customer_name || "",
           customer_phone: customer.customer_phone || "",
           customer_email: customer.customer_email || "",
           customer_gst: customer.customer_gst || "",
@@ -86,6 +90,8 @@ export function CustomerFormModal({
       await onSave({
         ...form,
         customer_name: form.customer_name.trim(),
+        customer_title: form.customer_title.trim(),
+        customer_display_name: (form.customer_display_name || form.customer_name).trim(),
         customer_phone: form.customer_phone.trim(),
         customer_email: form.customer_email.trim(),
         customer_gst: form.customer_gst.trim().toUpperCase(),

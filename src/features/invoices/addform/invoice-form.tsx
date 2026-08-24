@@ -20,8 +20,8 @@ import {
 
 import { ItemPickerDialog } from "@/features/estimates/addform/item-picker-dialog";
 import { CustomerPickerField } from "@/features/customers/components/customer-picker-field";
-import { useCustomers } from "@/features/customers/hooks/use-customers";
 import { checkStockAvailability } from "@/features/inventory/lib/stock-validation";
+import type { Customer } from "@/features/customers/types";
 
 import {
   useCreateInvoice,
@@ -128,12 +128,13 @@ export function InvoiceForm({ invoiceId }: InvoiceFormProps) {
   const { data: existing, isLoading: loadingExisting } = useInvoice(
     invoiceId ?? 0
   );
-  const { data: customers = [] } = useCustomers();
 
   const [invoiceNumber, setInvoiceNumber] = useState(
     `INV-${new Date().getFullYear()}-`
   );
   const [customerId, setCustomerId] = useState("");
+  const [billingAddress, setBillingAddress] = useState("");
+  const [deliveryAddress, setDeliveryAddress] = useState("");
   const [invoiceDate, setInvoiceDate] = useState(localDate());
   const [dueDate, setDueDate] = useState("");
   const [paymentTerms, setPaymentTerms] = useState("");
@@ -152,6 +153,8 @@ export function InvoiceForm({ invoiceId }: InvoiceFormProps) {
 
     setInvoiceNumber(existing.invoice_number);
     setCustomerId(String(existing.customer_id));
+    setBillingAddress(existing.custom_billing_address || "");
+    setDeliveryAddress(existing.custom_delivery_address || "");
     setInvoiceDate(existing.invoice_date || localDate());
     setDueDate(existing.due_date || "");
     setPaymentTerms(existing.payment_terms || "");
@@ -162,10 +165,6 @@ export function InvoiceForm({ invoiceId }: InvoiceFormProps) {
     setLineItems(mapLineItems(existing.line_items ?? []));
     setInitializedForId(invoiceId);
   }, [invoiceId, existing, initializedForId]);
-
-  const selectedCustomer = customers.find(
-    (customer) => customer.id === Number(customerId)
-  );
 
   const totals = useMemo(() => {
     const subtotal = lineItems.reduce(
@@ -281,11 +280,8 @@ export function InvoiceForm({ invoiceId }: InvoiceFormProps) {
         invoice_number: invoiceNumber.trim(),
         customer_id: Number(customerId),
 
-        custom_billing_address:
-          selectedCustomer?.customer_billing_address || "",
-
-        custom_delivery_address:
-          selectedCustomer?.customer_shipping_address || "",
+        custom_billing_address: billingAddress,
+        custom_delivery_address: deliveryAddress,
 
         invoice_date: invoiceDate,
         due_date: dueDate,
@@ -397,17 +393,21 @@ export function InvoiceForm({ invoiceId }: InvoiceFormProps) {
             <CustomerPickerField
               value={customerId}
               onChange={setCustomerId}
+              onCustomerSelect={(customer: Customer | null) => {
+                setBillingAddress(customer?.customer_billing_address || "");
+                setDeliveryAddress(customer?.customer_shipping_address || "");
+              }}
             />
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <AddressCard
                 title="Billing Address"
-                value={selectedCustomer?.customer_billing_address}
+                value={billingAddress}
               />
 
               <AddressCard
                 title="Delivery Address"
-                value={selectedCustomer?.customer_shipping_address}
+                value={deliveryAddress}
               />
             </div>
           </CardContent>
@@ -518,6 +518,17 @@ export function InvoiceForm({ invoiceId }: InvoiceFormProps) {
                         <p className="text-xs text-muted-foreground">
                           {line.unit} · HSN: {line.hsn_code || "—"}
                         </p>
+                        <Textarea
+                          value={line.description}
+                          onChange={(event) =>
+                            updateLine(line.id, {
+                              description: event.target.value,
+                            })
+                          }
+                          placeholder="Narration for this line item"
+                          rows={2}
+                          className="mt-2 min-h-0 text-xs"
+                        />
                       </TableCell>
 
                       <TableCell>

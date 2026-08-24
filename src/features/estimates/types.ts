@@ -2,6 +2,8 @@ export interface Customer {
   id: number;
   reference: string;
   customer_name: string;
+  customer_title: string | null;
+  customer_display_name: string | null;
   customer_phone: string | null;
   customer_email: string | null;
   customer_gst: string | null;
@@ -53,6 +55,7 @@ export interface Estimate {
   reference_number: string | null;
   customer_id: number;
   customer_name: string;
+  customer_display_name?: string | null;
   custom_billing_address: string | null;
   custom_delivery_address: string | null;
   estimate_date: string | null;

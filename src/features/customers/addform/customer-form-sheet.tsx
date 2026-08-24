@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Sheet,
   SheetContent,
@@ -26,6 +27,8 @@ interface CustomerFormSheetProps {
 
 const DEFAULT_FORM_DATA: CustomerInput = {
   customer_name: "",
+  customer_title: "",
+  customer_display_name: "",
   customer_business_name: "",
   customer_email: "",
   customer_phone: "",
@@ -49,6 +52,8 @@ export function CustomerFormSheet({
     if (customer) {
       setFormData({
         customer_name: customer.customer_name || "",
+        customer_title: customer.customer_title || "",
+        customer_display_name: customer.customer_display_name || customer.customer_name || "",
         customer_business_name: customer.customer_business_name || "",
         customer_email: customer.customer_email || "",
         customer_phone: customer.customer_phone || "",
@@ -64,7 +69,15 @@ export function CustomerFormSheet({
   }, [customer, open]);
 
   function handleChange(field: keyof CustomerInput, value: string) {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+      // A useful default, while still letting the user intentionally choose a
+      // different name for invoices and estimates.
+      ...(field === "customer_name" && !prev.customer_display_name
+        ? { customer_display_name: value }
+        : {}),
+    }));
   }
 
   function copyBillingToShipping() {
@@ -78,7 +91,11 @@ export function CustomerFormSheet({
     e.preventDefault();
     try {
       setSubmitting(true);
-      await onSave(formData);
+      await onSave({
+        ...formData,
+        customer_name: formData.customer_name.trim(),
+        customer_display_name: (formData.customer_display_name || formData.customer_name).trim(),
+      });
     } finally {
       setSubmitting(false);
     }
@@ -105,7 +122,14 @@ export function CustomerFormSheet({
               <User className="h-3.5 w-3.5" /> Basic Details
             </h3>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="customer_title">Title</Label>
+                <Select value={formData.customer_title} onValueChange={(value) => handleChange("customer_title", value === "none" ? "" : value)}>
+                  <SelectTrigger id="customer_title" className="w-full"><SelectValue placeholder="None" /></SelectTrigger>
+                  <SelectContent><SelectItem value="none">None</SelectItem><SelectItem value="Mr.">Mr.</SelectItem><SelectItem value="Mrs.">Mrs.</SelectItem><SelectItem value="Ms.">Ms.</SelectItem><SelectItem value="Dr.">Dr.</SelectItem><SelectItem value="Mx.">Mx.</SelectItem></SelectContent>
+                </Select>
+              </div>
               <div className="space-y-1.5">
                 <Label htmlFor="customer_name">Customer Name *</Label>
                 <Input
@@ -116,7 +140,8 @@ export function CustomerFormSheet({
                   onChange={(e) => handleChange("customer_name", e.target.value)}
                 />
               </div>
-
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label htmlFor="customer_business_name">Business Name</Label>
                 <div className="relative">
@@ -129,6 +154,11 @@ export function CustomerFormSheet({
                     onChange={(e) => handleChange("customer_business_name", e.target.value)}
                   />
                 </div>
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="customer_display_name">Display Name *</Label>
+                <Input id="customer_display_name" required placeholder="e.g. Rajesh or Acme Corp" value={formData.customer_display_name} onChange={(e) => handleChange("customer_display_name", e.target.value)} />
+                <p className="text-xs text-muted-foreground">Used on invoices, estimates, and customer selection.</p>
               </div>
             </div>
           </div>

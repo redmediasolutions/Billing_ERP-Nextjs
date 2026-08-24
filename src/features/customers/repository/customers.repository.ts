@@ -4,6 +4,11 @@ import type { Customer, CustomerInput } from "../types";
 export const customersRepository = {
   list: () => apiRequest<Customer[]>("/customers"),
 
+  search: (query: string) =>
+    apiRequest<Customer[]>(
+      `/customers?search=${encodeURIComponent(query)}&limit=10`
+    ),
+
   getWalkIn: () => apiRequest<Customer>("/customers/walk-in"),
 
   create: (input: CustomerInput) =>
