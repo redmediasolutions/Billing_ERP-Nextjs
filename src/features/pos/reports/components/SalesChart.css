@@ -3,3 +3,11 @@
   height: 260px;
   min-width: 0;
 }
+
+.sales-chart-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-faint);
+  font-size: 13px;
+}

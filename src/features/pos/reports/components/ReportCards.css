@@ -3,7 +3,7 @@
 .report-card-title { font-size: 15px; font-weight: 700; margin-top: 2px; }
 .report-card-total { text-align: right; }
 .report-card-rows { display: flex; flex-direction: column; gap: 2px; border-top: 1px solid var(--border); padding-top: 10px; }
-.channel-row { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 12px; padding: 6px 0; font-size: 13px; }
-.channel-row-label { display: flex; align-items: center; gap: 7px; font-weight: 500; }
+.channel-row { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 12px; padding: 6px 0; font-size: 13px; min-width: 0; }
+.channel-row-label { display: flex; align-items: center; gap: 7px; font-weight: 500; min-width: 0; }
 .channel-row-strong { border-top: 1px dashed var(--border); margin-top: 4px; padding-top: 10px; font-weight: 700; }
 .channel-row-amount { min-width: 84px; text-align: right; }

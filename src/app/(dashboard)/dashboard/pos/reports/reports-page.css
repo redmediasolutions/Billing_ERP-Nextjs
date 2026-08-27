@@ -1,0 +1,117 @@
+.pos-reports-stats {
+  margin-bottom: 20px;
+}
+
+.pos-reports-chart-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+@media (max-width: 860px) {
+  .pos-reports-page .page-header {
+    margin-bottom: 14px;
+  }
+
+  .pos-reports-page .page-title {
+    font-size: 18px;
+  }
+
+  .pos-reports-page .page-subtitle {
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .pos-reports-page .pos-reports-stats {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .pos-reports-page .report-card {
+    padding: 12px 14px;
+  }
+
+  .pos-reports-page .report-card-head {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .pos-reports-page .report-card-total {
+    text-align: left;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .pos-reports-page .report-card-total .amount {
+    font-size: 18px !important;
+    min-width: 0;
+    overflow: visible;
+    white-space: nowrap;
+  }
+
+  .pos-reports-page .channel-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "label amount"
+      "count amount";
+    column-gap: 8px;
+    row-gap: 0;
+    padding: 8px 0;
+  }
+
+  .pos-reports-page .channel-row-label {
+    grid-area: label;
+    min-width: 0;
+  }
+
+  .pos-reports-page .channel-row-count {
+    grid-area: count;
+    padding-left: 21px;
+  }
+
+  .pos-reports-page .channel-row-amount {
+    grid-area: amount;
+    min-width: 0;
+    justify-self: end;
+    align-self: center;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  .pos-reports-page .pos-reports-chart-card .card-header {
+    padding: 14px 14px 0;
+  }
+
+  .pos-reports-page .pos-reports-chart-card .card-content {
+    padding: 12px 10px 14px;
+  }
+
+  .pos-reports-page .pos-reports-chart-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .pos-reports-page .pos-reports-period-tabs {
+    display: flex;
+    width: 100%;
+  }
+
+  .pos-reports-page .pos-reports-period-tabs .tab-btn {
+    flex: 1;
+    justify-content: center;
+    height: 34px;
+    padding: 0 8px;
+    font-size: 12px;
+  }
+
+  .pos-reports-page .sales-chart {
+    height: 220px;
+  }
+}

@@ -34,6 +34,7 @@ import { ProfileMenu } from "@/components/profile-menu";
 import { buildSearchUrl, isNavLinkActive } from "@/lib/erp-search";
 import { BusinessLogo } from "@/features/tenant/components/business-logo";
 import { useTenant } from "@/features/tenant/hooks/use-tenant";
+import { isPosOnlyTenant } from "@/lib/pos-only-tenants";
 
 const modules = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard, group: "Home" },
@@ -69,6 +70,7 @@ export function TopNavigation() {
   const isDashboardHome = pathname === "/dashboard";
   const { data: tenant } = useTenant();
   const businessName = tenant?.business_name || "Billing ERP";
+  const posOnly = isPosOnlyTenant(tenant?.id);
 
   const activeModule = useMemo(() => {
     const match = modules.find((item) => {
@@ -135,6 +137,12 @@ export function TopNavigation() {
       <div className="flex h-14 items-center gap-3 px-4 lg:px-6">
         <div className="flex min-w-0 flex-1 items-center gap-3">
           <div className="relative shrink-0" ref={menuRef}>
+            {posOnly ? (
+              <div className="flex max-w-[220px] items-center gap-2 px-3 py-2">
+                <BusinessLogo tenant={tenant} size="sm" />
+                <span className="truncate font-semibold">{businessName}</span>
+              </div>
+            ) : (
             <Button
               variant="ghost"
               onClick={() => setOpen((v) => !v)}
@@ -157,8 +165,9 @@ export function TopNavigation() {
                 className={`shrink-0 transition-transform ${open ? "rotate-180" : ""}`}
               />
             </Button>
+            )}
 
-            {open && (
+            {!posOnly && open && (
               <div className="absolute mt-2 w-[22rem] rounded-2xl border border-border bg-popover p-3 shadow-xl">
                 <div className="relative mb-3">
                   <Search

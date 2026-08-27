@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/fea
 import { useReportSummary, useTimeseries } from "@/features/pos/reports/hooks/useReports";
 import { ChannelBreakdownCard } from "@/features/pos/reports/components/ReportCards";
 import { SalesChart } from "@/features/pos/reports/components/SalesChart";
+import "./reports-page.css";
 
 export default function ReportsPage() {
   const { summary, loading, error } = useReportSummary();
@@ -12,7 +13,7 @@ export default function ReportsPage() {
   const { data: timeseries, loading: chartLoading } = useTimeseries(period);
 
   return (
-    <div className="container-page">
+    <div className="container-page pos-reports-page">
       <div className="page-header">
         <div>
           <div className="eyebrow">Performance</div>
@@ -24,7 +25,7 @@ export default function ReportsPage() {
       {error && <p className="text-sm" style={{ color: "var(--danger)" }}>{error}</p>}
 
       {!loading && summary && (
-        <div className="stat-grid" style={{ marginBottom: 20 }}>
+        <div className="stat-grid pos-reports-stats">
           <ChannelBreakdownCard
             title="Today"
             subtitle="Since midnight"
@@ -49,14 +50,15 @@ export default function ReportsPage() {
         </div>
       )}
 
-      <Card>
+      <Card className="pos-reports-chart-card">
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="pos-reports-chart-head">
             <div>
               <CardTitle>Sales by day</CardTitle>
               <CardDescription>Walk-in vs cloud kitchen, stacked by day</CardDescription>
             </div>
             <Tabs
+              className="pos-reports-period-tabs"
               value={period}
               onChange={(v) => setPeriod(v as "week" | "month")}
               options={[
