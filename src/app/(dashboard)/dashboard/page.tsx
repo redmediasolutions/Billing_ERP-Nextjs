@@ -29,6 +29,7 @@ import { useStocks } from "@/features/stocks/hooks/use-stocks";
 import { useExpenseSummary } from "@/features/expenses/hooks/use-expenses";
 import { useEnquirySummary } from "@/features/enquiries/hooks/use-enquiries";
 import { useBookingSummary } from "@/features/bookings/hooks/use-bookings";
+import { useWarrantySummary } from "@/features/warranty/hooks/use-warranty";
 
 const money = new Intl.NumberFormat("en-IN", {
   style: "currency",
@@ -47,6 +48,7 @@ export default function DashboardPage() {
   const { data: expenseSummary } = useExpenseSummary();
   const { data: enquirySummary } = useEnquirySummary();
   const { data: bookingSummary } = useBookingSummary();
+  const { data: warrantySummary } = useWarrantySummary();
   const { summary, loading: reportsLoading } = useReportSummary();
 
   const statsLoading =
@@ -319,7 +321,7 @@ export default function DashboardPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-8">
             <SnapshotItem label="Brands" value={brands.length} href="/dashboard/brands" />
             <SnapshotItem label="Products" value={products.length} href="/dashboard/products" />
             <SnapshotItem
@@ -346,6 +348,11 @@ export default function DashboardPage() {
               label="Bookings today"
               value={bookingSummary?.today ?? 0}
               href="/dashboard/bookings?filter=today"
+            />
+            <SnapshotItem
+              label="Warranties expiring"
+              value={warrantySummary?.expiring_soon ?? 0}
+              href="/dashboard/warranty?filter=expiring"
             />
           </div>
         </CardContent>

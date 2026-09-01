@@ -19,6 +19,7 @@ import {
   CalendarDays,
   FileText,
   Search,
+  ShieldCheck,
   Store,
 } from "lucide-react";
 
@@ -44,6 +45,7 @@ const modules = [
   { label: "Customers", href: "/dashboard/customers", icon: Users, group: "Sales" },
   { label: "Enquiries", href: "/dashboard/enquiries", icon: PhoneCall, group: "Sales" },
   { label: "Bookings", href: "/dashboard/bookings", icon: CalendarDays, group: "Sales" },
+  { label: "Warranty", href: "/dashboard/warranty", icon: ShieldCheck, group: "Sales" },
   { label: "Items", href: "/dashboard/items", icon: Package, group: "Catalog" },
   { label: "Inventory", href: "/dashboard/inventory", icon: Warehouse, group: "Catalog" },
   { label: "Vendors", href: "/dashboard/vendors", icon: Truck, group: "Operations" },

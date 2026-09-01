@@ -74,6 +74,14 @@ export const moduleMenus = {
     { label: "Resources", href: "/dashboard/bookings/resources" },
   ],
 
+  warranty: [
+    { label: "Registrations", href: "/dashboard/warranty" },
+    { label: "Claims", href: "/dashboard/warranty?view=claims" },
+    { label: "Active", href: "/dashboard/warranty?filter=active" },
+    { label: "Expiring", href: "/dashboard/warranty?filter=expiring" },
+    { label: "Open claims", href: "/dashboard/warranty?filter=open_claims&view=claims" },
+  ],
+
   employees: [
     { label: "Employees", href: "/dashboard/employees" },
     { label: "Payroll", href: "/dashboard/payroll" },
@@ -111,6 +119,7 @@ export function getCurrentModule(pathname: string): keyof typeof moduleMenus {
   if (pathname.startsWith("/dashboard/customers")) return "customers";
   if (pathname.startsWith("/dashboard/enquiries")) return "enquiries";
   if (pathname.startsWith("/dashboard/bookings")) return "bookings";
+  if (pathname.startsWith("/dashboard/warranty")) return "warranty";
   if (pathname.startsWith("/dashboard/employees")) return "employees";
   if (pathname.startsWith("/dashboard/payroll")) return "payroll";
 
