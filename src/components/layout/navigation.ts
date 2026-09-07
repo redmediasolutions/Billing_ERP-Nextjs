@@ -94,6 +94,11 @@ export const moduleMenus = {
     { label: "Reports", href: "/dashboard/pos/reports" },
   ],
 
+  subscription: [
+    { label: "Licence", href: "/dashboard/subscription" },
+    { label: "Packages", href: "/dashboard/subscription#packages" },
+  ],
+
   reports: [
     { label: "POS Reports", href: "/dashboard/pos/reports" },
     { label: "POS Invoices", href: "/dashboard/pos/invoices" },
@@ -122,6 +127,7 @@ export function getCurrentModule(pathname: string): keyof typeof moduleMenus {
   if (pathname.startsWith("/dashboard/warranty")) return "warranty";
   if (pathname.startsWith("/dashboard/employees")) return "employees";
   if (pathname.startsWith("/dashboard/payroll")) return "payroll";
+  if (pathname.startsWith("/dashboard/subscription")) return "subscription";
 
   return "dashboard";
 }

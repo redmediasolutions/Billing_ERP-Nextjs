@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { User, onAuthStateChanged, signOut } from "firebase/auth";
-import { LogOut, Mail, UserCircle } from "lucide-react";
+import { CreditCard, LogOut, Mail, UserCircle } from "lucide-react";
 
 import { auth } from "@/firebase/config";
 
@@ -87,6 +87,16 @@ export function ProfileMenu() {
             </div>
           </div>
         </DropdownMenuLabel>
+
+        <DropdownMenuSeparator />
+
+        <DropdownMenuItem
+          onClick={() => router.push("/dashboard/subscription")}
+          className="cursor-pointer"
+        >
+          <CreditCard className="mr-2 h-4 w-4" />
+          Subscription
+        </DropdownMenuItem>
 
         <DropdownMenuSeparator />
 

@@ -21,5 +21,11 @@ export interface Tenant {
   is_active: boolean;
   subscription_plan: string | null;
   subscription_expiry: string | null;
+  subscription_cycle?: "monthly" | "yearly" | null;
+  subscription_started_on?: string | null;
+  subscription_amount?: number | string | null;
+  subscription_status?: string | null;
+  subscription_seats?: number | string | null;
+  subscription_auto_renew?: boolean | number | string | null;
   created_at: string;
 }

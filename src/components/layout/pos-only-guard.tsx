@@ -13,6 +13,7 @@ export function PosOnlyGuard() {
   useEffect(() => {
     if (!isPosOnlyTenant(tenant?.id)) return;
     if (pathname.startsWith("/dashboard/pos")) return;
+    if (pathname.startsWith("/dashboard/subscription")) return;
     router.replace("/dashboard/pos");
   }, [tenant?.id, pathname, router]);
 

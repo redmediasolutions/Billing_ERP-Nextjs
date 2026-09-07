@@ -16,6 +16,7 @@ const MODULE_SEARCH_PATHS: Record<string, string> = {
   employees: "/dashboard/employees",
   payroll: "/dashboard/payroll",
   reports: "/dashboard/pos/invoices",
+  subscription: "/dashboard/subscription",
 };
 
 export function getModuleSearchPath(pathname: string) {
