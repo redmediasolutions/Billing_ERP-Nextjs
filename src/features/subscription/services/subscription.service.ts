@@ -10,7 +10,6 @@ import {
   subscriptionFromTenant,
 } from "../lib/entitlement";
 import type {
-  SubscriptionAssignInput,
   SubscriptionInvoice,
   SubscriptionRenewRequestInput,
   TenantSubscription,
@@ -65,13 +64,6 @@ export const subscriptionService = {
       }
       throw error;
     }
-  },
-
-  async assign(input: SubscriptionAssignInput) {
-    const remote = await subscriptionRepository.assign(input);
-    return normalizeSubscription(
-      remote as TenantSubscription & Record<string, unknown>
-    );
   },
 
   requestRenewal: (input: SubscriptionRenewRequestInput) =>

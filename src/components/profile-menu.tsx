@@ -4,9 +4,10 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { User, onAuthStateChanged, signOut } from "firebase/auth";
-import { CreditCard, LogOut, Mail, UserCircle } from "lucide-react";
+import { Building2, CreditCard, LogOut, Mail, UserCircle } from "lucide-react";
 
 import { auth } from "@/firebase/config";
+import { usePlatformAdmin } from "@/hooks/use-platform-admin";
 
 import {
   DropdownMenu,
@@ -25,6 +26,7 @@ export function ProfileMenu() {
 
   const [mounted, setMounted] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const { isPlatformAdmin } = usePlatformAdmin();
 
   useEffect(() => {
     setMounted(true);
@@ -95,8 +97,18 @@ export function ProfileMenu() {
           className="cursor-pointer"
         >
           <CreditCard className="mr-2 h-4 w-4" />
-          Subscription
+          Software licence
         </DropdownMenuItem>
+
+        {isPlatformAdmin ? (
+          <DropdownMenuItem
+            onClick={() => router.push("/dashboard/platform/licenses")}
+            className="cursor-pointer"
+          >
+            <Building2 className="mr-2 h-4 w-4" />
+            Tenant licences
+          </DropdownMenuItem>
+        ) : null}
 
         <DropdownMenuSeparator />
 

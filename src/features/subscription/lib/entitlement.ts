@@ -1,4 +1,5 @@
 import type { Tenant } from "@/features/tenant/types";
+import { platformBilling } from "@/lib/platform-billing";
 
 import { getPlanByCode } from "./plans";
 import type {
@@ -11,11 +12,20 @@ import type {
 /** Days after expiry when the company can still work before lock. */
 export const GRACE_DAYS = 7;
 
-/** Persistent top banner window (Zoho-style renewal reminder). */
-export const BANNER_WITHIN_DAYS = 15;
+/** Banner starts this many days before expiry (cycle-aware). */
+export function bannerWithinDays(cycle: BillingCycle | null | undefined) {
+  return cycle === "monthly" ? 7 : 15;
+}
 
-/** Modal reminder cadence — once per calendar day on these remaining days. */
-export const NAG_REMAINING_DAYS = [7, 5, 3, 1, 0] as const;
+/** Popup once per day on these remaining days (cycle-aware). */
+export function nagRemainingDays(
+  cycle: BillingCycle | null | undefined
+): readonly number[] {
+  return cycle === "monthly" ? [5, 3, 1, 0] : [14, 7, 5, 3, 1, 0];
+}
+
+/** @deprecated use bannerWithinDays(cycle) */
+export const BANNER_WITHIN_DAYS = 15;
 
 function startOfLocalDay(value: Date) {
   return new Date(value.getFullYear(), value.getMonth(), value.getDate());
@@ -97,16 +107,22 @@ function asNumber(value: unknown) {
 export function deriveStatus(input: {
   expiresOn: string | null;
   graceEndsOn: string | null;
+  billingCycle?: BillingCycle | null;
   reportedStatus?: string | null;
   now?: Date;
 }): SubscriptionStatus {
+  const bannerDays = bannerWithinDays(input.billingCycle);
   const reported = String(input.reportedStatus || "").toLowerCase();
   if (reported === "cancelled") return "cancelled";
   if (reported === "locked" || reported === "suspended") return "locked";
   if (reported === "trial") {
     const remaining = daysUntil(input.expiresOn, input.now);
     if (remaining != null && remaining < 0) {
-      return deriveStatus({ ...input, reportedStatus: null });
+      return deriveStatus({
+        ...input,
+        reportedStatus: null,
+        billingCycle: input.billingCycle,
+      });
     }
     return "trial";
   }
@@ -116,8 +132,8 @@ export function deriveStatus(input: {
   const remaining = daysUntil(input.expiresOn, input.now);
   if (remaining == null) return "unconfigured";
 
-  if (remaining > BANNER_WITHIN_DAYS) return "active";
-  if (remaining >= 0) return remaining <= 7 ? "due_soon" : "active";
+  if (remaining > bannerDays) return "active";
+  if (remaining >= 0) return "due_soon";
 
   const untilLock = daysUntil(input.graceEndsOn, input.now);
   if (untilLock != null && untilLock >= 0) return "grace";
@@ -140,19 +156,23 @@ export function buildEntitlement(
 
   const canUseApp = status !== "locked" && status !== "cancelled";
   const isBlocking = status === "locked";
+  const cycle = subscription?.billing_cycle ?? null;
+  const bannerDays = bannerWithinDays(cycle);
+  const nagDays = nagRemainingDays(cycle);
+
   const showBanner =
     status === "due_soon" ||
     status === "grace" ||
     status === "locked" ||
     status === "cancelled" ||
-    (status === "trial" && daysRemaining != null && daysRemaining <= BANNER_WITHIN_DAYS);
+    (status === "trial" &&
+      daysRemaining != null &&
+      daysRemaining <= bannerDays);
   const showNag =
     status === "grace" ||
     status === "locked" ||
     (daysRemaining != null &&
-      NAG_REMAINING_DAYS.includes(
-        daysRemaining as (typeof NAG_REMAINING_DAYS)[number]
-      ));
+      nagDays.includes(daysRemaining as (typeof nagDays)[number]));
 
   return {
     plan,
@@ -194,6 +214,7 @@ export function subscriptionFromTenant(
   const status = deriveStatus({
     expiresOn,
     graceEndsOn,
+    billingCycle: cycle,
     reportedStatus: tenant.subscription_status,
   });
 
@@ -238,7 +259,11 @@ export function normalizeSubscription(
   const status = deriveStatus({
     expiresOn,
     graceEndsOn,
-    reportedStatus: (raw.status as string | null) || fallback?.status,
+    billingCycle: cycle,
+    reportedStatus:
+      (raw.status as string | null) ||
+      (raw.subscription_status as string | null) ||
+      fallback?.status,
   });
 
   return {
@@ -300,13 +325,31 @@ export function statusBadgeVariant(status: SubscriptionStatus) {
   }
 }
 
+export function extendOneBillingPeriod(
+  expiresOn: string | null,
+  cycle: BillingCycle
+) {
+  const today = startOfLocalDay(new Date());
+  const current = parseDateOnly(expiresOn);
+  const base =
+    current && current.getTime() > today.getTime() ? current : today;
+  return addMonthsIso(toIsoDate(base), cycle === "yearly" ? 12 : 1);
+}
+
+export function cycleLabel(cycle: BillingCycle | null | undefined) {
+  if (cycle === "monthly") return "monthly";
+  if (cycle === "yearly") return "yearly";
+  return "licence";
+}
+
 export function nagCopy(entitlement: SubscriptionEntitlement) {
-  const planName = entitlement.plan?.name ?? "your plan";
+  const planName = entitlement.plan?.name ?? "your ERP licence";
+  const cycle = cycleLabel(entitlement.billingCycle);
 
   if (entitlement.status === "locked") {
     return {
       title: "This workspace is locked",
-      description: `Payment for ${planName} was not received. Billing ERP is frozen until the subscription is renewed.`,
+      description: `Your licence fee was not received. ${platformBilling.providerName} is frozen until your subscription is renewed.`,
       cta: "Pay now",
     };
   }
@@ -318,7 +361,7 @@ export function nagCopy(entitlement: SubscriptionEntitlement) {
         days === 0
           ? "Last day of grace — app locks tonight"
           : `Grace period: ${days} day${days === 1 ? "" : "s"} until lock`,
-      description: `${planName} expired on ${formatDateOnly(entitlement.expiresOn)}. Renew now to keep invoices, POS, and inventory unlocked.`,
+      description: `Your ${planName} licence expired on ${formatDateOnly(entitlement.expiresOn)}. Pay ${platformBilling.providerName} to keep using the ERP.`,
       cta: "Renew now",
     };
   }
@@ -327,9 +370,9 @@ export function nagCopy(entitlement: SubscriptionEntitlement) {
   return {
     title:
       days === 0
-        ? "Your subscription expires today"
-        : `In ${days} day${days === 1 ? "" : "s"} this app will lock if you don't pay`,
-    description: `${planName} renews on ${formatDateOnly(entitlement.expiresOn)}. Settle the invoice before the grace period ends or the workspace will be frozen.`,
+        ? `Your ${cycle} licence expires today`
+        : `In ${days} day${days === 1 ? "" : "s"} your ERP will lock if renewal isn't paid`,
+    description: `Your ${planName} (${cycle}) licence ends on ${formatDateOnly(entitlement.expiresOn)}. Pay ${platformBilling.providerName} before the ${GRACE_DAYS}-day grace period ends or the software locks.`,
     cta: "Pay now",
   };
 }

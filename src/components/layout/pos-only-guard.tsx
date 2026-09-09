@@ -14,6 +14,7 @@ export function PosOnlyGuard() {
     if (!isPosOnlyTenant(tenant?.id)) return;
     if (pathname.startsWith("/dashboard/pos")) return;
     if (pathname.startsWith("/dashboard/subscription")) return;
+    if (pathname.startsWith("/dashboard/platform")) return;
     router.replace("/dashboard/pos");
   }, [tenant?.id, pathname, router]);
 

@@ -11,10 +11,7 @@ import { tenantKeys, useTenant } from "@/features/tenant/hooks/use-tenant";
 
 import { buildEntitlement } from "../lib/entitlement";
 import { subscriptionService } from "../services/subscription.service";
-import type {
-  SubscriptionAssignInput,
-  SubscriptionRenewRequestInput,
-} from "../types";
+import type { SubscriptionRenewRequestInput } from "../types";
 
 export const subscriptionKeys = {
   all: ["subscription"] as const,
@@ -24,11 +21,7 @@ export const subscriptionKeys = {
 
 function useClientReady() {
   const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    setReady(true);
-  }, []);
-
+  useEffect(() => setReady(true), []);
   return ready;
 }
 
@@ -68,7 +61,6 @@ export function useSubscriptionEntitlement() {
 
 export function useSubscriptionInvoices() {
   const ready = useClientReady();
-
   return useQuery({
     queryKey: subscriptionKeys.invoices(),
     queryFn: subscriptionService.invoices,
@@ -77,27 +69,13 @@ export function useSubscriptionInvoices() {
   });
 }
 
-function invalidateBilling(queryClient: ReturnType<typeof useQueryClient>) {
-  queryClient.invalidateQueries({ queryKey: subscriptionKeys.all });
-  queryClient.invalidateQueries({ queryKey: tenantKeys.current });
-}
-
-export function useAssignSubscription() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (input: SubscriptionAssignInput) =>
-      subscriptionService.assign(input),
-    onSuccess: () => invalidateBilling(queryClient),
-  });
-}
-
 export function useRequestSubscriptionRenewal() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (input: SubscriptionRenewRequestInput) =>
       subscriptionService.requestRenewal(input),
-    onSuccess: () => invalidateBilling(queryClient),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: subscriptionKeys.all });
+    },
   });
 }

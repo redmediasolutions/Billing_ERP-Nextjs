@@ -95,8 +95,11 @@ export const moduleMenus = {
   ],
 
   subscription: [
-    { label: "Licence", href: "/dashboard/subscription" },
-    { label: "Packages", href: "/dashboard/subscription#packages" },
+    { label: "Software licence", href: "/dashboard/subscription" },
+  ],
+
+  platform: [
+    { label: "Tenant licences", href: "/dashboard/platform/licenses" },
   ],
 
   reports: [
@@ -128,6 +131,7 @@ export function getCurrentModule(pathname: string): keyof typeof moduleMenus {
   if (pathname.startsWith("/dashboard/employees")) return "employees";
   if (pathname.startsWith("/dashboard/payroll")) return "payroll";
   if (pathname.startsWith("/dashboard/subscription")) return "subscription";
+  if (pathname.startsWith("/dashboard/platform")) return "platform";
 
   return "dashboard";
 }

@@ -2,13 +2,13 @@
 
 import { useEffect, useMemo, useState } from "react";
 import {
+  AlertTriangle,
   CalendarClock,
   Check,
   CreditCard,
   Landmark,
   Loader2,
   ShieldCheck,
-  Sparkles,
 } from "lucide-react";
 
 import { EmptyState } from "@/components/empty-state";
@@ -24,9 +24,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useTenant } from "@/features/tenant/hooks/use-tenant";
-import { company } from "@/lib/company";
+import { platformBilling } from "@/lib/platform-billing";
 
-import { PlanAssignSheet } from "../addform/plan-assign-sheet";
 import { RenewRequestSheet } from "../addform/renew-request-sheet";
 import {
   useSubscription,
@@ -39,7 +38,6 @@ import {
   statusBadgeVariant,
   statusLabel,
 } from "../lib/entitlement";
-import { SUBSCRIPTION_PLANS, planPrice } from "../lib/plans";
 
 const money = new Intl.NumberFormat("en-IN", {
   style: "currency",
@@ -49,31 +47,25 @@ const money = new Intl.NumberFormat("en-IN", {
 
 export function SubscriptionDashboard() {
   const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  useEffect(() => setMounted(true), []);
 
   if (!mounted) {
-    return (
-      <section className="w-full space-y-6 text-left">
-        <div className="space-y-1">
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Billing
-          </p>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            Subscription
-          </h1>
-        </div>
-        <div className="flex h-48 items-center justify-center gap-2 text-muted-foreground">
-          <Loader2 className="h-5 w-5 animate-spin" />
-          Loading subscription...
-        </div>
-      </section>
-    );
+    return <SubscriptionLoading />;
   }
 
   return <SubscriptionDashboardLoaded />;
+}
+
+function SubscriptionLoading() {
+  return (
+    <section className="w-full space-y-6 text-left">
+      <Header />
+      <div className="flex h-48 items-center justify-center gap-2 text-muted-foreground">
+        <Loader2 className="h-5 w-5 animate-spin" />
+        Loading licence...
+      </div>
+    </section>
+  );
 }
 
 function SubscriptionDashboardLoaded() {
@@ -81,134 +73,116 @@ function SubscriptionDashboardLoaded() {
   const { data: subscription, isLoading, error } = useSubscription();
   const { entitlement } = useSubscriptionEntitlement();
   const invoicesQuery = useSubscriptionInvoices();
-
-  const [assignOpen, setAssignOpen] = useState(false);
   const [renewOpen, setRenewOpen] = useState(false);
 
-  const optedCode = String(entitlement.planCode || "").toLowerCase();
   const invoices = invoicesQuery.data ?? [];
+  const renewalFee =
+    subscription?.amount != null ? money.format(subscription.amount) : "—";
 
   const countdownLabel = useMemo(() => {
-    if (entitlement.status === "locked") return "Workspace locked";
+    if (entitlement.status === "locked") return "Software locked";
     if (entitlement.status === "grace") {
       const days = Math.max(entitlement.daysUntilLock ?? 0, 0);
       return days === 0
         ? "Locks today"
         : `${days} day${days === 1 ? "" : "s"} until lock`;
     }
-    if (entitlement.daysRemaining == null) return "No expiry set";
+    if (entitlement.daysRemaining == null) return "No expiry on file";
     if (entitlement.daysRemaining < 0) return "Expired";
     if (entitlement.daysRemaining === 0) return "Expires today";
-    return `${entitlement.daysRemaining} day${entitlement.daysRemaining === 1 ? "" : "s"} remaining`;
+    return `${entitlement.daysRemaining} day${entitlement.daysRemaining === 1 ? "" : "s"} left`;
   }, [entitlement]);
 
-  const kpis = [
-    {
-      title: "Licensed package",
-      value: entitlement.plan?.name ?? subscription?.plan_name ?? "Not assigned",
-      hint: entitlement.billingCycle
-        ? `${entitlement.billingCycle} billing`
-        : "Set the opted package on this company",
-      icon: Sparkles,
-    },
-    {
-      title: "Licence status",
-      value: statusLabel(entitlement.status),
-      hint:
-        entitlement.status === "unconfigured"
-          ? "Grandfathered until an expiry is saved"
-          : `${GRACE_DAYS}-day grace after expiry`,
-      icon: ShieldCheck,
-    },
-    {
-      title: "Countdown",
-      value: countdownLabel,
-      hint: `Renews ${formatDateOnly(entitlement.expiresOn)}`,
-      icon: CalendarClock,
-    },
-    {
-      title: "Licensed amount",
-      value:
-        subscription?.amount != null
-          ? money.format(subscription.amount)
-          : "—",
-      hint: subscription?.source === "api" ? "From billing API" : "Confirm on save",
-      icon: CreditCard,
-    },
-  ];
+  const urgent =
+    entitlement.status === "due_soon" ||
+    entitlement.status === "grace" ||
+    entitlement.status === "locked";
 
   return (
     <section className="w-full space-y-6 text-left">
       <div className="flex w-full flex-col items-start gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-1">
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Billing
-          </p>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            Subscription
-          </h1>
-          <p className="max-w-2xl text-sm text-muted-foreground">
-            Company licence for {tenant?.business_name || "this workspace"}.
-            The opted package lives on the tenant record — reminders, grace,
-            and lock follow the expiry date.
-          </p>
-        </div>
+        <Header businessName={tenant?.business_name} />
 
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setAssignOpen(true)}>
-            Set licensed plan
-          </Button>
-          <Button onClick={() => setRenewOpen(true)}>Pay / renew</Button>
-        </div>
+        <Button onClick={() => setRenewOpen(true)} className="gap-2">
+          <CreditCard className="h-4 w-4" />
+          Pay / renew
+        </Button>
       </div>
+
+      {urgent ? (
+        <Card className="border-amber-500/40 bg-amber-500/10">
+          <CardContent className="flex items-start gap-3 p-4">
+            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-700 dark:text-amber-300" />
+            <div className="text-sm">
+              <p className="font-semibold">
+                {entitlement.status === "locked"
+                  ? "Your ERP licence has expired"
+                  : "Renewal required soon"}
+              </p>
+              <p className="mt-1 text-muted-foreground">
+                {entitlement.status === "locked"
+                  ? `Pay ${platformBilling.providerName} to unlock ${tenant?.business_name || "your workspace"}.`
+                  : `Licence ends ${formatDateOnly(entitlement.expiresOn)}. After ${GRACE_DAYS} days grace the software locks.`}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      ) : null}
 
       {isLoading ? (
         <div className="flex h-48 items-center justify-center gap-2 text-muted-foreground">
           <Loader2 className="h-5 w-5 animate-spin" />
-          Loading subscription...
+          Loading licence...
         </div>
       ) : error ? (
         <Card>
           <CardContent className="p-6">
             <p className="text-sm font-medium text-destructive">
-              Unable to load subscription.
+              Unable to load licence details.
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
-              {error instanceof Error ? error.message : "Check /tenant and /subscription."}
+              {error instanceof Error ? error.message : "Try again later."}
             </p>
           </CardContent>
         </Card>
       ) : (
         <>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            {kpis.map((item) => {
-              const Icon = item.icon;
-              return (
-                <Card key={item.title}>
-                  <CardContent className="flex items-center justify-between p-6">
-                    <div className="min-w-0">
-                      <p className="text-sm text-muted-foreground">{item.title}</p>
-                      <h2 className="mt-2 truncate text-2xl font-bold tracking-tight">
-                        {item.value}
-                      </h2>
-                      <p className="mt-1 truncate text-xs text-muted-foreground">
-                        {item.hint}
-                      </p>
-                    </div>
-                    <div className="rounded-2xl bg-primary/10 p-3 text-primary">
-                      <Icon className="h-6 w-6" />
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
+            <Kpi
+              title="Your package"
+              value={subscription?.plan_name ?? "Not assigned"}
+              hint={
+                subscription?.billing_cycle
+                  ? `${subscription.billing_cycle} billing`
+                  : "Assigned by " + platformBilling.providerName
+              }
+              icon={ShieldCheck}
+            />
+            <Kpi
+              title="Status"
+              value={statusLabel(entitlement.status)}
+              hint={`${GRACE_DAYS}-day grace after expiry`}
+              icon={ShieldCheck}
+            />
+            <Kpi
+              title="Countdown"
+              value={countdownLabel}
+              hint={`Valid until ${formatDateOnly(entitlement.expiresOn)}`}
+              icon={CalendarClock}
+            />
+            <Kpi
+              title="Your renewal fee"
+              value={renewalFee}
+              hint="Custom price for your company"
+              icon={CreditCard}
+            />
           </div>
 
           <div className="grid gap-6 lg:grid-cols-3">
             <Card className="lg:col-span-2">
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center justify-between gap-3 text-base">
-                  <span>Current licence</span>
+                  <span>Licence details</span>
                   <Badge variant={statusBadgeVariant(entitlement.status)}>
                     {statusLabel(entitlement.status)}
                   </Badge>
@@ -216,34 +190,33 @@ function SubscriptionDashboardLoaded() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <dl className="grid gap-3 sm:grid-cols-2">
-                  <InfoRow
-                    label="Opted package"
-                    value={
-                      entitlement.plan?.name ??
-                      subscription?.plan_name ??
-                      "Not assigned"
-                    }
-                  />
-                  <InfoRow
+                  <Info label="Package" value={subscription?.plan_name ?? "—"} />
+                  <Info
                     label="Billing cycle"
                     value={
-                      entitlement.billingCycle
-                        ? entitlement.billingCycle === "yearly"
-                          ? "Yearly"
-                          : "Monthly"
-                        : "—"
+                      subscription?.billing_cycle === "yearly"
+                        ? "Yearly"
+                        : subscription?.billing_cycle === "monthly"
+                          ? "Monthly"
+                          : "—"
                     }
                   />
-                  <InfoRow
+                  <Info
                     label="Valid until"
                     value={formatDateOnly(entitlement.expiresOn)}
                   />
-                  <InfoRow
+                  <Info
                     label="Grace ends"
                     value={formatDateOnly(entitlement.graceEndsOn)}
                   />
+                  <Info label="Renewal fee" value={renewalFee} />
+                  <Info
+                    label="Provider"
+                    value={platformBilling.providerName}
+                  />
                 </dl>
-                {entitlement.plan ? (
+
+                {entitlement.plan?.features?.length ? (
                   <ul className="grid gap-2 sm:grid-cols-2">
                     {entitlement.plan.features.map((feature) => (
                       <li
@@ -257,9 +230,8 @@ function SubscriptionDashboardLoaded() {
                   </ul>
                 ) : (
                   <p className="text-sm text-muted-foreground">
-                    No package is licensed yet. Use Set licensed plan after
-                    the tenant opts for Starter, Professional, Business, or
-                    Enterprise.
+                    {platformBilling.providerName} has not assigned a package
+                    yet. Contact {platformBilling.email}.
                   </p>
                 )}
               </CardContent>
@@ -269,109 +241,35 @@ function SubscriptionDashboardLoaded() {
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 text-base">
                   <Landmark className="h-4 w-4" />
-                  How to pay
+                  Pay {platformBilling.providerName}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 text-sm">
                 <p className="text-muted-foreground">
-                  Offline settlement, same as a typical ERP licence — UPI or
-                  bank transfer, then accounts extends the expiry.
+                  Transfer the renewal fee above, then tap Pay / renew and send
+                  your payment reference.
                 </p>
-                {tenant?.business_upi ? (
-                  <p>
-                    <span className="text-muted-foreground">UPI · </span>
-                    {tenant.business_upi}
-                  </p>
-                ) : null}
-                {tenant?.business_bank ? (
-                  <p>
-                    <span className="text-muted-foreground">Bank · </span>
-                    {tenant.business_bank}
-                  </p>
-                ) : null}
                 <p>
-                  <span className="text-muted-foreground">Billing · </span>
-                  {company.email}
+                  <span className="text-muted-foreground">UPI · </span>
+                  {platformBilling.upi}
+                </p>
+                <p>
+                  <span className="text-muted-foreground">Bank · </span>
+                  {platformBilling.bank}
+                </p>
+                <p>
+                  <span className="text-muted-foreground">Email · </span>
+                  {platformBilling.email}
                 </p>
                 <p>
                   <span className="text-muted-foreground">Phone · </span>
-                  {company.phone}
+                  {platformBilling.phone}
                 </p>
                 <Button className="w-full" onClick={() => setRenewOpen(true)}>
-                  Send payment notice
+                  I have paid — notify billing
                 </Button>
               </CardContent>
             </Card>
-          </div>
-
-          <div id="packages">
-            <div className="mb-3">
-              <h2 className="text-lg font-semibold tracking-tight">Packages</h2>
-              <p className="text-sm text-muted-foreground">
-                Highlighted card is the package this company has opted for.
-              </p>
-            </div>
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-              {SUBSCRIPTION_PLANS.map((plan) => {
-                const selected = optedCode === plan.code;
-                const yearly = planPrice(plan, "yearly");
-                const monthly = planPrice(plan, "monthly");
-                return (
-                  <Card
-                    key={plan.code}
-                    className={
-                      selected
-                        ? "ring-2 ring-primary"
-                        : undefined
-                    }
-                  >
-                    <CardHeader className="pb-2">
-                      <div className="flex items-center justify-between gap-2">
-                        <CardTitle>{plan.name}</CardTitle>
-                        {selected ? (
-                          <Badge>Opted</Badge>
-                        ) : plan.recommended ? (
-                          <Badge variant="secondary">Popular</Badge>
-                        ) : null}
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        {plan.tagline}
-                      </p>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <p className="text-2xl font-bold tracking-tight">
-                        {plan.custom
-                          ? "Custom"
-                          : yearly != null
-                            ? money.format(yearly)
-                            : "—"}
-                        {!plan.custom ? (
-                          <span className="ml-1 text-xs font-normal text-muted-foreground">
-                            / year
-                          </span>
-                        ) : null}
-                      </p>
-                      {monthly != null ? (
-                        <p className="text-xs text-muted-foreground">
-                          or {money.format(monthly)} monthly
-                        </p>
-                      ) : null}
-                      <ul className="space-y-1.5">
-                        {plan.features.map((feature) => (
-                          <li
-                            key={feature}
-                            className="flex items-start gap-2 text-xs text-muted-foreground"
-                          >
-                            <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
-                            {feature}
-                          </li>
-                        ))}
-                      </ul>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
           </div>
 
           <Card>
@@ -382,13 +280,13 @@ function SubscriptionDashboardLoaded() {
               {invoicesQuery.isLoading ? (
                 <div className="flex h-40 items-center justify-center gap-2 text-sm text-muted-foreground">
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Loading invoices...
+                  Loading...
                 </div>
               ) : invoices.length === 0 ? (
                 <EmptyState
                   icon={CreditCard}
                   title="No licence invoices yet"
-                  description="When GET /subscription/invoices is available, paid and pending licence bills will list here. Until then, keep the opted package and expiry on the tenant."
+                  description={`Past renewals from ${platformBilling.providerName} will appear here.`}
                 />
               ) : (
                 <Table>
@@ -436,11 +334,6 @@ function SubscriptionDashboardLoaded() {
         </>
       )}
 
-      <PlanAssignSheet
-        open={assignOpen}
-        onOpenChange={setAssignOpen}
-        current={subscription}
-      />
       <RenewRequestSheet
         open={renewOpen}
         onOpenChange={setRenewOpen}
@@ -450,7 +343,54 @@ function SubscriptionDashboardLoaded() {
   );
 }
 
-function InfoRow({ label, value }: { label: string; value: string }) {
+function Header({ businessName }: { businessName?: string }) {
+  return (
+    <div className="space-y-1">
+      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        Billing
+      </p>
+      <h1 className="text-3xl font-bold tracking-tight text-foreground">
+        Software licence
+      </h1>
+      <p className="max-w-2xl text-sm text-muted-foreground">
+        {businessName || "Your company"} uses Billing ERP under a licence from{" "}
+        {platformBilling.providerName}. Renewal reminders and lock are based on
+        the expiry date we set for you.
+      </p>
+    </div>
+  );
+}
+
+function Kpi({
+  title,
+  value,
+  hint,
+  icon: Icon,
+}: {
+  title: string;
+  value: string;
+  hint: string;
+  icon: React.ComponentType<{ className?: string }>;
+}) {
+  return (
+    <Card>
+      <CardContent className="flex items-center justify-between p-6">
+        <div className="min-w-0">
+          <p className="text-sm text-muted-foreground">{title}</p>
+          <h2 className="mt-2 truncate text-2xl font-bold tracking-tight">
+            {value}
+          </h2>
+          <p className="mt-1 truncate text-xs text-muted-foreground">{hint}</p>
+        </div>
+        <div className="rounded-2xl bg-primary/10 p-3 text-primary">
+          <Icon className="h-6 w-6" />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function Info({ label, value }: { label: string; value: string }) {
   return (
     <div>
       <dt className="text-xs text-muted-foreground">{label}</dt>

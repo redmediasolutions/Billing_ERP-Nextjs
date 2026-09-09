@@ -21,6 +21,7 @@ import {
   Search,
   ShieldCheck,
   Store,
+  Building2,
 } from "lucide-react";
 
 import {
@@ -36,8 +37,9 @@ import { buildSearchUrl, isNavLinkActive } from "@/lib/erp-search";
 import { BusinessLogo } from "@/features/tenant/components/business-logo";
 import { useTenant } from "@/features/tenant/hooks/use-tenant";
 import { isPosOnlyTenant } from "@/lib/pos-only-tenants";
+import { usePlatformAdmin } from "@/hooks/use-platform-admin";
 
-const modules = [
+const BASE_MODULES = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard, group: "Home" },
   { label: "POS Billing", href: "/dashboard/pos", icon: Store, group: "Sales" },
   { label: "Invoices", href: "/dashboard/invoices", icon: ReceiptText, group: "Sales" },
@@ -55,7 +57,21 @@ const modules = [
   { label: "Reports", href: "/dashboard/pos/reports", icon: FileText, group: "Operations" },
 ];
 
-const MODULE_GROUPS = ["Home", "Sales", "Catalog", "Operations", "People"] as const;
+const PLATFORM_MODULE = {
+  label: "Tenant licences",
+  href: "/dashboard/platform/licenses",
+  icon: Building2,
+  group: "Platform" as const,
+};
+
+const MODULE_GROUPS = [
+  "Home",
+  "Sales",
+  "Catalog",
+  "Operations",
+  "People",
+  "Platform",
+] as const;
 
 export function TopNavigation() {
   const pathname = usePathname();
@@ -71,8 +87,15 @@ export function TopNavigation() {
   const topMenu = moduleMenus[currentModule] ?? [];
   const isDashboardHome = pathname === "/dashboard";
   const { data: tenant } = useTenant();
+  const { isPlatformAdmin } = usePlatformAdmin();
   const businessName = tenant?.business_name || "Billing ERP";
   const posOnly = isPosOnlyTenant(tenant?.id);
+
+  const modules = useMemo(
+    () =>
+      isPlatformAdmin ? [...BASE_MODULES, PLATFORM_MODULE] : BASE_MODULES,
+    [isPlatformAdmin]
+  );
 
   const activeModule = useMemo(() => {
     const match = modules.find((item) => {
@@ -86,7 +109,7 @@ export function TopNavigation() {
     });
 
     return match ?? modules[0];
-  }, [pathname]);
+  }, [pathname, modules]);
 
   const ActiveModuleIcon = activeModule.icon;
 
