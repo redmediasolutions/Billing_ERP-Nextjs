@@ -17,6 +17,7 @@ import { itemsService } from "@/features/items/services/items.service";
 import type { ItemInput } from "@/features/items/types";
 import { estimateKeys, useCatalogItems } from "../hooks/use-estimates";
 import type { CatalogItem } from "../types";
+import { catalogSellPrice } from "@/lib/catalog-price";
 
 export function ItemPickerDialog({
   onSelect,
@@ -65,6 +66,8 @@ export function ItemPickerDialog({
         item_code: created.item_code,
         hsn_code: created.hsn_code,
         item_cost: created.item_cost,
+        walk_in_price: created.walk_in_price,
+        cloud_kitchen_price: created.cloud_kitchen_price,
         tax_rate: created.tax_rate,
         unit: created.unit,
         item_description: created.item_description,
@@ -154,7 +157,7 @@ export function ItemPickerDialog({
 
                       <div className="shrink-0 text-right">
                         <p className="font-semibold text-foreground">
-                          ₹{Number(item.item_cost).toFixed(2)}
+                          ₹{catalogSellPrice(item).toFixed(2)}
                         </p>
                         <p className="text-xs text-muted-foreground">
                           GST {Number(item.tax_rate)}%

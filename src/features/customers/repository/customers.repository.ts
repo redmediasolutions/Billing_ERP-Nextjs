@@ -11,6 +11,8 @@ export const customersRepository = {
 
   getWalkIn: () => apiRequest<Customer>("/customers/walk-in"),
 
+  getById: (id: number) => apiRequest<Customer>(`/customers/${id}`),
+
   create: (input: CustomerInput) =>
     apiRequest<Customer>("/customers", {
       method: "POST",

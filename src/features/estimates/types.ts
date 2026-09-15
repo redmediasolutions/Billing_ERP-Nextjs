@@ -25,6 +25,8 @@ export interface CatalogItem {
   item_code: string;
   hsn_code: string | null;
   item_cost: number;
+  walk_in_price?: number | null;
+  cloud_kitchen_price?: number | null;
   tax_rate: number;
   unit: string | null;
   item_description: string | null;

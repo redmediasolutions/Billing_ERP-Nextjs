@@ -66,6 +66,9 @@ export function useUpdateInvoice() {
       queryClient.invalidateQueries({
         queryKey: invoiceKeys.detail(variables.id),
       });
+      queryClient.invalidateQueries({
+        queryKey: ["inventory"],
+      });
     },
   });
 }

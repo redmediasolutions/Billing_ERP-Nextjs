@@ -14,8 +14,6 @@ function normalizeLineItem(
   const amountBeforeTax = toNum(line.amount_before_tax);
   const lineTotal = toNum(line.line_total);
 
-  // Some rows were saved with line totals but a missing/zero quantity.
-  // Prefer the DB quantity; otherwise derive from amount ÷ rate.
   let quantity = toNum(line.quantity ?? line.qty);
 
   if (quantity <= 0 && unitPrice > 0) {
@@ -25,23 +23,32 @@ function normalizeLineItem(
     }
   }
 
+  const taxRate = toNum(line.tax_rate);
+  const discountPercent = toNum(line.line_discount);
+  const resolvedAmount =
+    amountBeforeTax > 0 ? amountBeforeTax : unitPrice * (quantity || 0);
+  const discountAmount = (resolvedAmount * discountPercent) / 100;
+  const taxable = resolvedAmount - discountAmount;
+  const taxAmount =
+    toNum(line.tax_amount) || (taxable * taxRate) / 100;
+  const resolvedTotal = lineTotal > 0 ? lineTotal : taxable + taxAmount;
+
   return {
     ...line,
     id: String(line.id),
     quantity,
     unit_price: unitPrice,
-    amount_before_tax: amountBeforeTax,
-    tax_rate: toNum(line.tax_rate),
-    tax_amount: toNum(line.tax_amount),
-    line_discount: toNum(line.line_discount),
-    line_total: lineTotal,
+    amount_before_tax: resolvedAmount,
+    tax_rate: taxRate,
+    tax_amount: taxAmount,
+    line_discount: discountPercent,
+    line_total: resolvedTotal,
   };
 }
 
 function normalizeInvoice(invoice: Invoice): Invoice {
   const lineItems = invoice.line_items?.map(normalizeLineItem);
 
-  // If header totals were saved as 0 but lines have amounts, rebuild for display.
   const linesSubtotal =
     lineItems?.reduce(
       (sum, line) => sum + toNum(line.amount_before_tax || line.line_total),
@@ -51,6 +58,11 @@ function normalizeInvoice(invoice: Invoice): Invoice {
     lineItems?.reduce((sum, line) => sum + toNum(line.tax_amount), 0) ?? 0;
   const linesTotal =
     lineItems?.reduce((sum, line) => sum + toNum(line.line_total), 0) ?? 0;
+  const linesDiscount =
+    lineItems?.reduce((sum, line) => {
+      const amount = toNum(line.amount_before_tax);
+      return sum + (amount * toNum(line.line_discount)) / 100;
+    }, 0) ?? 0;
 
   const subtotal = toNum(invoice.subtotal) || linesSubtotal;
   const taxAmount = toNum(invoice.tax_amount) || linesTax;
@@ -61,7 +73,7 @@ function normalizeInvoice(invoice: Invoice): Invoice {
   return {
     ...invoice,
     subtotal,
-    discount_amount: toNum(invoice.discount_amount),
+    discount_amount: toNum(invoice.discount_amount) || linesDiscount,
     tax_amount: taxAmount,
     grand_total: grandTotal,
     rounded_total: roundedTotal,

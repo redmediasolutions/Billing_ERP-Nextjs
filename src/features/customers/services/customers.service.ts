@@ -24,6 +24,11 @@ export const customersService = {
     return normalizeCustomer(customer);
   },
 
+  async getById(id: number) {
+    const customer = await customersRepository.getById(id);
+    return normalizeCustomer(customer);
+  },
+
   async create(input: CustomerInput) {
     const customer = await customersRepository.create(input);
     return normalizeCustomer(customer);

@@ -41,7 +41,7 @@ function InvoiceRow({ invoice }: { invoice: Invoice }) {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <span className="invoice-card-total amount">{money(invoice.grand_total)}</span>
+          <span className="invoice-card-total amount">{money(invoice.rounded_total || invoice.grand_total)}</span>
           <ChevronRight size={16} className="text-faint invoice-card-chevron" aria-hidden />
         </div>
       </div>

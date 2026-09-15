@@ -11,7 +11,7 @@ import {
   Trash2,
 } from "lucide-react";
 
-import { EmptyState } from "@/components/empty-state";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CsvExportDialog } from "@/components/export/csv-export-dialog";
@@ -52,6 +52,10 @@ export function EstimatesDashboard() {
   const { value: search, setSearch } = useUrlSearchParam();
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [exportOpen, setExportOpen] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<{
+    id: number;
+    number: string;
+  } | null>(null);
 
   const { data: estimates = [], isLoading, error } = useEstimates();
   const deleteEstimate = useDeleteEstimate();
@@ -81,12 +85,13 @@ export function EstimatesDashboard() {
     return expiry >= today && expiry <= inSevenDays;
   }).length;
 
-  async function removeEstimate(id: number) {
-    if (!window.confirm("Archive this estimate?")) return;
+  async function confirmDeleteEstimate() {
+    if (!pendingDelete) return;
 
-    await deleteEstimate.mutateAsync(id);
+    await deleteEstimate.mutateAsync(pendingDelete.id);
 
-    if (selectedId === id) setSelectedId(null);
+    if (selectedId === pendingDelete.id) setSelectedId(null);
+    setPendingDelete(null);
   }
 
   return (
@@ -110,6 +115,16 @@ export function EstimatesDashboard() {
         open={exportOpen}
         onOpenChange={setExportOpen}
         kind="estimates"
+      />
+
+      <ConfirmDialog
+        open={pendingDelete !== null}
+        title="Delete this estimate?"
+        description={`Are you sure you want to archive ${pendingDelete?.number || "this estimate"}? This cannot be undone from the list.`}
+        confirmLabel="Yes, delete"
+        pending={deleteEstimate.isPending}
+        onCancel={() => setPendingDelete(null)}
+        onConfirm={() => void confirmDeleteEstimate()}
       />
 
       <style jsx global>{`
@@ -269,7 +284,9 @@ export function EstimatesDashboard() {
                           </TableCell>
 
                           <TableCell className="font-semibold text-foreground">
-                            {money.format(estimate.rounded_total)}
+                            {money.format(
+                              estimate.rounded_total || estimate.grand_total
+                            )}
                           </TableCell>
 
                           <TableCell>
@@ -311,7 +328,12 @@ export function EstimatesDashboard() {
                                 variant="ghost"
                                 size="icon"
                                 disabled={deleteEstimate.isPending}
-                                onClick={() => removeEstimate(estimate.id)}
+                                onClick={() =>
+                                  setPendingDelete({
+                                    id: estimate.id,
+                                    number: estimate.estimate_number,
+                                  })
+                                }
                                 className="h-8 w-8 text-muted-foreground hover:text-destructive"
                               >
                                 <Trash2 className="h-4 w-4" />

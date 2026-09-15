@@ -11,7 +11,7 @@ import {
   Trash2,
 } from "lucide-react";
 
-import { EmptyState } from "@/components/empty-state";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CsvExportDialog } from "@/components/export/csv-export-dialog";
@@ -63,6 +63,10 @@ export function InvoicesDashboard() {
   const statusFilter = useUrlParam("status");
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [exportOpen, setExportOpen] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<{
+    id: number;
+    number: string;
+  } | null>(null);
 
   const { data: invoices = [], isLoading, error } = useInvoices();
   const deleteInvoice = useDeleteInvoice();
@@ -92,18 +96,13 @@ export function InvoicesDashboard() {
     0
   );
 
-  async function removeInvoice(id: number) {
-    if (
-      !window.confirm(
-        "Archive this invoice? Stock will be automatically restored."
-      )
-    ) {
-      return;
-    }
+  async function confirmDeleteInvoice() {
+    if (!pendingDelete) return;
 
-    await deleteInvoice.mutateAsync(id);
+    await deleteInvoice.mutateAsync(pendingDelete.id);
 
-    if (selectedId === id) setSelectedId(null);
+    if (selectedId === pendingDelete.id) setSelectedId(null);
+    setPendingDelete(null);
   }
 
   return (
@@ -127,6 +126,16 @@ export function InvoicesDashboard() {
         open={exportOpen}
         onOpenChange={setExportOpen}
         kind="invoices"
+      />
+
+      <ConfirmDialog
+        open={pendingDelete !== null}
+        title="Delete this invoice?"
+        description={`Are you sure you want to archive ${pendingDelete?.number || "this invoice"}? Stock will be restored if it was finalized.`}
+        confirmLabel="Yes, delete"
+        pending={deleteInvoice.isPending}
+        onCancel={() => setPendingDelete(null)}
+        onConfirm={() => void confirmDeleteInvoice()}
       />
 
       <style jsx global>{`
@@ -290,7 +299,9 @@ export function InvoicesDashboard() {
                           </TableCell>
 
                           <TableCell className="font-semibold text-foreground">
-                            {money.format(invoice.rounded_total)}
+                            {money.format(
+                              invoice.rounded_total || invoice.grand_total
+                            )}
                           </TableCell>
 
                           <TableCell>
@@ -332,7 +343,12 @@ export function InvoicesDashboard() {
                                 variant="ghost"
                                 size="icon"
                                 disabled={deleteInvoice.isPending}
-                                onClick={() => removeInvoice(invoice.id)}
+                                onClick={() =>
+                                  setPendingDelete({
+                                    id: invoice.id,
+                                    number: invoice.invoice_number,
+                                  })
+                                }
                                 className="h-8 w-8 text-muted-foreground hover:text-destructive"
                               >
                                 <Trash2 className="h-4 w-4" />

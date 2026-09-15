@@ -34,6 +34,7 @@ import type {
   InvoiceLineItem,
 } from "../types";
 import type { CatalogItem } from "@/features/estimates/types";
+import { catalogSellPrice, toDateInputValue } from "@/lib/catalog-price";
 
 function localDate() {
   return new Date().toISOString().slice(0, 10);
@@ -41,7 +42,7 @@ function localDate() {
 
 function newLineItem(item: CatalogItem): InvoiceLineItem {
   const quantity = 1;
-  const unitPrice = Number(item.item_cost || 0);
+  const unitPrice = catalogSellPrice(item);
   const taxRate = Number(item.tax_rate || 0);
   const amountBeforeTax = quantity * unitPrice;
   const taxAmount = (amountBeforeTax * taxRate) / 100;
@@ -65,10 +66,15 @@ function newLineItem(item: CatalogItem): InvoiceLineItem {
 }
 
 function mapLineItems(lines: InvoiceLineItem[]): InvoiceLineItem[] {
-  return lines.map((line) => ({
-    ...line,
-    id: String(line.id),
-  }));
+  return lines.map((line) =>
+    calculateLine(
+      {
+        ...line,
+        id: String(line.id ?? crypto.randomUUID()),
+      },
+      {}
+    )
+  );
 }
 
 function deriveDiscountPercent(invoice: Invoice): number {
@@ -155,8 +161,8 @@ export function InvoiceForm({ invoiceId }: InvoiceFormProps) {
     setCustomerId(String(existing.customer_id));
     setBillingAddress(existing.custom_billing_address || "");
     setDeliveryAddress(existing.custom_delivery_address || "");
-    setInvoiceDate(existing.invoice_date || localDate());
-    setDueDate(existing.due_date || "");
+    setInvoiceDate(toDateInputValue(existing.invoice_date) || localDate());
+    setDueDate(toDateInputValue(existing.due_date));
     setPaymentTerms(existing.payment_terms || "");
     setNotes(existing.notes || "");
     setOrderType(existing.order_type || "SALE");
@@ -295,6 +301,7 @@ export function InvoiceForm({ invoiceId }: InvoiceFormProps) {
         order_type: orderType,
         table_name: tableName,
         is_draft: isDraft,
+        sales_channel: existing?.sales_channel || "walk_in",
         line_items: lineItems,
       };
 
@@ -392,6 +399,15 @@ export function InvoiceForm({ invoiceId }: InvoiceFormProps) {
           <CardContent className="space-y-5">
             <CustomerPickerField
               value={customerId}
+              initialCustomer={
+                existing
+                  ? {
+                      id: existing.customer_id,
+                      customer_name: existing.customer_name,
+                      customer_display_name: existing.customer_display_name,
+                    }
+                  : null
+              }
               onChange={setCustomerId}
               onCustomerSelect={(customer: Customer | null) => {
                 setBillingAddress(customer?.customer_billing_address || "");
@@ -593,7 +609,7 @@ export function InvoiceForm({ invoiceId }: InvoiceFormProps) {
                       </TableCell>
 
                       <TableCell className="text-right font-medium">
-                        ₹{line.line_total.toFixed(2)}
+                        ₹{Number(line.line_total || 0).toFixed(2)}
                       </TableCell>
 
                       <TableCell>
@@ -658,7 +674,7 @@ export function InvoiceForm({ invoiceId }: InvoiceFormProps) {
             <div className="flex items-center justify-between border-t pt-3 font-semibold text-foreground">
               <span className="text-base">Grand Total</span>
               <span className="text-xl text-primary">
-                ₹{totals.roundedTotal.toFixed(2)}
+                ₹{Number(totals.roundedTotal || 0).toFixed(2)}
               </span>
             </div>
           </CardContent>
@@ -719,7 +735,7 @@ function Summary({
     <div className="flex items-center justify-between text-sm">
       <span className="text-muted-foreground">{label}</span>
       <span className="font-medium text-foreground">
-        ₹{value.toFixed(2)}
+        ₹{Number(value || 0).toFixed(2)}
       </span>
     </div>
   );

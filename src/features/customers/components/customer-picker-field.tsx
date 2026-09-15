@@ -14,6 +14,7 @@ import {
   useCustomerSearch,
   useUpdateCustomer,
 } from "../hooks/use-customers";
+import { customersService } from "../services/customers.service";
 import { estimateKeys } from "@/features/estimates/hooks/use-estimates";
 import type { Customer, CustomerInput } from "../types";
 import { customerContactName, customerDisplayName } from "../customer-display";
@@ -23,6 +24,7 @@ interface CustomerPickerFieldProps {
   onChange: (customerId: string) => void;
   onCustomerSelect?: (customer: Customer | null) => void;
   label?: string;
+  initialCustomer?: Partial<Customer> | null;
 }
 
 export function CustomerPickerField({
@@ -30,6 +32,7 @@ export function CustomerPickerField({
   onChange,
   onCustomerSelect,
   label = "Select Customer *",
+  initialCustomer = null,
 }: CustomerPickerFieldProps) {
   const queryClient = useQueryClient();
   const createCustomer = useCreateCustomer();
@@ -45,9 +48,51 @@ export function CustomerPickerField({
   useEffect(() => {
     if (!value) {
       setSelectedCustomer(null);
-      onCustomerSelect?.(null);
+      return;
     }
-  }, [value, onCustomerSelect]);
+
+    const selectedId = Number(value);
+    if (!Number.isFinite(selectedId) || selectedId <= 0) return;
+
+    setSelectedCustomer((current) => {
+      if (current?.id === selectedId) return current;
+      if (initialCustomer && Number(initialCustomer.id) === selectedId) {
+        return {
+          id: selectedId,
+          reference: initialCustomer.reference || "",
+          customer_name: initialCustomer.customer_name || "",
+          customer_title: initialCustomer.customer_title ?? null,
+          customer_display_name: initialCustomer.customer_display_name ?? null,
+          customer_phone: initialCustomer.customer_phone ?? null,
+          customer_email: initialCustomer.customer_email ?? null,
+          customer_gst: initialCustomer.customer_gst ?? null,
+          customer_business_name: initialCustomer.customer_business_name ?? null,
+          customer_billing_address: initialCustomer.customer_billing_address ?? null,
+          customer_shipping_address: initialCustomer.customer_shipping_address ?? null,
+          customer_gst_state: initialCustomer.customer_gst_state ?? null,
+          customer_gst_state_code: initialCustomer.customer_gst_state_code ?? null,
+          is_archived: Boolean(initialCustomer.is_archived),
+          created_at: initialCustomer.created_at || "",
+        };
+      }
+      return current;
+    });
+
+    let cancelled = false;
+
+    customersService
+      .getById(selectedId)
+      .then((customer) => {
+        if (!cancelled) setSelectedCustomer(customer);
+      })
+      .catch(() => {
+        // Keep the snapshot from the invoice/estimate if GET /customers/:id is unavailable.
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [value]);
 
   function invalidateCustomers() {
     void queryClient.invalidateQueries({ queryKey: customerKeys.all });
