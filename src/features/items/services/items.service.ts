@@ -28,6 +28,12 @@ function serializeItemInput(input: ItemInput): ItemApiPayload {
       trackInventory && input.is_batch_tracked ? (1 as const) : (0 as const),
     walk_in_price: walkInRaw || 0,
     cloud_kitchen_price: cloudKitchenRaw || 0,
+    service_interval_days:
+      input.service_interval_days == null ||
+      input.service_interval_days === undefined
+        ? null
+        : Number(input.service_interval_days) || null,
+    service_reminder_title: (input.service_reminder_title ?? "").trim(),
   };
 }
 
@@ -49,6 +55,12 @@ function normalizeItem(item: Item): Item {
     // MariaDB may return 0 / 1 or "0" / "1".
     track_inventory: Number(item.track_inventory) === 1,
     is_batch_tracked: Number(item.is_batch_tracked) === 1,
+    service_interval_days:
+      item.service_interval_days == null ||
+      item.service_interval_days === undefined
+        ? null
+        : Number(item.service_interval_days),
+    service_reminder_title: item.service_reminder_title || null,
   };
 }
 

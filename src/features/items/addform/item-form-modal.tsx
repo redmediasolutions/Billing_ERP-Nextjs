@@ -31,6 +31,8 @@ const emptyItem: ItemInput = {
   item_image: null,
   track_inventory: false,
   is_batch_tracked: false,
+  service_interval_days: null,
+  service_reminder_title: "",
 };
 
 const selectClassName =
@@ -62,6 +64,8 @@ export function ItemFormModal({
           item_image: item.item_image,
           track_inventory: item.track_inventory,
           is_batch_tracked: item.is_batch_tracked,
+          service_interval_days: item.service_interval_days ?? null,
+          service_reminder_title: item.service_reminder_title || "",
         }
       : emptyItem
   );
@@ -85,6 +89,8 @@ export function ItemFormModal({
             item_image: item.item_image,
             track_inventory: item.track_inventory,
             is_batch_tracked: item.is_batch_tracked,
+            service_interval_days: item.service_interval_days ?? null,
+            service_reminder_title: item.service_reminder_title || "",
           }
         : emptyItem
     );
@@ -274,6 +280,35 @@ export function ItemFormModal({
                 }
               />
             )}
+
+            <Field
+              label="Default service interval (days)"
+              className="sm:col-span-2"
+            >
+              <Input
+                type="number"
+                min={0}
+                placeholder="e.g. 180"
+                value={form.service_interval_days ?? ""}
+                onChange={(event) => {
+                  const raw = event.target.value;
+                  updateField(
+                    "service_interval_days",
+                    raw === "" ? null : Number(raw)
+                  );
+                }}
+              />
+            </Field>
+
+            <Field label="Service reminder title" className="sm:col-span-2">
+              <Input
+                value={form.service_reminder_title || ""}
+                onChange={(event) =>
+                  updateField("service_reminder_title", event.target.value)
+                }
+                placeholder="Default title when scheduling from this item"
+              />
+            </Field>
           </div>
 
           {error && (

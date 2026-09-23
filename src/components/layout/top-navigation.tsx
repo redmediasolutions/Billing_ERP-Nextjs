@@ -20,6 +20,7 @@ import {
   FileText,
   Search,
   ShieldCheck,
+  BellRing,
   Store,
   Building2,
 } from "lucide-react";
@@ -48,6 +49,7 @@ const BASE_MODULES = [
   { label: "Enquiries", href: "/dashboard/enquiries", icon: PhoneCall, group: "Sales" },
   { label: "Bookings", href: "/dashboard/bookings", icon: CalendarDays, group: "Sales" },
   { label: "Warranty", href: "/dashboard/warranty", icon: ShieldCheck, group: "Sales" },
+  { label: "Reminders", href: "/dashboard/reminders", icon: BellRing, group: "Sales" },
   { label: "Items", href: "/dashboard/items", icon: Package, group: "Catalog" },
   { label: "Inventory", href: "/dashboard/inventory", icon: Warehouse, group: "Catalog" },
   { label: "Vendors", href: "/dashboard/vendors", icon: Truck, group: "Operations" },

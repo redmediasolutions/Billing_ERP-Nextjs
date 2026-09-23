@@ -31,6 +31,10 @@ export interface Item {
   track_inventory: boolean;
   is_batch_tracked: boolean;
   total_stock: number;
+  /** Default days between service visits (e.g. 180 for AC AMC). */
+  service_interval_days: number | null;
+  /** Suggested reminder title when scheduling from this item. */
+  service_reminder_title: string | null;
   created_at: string;
 }
 
@@ -47,6 +51,8 @@ export interface ItemInput {
   item_image: string | null;
   track_inventory: boolean;
   is_batch_tracked: boolean;
+  service_interval_days?: number | null;
+  service_reminder_title?: string;
 }
 
 /** Restaurant / POS unit options (item_cost_narration). */

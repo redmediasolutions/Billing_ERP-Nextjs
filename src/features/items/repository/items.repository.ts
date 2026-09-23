@@ -14,6 +14,8 @@ export type ItemApiPayload = {
   is_batch_tracked: 0 | 1;
   walk_in_price: number;
   cloud_kitchen_price: number;
+  service_interval_days?: number | null;
+  service_reminder_title?: string;
 };
 
 export const itemsRepository = {
