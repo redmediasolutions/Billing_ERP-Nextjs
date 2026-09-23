@@ -21,10 +21,18 @@ function parsePrefs(raw: string | null): DashboardModuleId[] | null {
   try {
     const parsed = JSON.parse(raw) as DashboardLayoutPrefs | DashboardModuleId[];
     if (Array.isArray(parsed)) {
-      return parsed.filter(isValidModule);
+      return parsed
+        .map((id) =>
+          String(id) === "reminders" ? "renewals" : (id as DashboardModuleId)
+        )
+        .filter(isValidModule);
     }
     if (parsed?.version === STORAGE_VERSION && Array.isArray(parsed.modules)) {
-      return parsed.modules.filter(isValidModule);
+      return parsed.modules
+        .map((id) =>
+          String(id) === "reminders" ? "renewals" : (id as DashboardModuleId)
+        )
+        .filter(isValidModule);
     }
   } catch {
     return null;

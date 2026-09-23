@@ -246,10 +246,10 @@ export function DashboardHome() {
       value: warrantySummary?.expiring_soon ?? 0,
       href: "/dashboard/warranty?filter=expiring",
     },
-    isModuleEnabled(enabled, "reminders") && {
-      label: "Reminders due today",
+    isModuleEnabled(enabled, "renewals") && {
+      label: "Renewals due today",
       value: reminderSummary?.due_today ?? 0,
-      href: "/dashboard/reminders?filter=today",
+      href: "/dashboard/renewals?filter=today",
     },
   ].filter(Boolean) as Array<{
     label: string;

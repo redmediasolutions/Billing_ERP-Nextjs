@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 
 import { ConfirmDialog } from "@/components/confirm-dialog";
+import { EmptyState } from "@/components/empty-state";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CsvExportDialog } from "@/components/export/csv-export-dialog";

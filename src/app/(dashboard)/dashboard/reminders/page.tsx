@@ -1,18 +1,22 @@
-import { Suspense } from "react";
-import { Loader2 } from "lucide-react";
-import { RemindersDashboard } from "@/features/reminders/components/reminders-dashboard";
+import { redirect } from "next/navigation";
 
-export default function RemindersPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="flex h-48 items-center justify-center gap-2 text-muted-foreground">
-          <Loader2 className="h-5 w-5 animate-spin" />
-          Loading reminders...
-        </div>
-      }
-    >
-      <RemindersDashboard />
-    </Suspense>
-  );
+export default async function RemindersRedirectPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const params = await searchParams;
+  const query = new URLSearchParams();
+
+  for (const [key, value] of Object.entries(params)) {
+    if (value === undefined) continue;
+    if (Array.isArray(value)) {
+      value.forEach((v) => query.append(key, v));
+    } else {
+      query.set(key, value);
+    }
+  }
+
+  const suffix = query.toString();
+  redirect(suffix ? `/dashboard/renewals?${suffix}` : "/dashboard/renewals");
 }

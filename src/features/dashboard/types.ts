@@ -6,7 +6,7 @@ export type DashboardModuleId =
   | "enquiries"
   | "bookings"
   | "warranty"
-  | "reminders"
+  | "renewals"
   | "expenses";
 
 export interface DashboardModuleOption {

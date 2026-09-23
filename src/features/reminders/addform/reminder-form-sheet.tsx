@@ -300,12 +300,12 @@ export function ReminderFormSheet({
         defaultWidth={560}
         minWidth={400}
         maxWidth={960}
-        storageKey="reminders-sheet-width"
+        storageKey="renewals-sheet-width"
         className="p-0"
       >
         <SheetHeader className="shrink-0 border-b px-6 py-4 pr-14">
           <SheetTitle className="text-lg">
-            {isEditing ? "Edit reminder" : "New reminder"}
+            {isEditing ? "Edit renewal" : "New renewal"}
           </SheetTitle>
           <SheetDescription>
             Set what to follow up, when it is due, and who it is for.
@@ -645,7 +645,7 @@ export function ReminderFormSheet({
             </Button>
             <Button type="submit" disabled={saving}>
               {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isEditing ? "Save changes" : "Create reminder"}
+              {isEditing ? "Save changes" : "Create renewal"}
             </Button>
           </SheetFooter>
         </form>

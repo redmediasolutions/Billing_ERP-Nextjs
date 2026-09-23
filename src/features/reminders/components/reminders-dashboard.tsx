@@ -174,26 +174,26 @@ export function RemindersDashboard() {
       label: "Due today",
       value: summary?.due_today ?? 0,
       icon: BellRing,
-      href: "/dashboard/reminders?filter=today",
+      href: "/dashboard/renewals?filter=today",
     },
     {
       label: "Overdue",
       value: summary?.overdue ?? 0,
       icon: AlarmClock,
-      href: "/dashboard/reminders?filter=overdue",
+      href: "/dashboard/renewals?filter=overdue",
       alert: (summary?.overdue ?? 0) > 0,
     },
     {
       label: "Next 7 days",
       value: summary?.upcoming_7d ?? 0,
       icon: CalendarClock,
-      href: "/dashboard/reminders?filter=upcoming",
+      href: "/dashboard/renewals?filter=upcoming",
     },
     {
       label: "Service",
       value: summary?.service ?? 0,
       icon: Wrench,
-      href: "/dashboard/reminders?filter=service",
+      href: "/dashboard/renewals?filter=service",
     },
   ];
 
@@ -201,7 +201,7 @@ export function RemindersDashboard() {
     <div className="space-y-6 p-4 lg:p-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Reminders</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Renewals</h1>
           <p className="text-sm text-muted-foreground">
             Service schedules, fee collection, renewals — linked to customers,
             invoices, and items.
@@ -223,7 +223,7 @@ export function RemindersDashboard() {
           </Button>
           <Button onClick={() => openCreate()}>
             <Plus className="mr-2 h-4 w-4" />
-            New reminder
+            New renewal
           </Button>
         </div>
       </div>
@@ -277,7 +277,7 @@ export function RemindersDashboard() {
           <Input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search reminders, customers, invoices…"
+            placeholder="Search renewals, customers, invoices…"
             className="pl-9"
           />
         </div>
@@ -293,7 +293,7 @@ export function RemindersDashboard() {
           ].map(([key, label]) => (
             <Link
               key={key}
-              href={`/dashboard/reminders?filter=${key}`}
+              href={`/dashboard/renewals?filter=${key}`}
               className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
                 filter === key
                   ? "border-primary bg-primary text-primary-foreground"
@@ -309,12 +309,12 @@ export function RemindersDashboard() {
       {isLoading ? (
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" />
-          Loading reminders...
+          Loading renewals...
         </div>
       ) : error ? (
         <Card className="border-destructive/40 bg-destructive/5">
           <CardContent className="p-6 text-sm">
-            <p className="font-medium text-destructive">Unable to load reminders.</p>
+            <p className="font-medium text-destructive">Unable to load renewals.</p>
             <p className="mt-2 text-muted-foreground">
               {error instanceof ApiError
                 ? error.message
@@ -329,11 +329,11 @@ export function RemindersDashboard() {
           icon={BellRing}
           title={
             search || filter !== "all"
-              ? "No reminders match your filters"
-              : "No reminders yet"
+              ? "No renewals match your filters"
+              : "No renewals yet"
           }
           description="Create a service schedule after installation, sync overdue invoices, or set a domain renewal."
-          actionLabel="New reminder"
+          actionLabel="New renewal"
           onAction={() => openCreate()}
         />
       ) : (
@@ -342,7 +342,7 @@ export function RemindersDashboard() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Reminder</TableHead>
+                  <TableHead>Renewal</TableHead>
                   <TableHead>Customer</TableHead>
                   <TableHead>Due</TableHead>
                   <TableHead>Repeat</TableHead>
@@ -474,7 +474,7 @@ export function RemindersDashboard() {
                             onClick={async () => {
                               if (
                                 !window.confirm(
-                                  `Delete reminder "${row.title}"?`
+                                  `Delete renewal "${row.title}"?`
                                 )
                               ) {
                                 return;

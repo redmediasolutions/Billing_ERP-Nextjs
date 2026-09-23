@@ -83,13 +83,13 @@ export const moduleMenus = {
     { label: "Open claims", href: "/dashboard/warranty?filter=open_claims&view=claims" },
   ],
 
-  reminders: [
-    { label: "All reminders", href: "/dashboard/reminders" },
-    { label: "Due today", href: "/dashboard/reminders?filter=today" },
-    { label: "Overdue", href: "/dashboard/reminders?filter=overdue" },
-    { label: "Service", href: "/dashboard/reminders?filter=service" },
-    { label: "Payments", href: "/dashboard/reminders?filter=payment" },
-    { label: "Renewals", href: "/dashboard/reminders?filter=renewal" },
+  renewals: [
+    { label: "All renewals", href: "/dashboard/renewals" },
+    { label: "Due today", href: "/dashboard/renewals?filter=today" },
+    { label: "Overdue", href: "/dashboard/renewals?filter=overdue" },
+    { label: "Service", href: "/dashboard/renewals?filter=service" },
+    { label: "Payments", href: "/dashboard/renewals?filter=payment" },
+    { label: "Contracts", href: "/dashboard/renewals?filter=renewal" },
   ],
 
   employees: [
@@ -138,7 +138,12 @@ export function getCurrentModule(pathname: string): keyof typeof moduleMenus {
   if (pathname.startsWith("/dashboard/enquiries")) return "enquiries";
   if (pathname.startsWith("/dashboard/bookings")) return "bookings";
   if (pathname.startsWith("/dashboard/warranty")) return "warranty";
-  if (pathname.startsWith("/dashboard/reminders")) return "reminders";
+  if (
+    pathname.startsWith("/dashboard/renewals") ||
+    pathname.startsWith("/dashboard/reminders")
+  ) {
+    return "renewals";
+  }
   if (pathname.startsWith("/dashboard/employees")) return "employees";
   if (pathname.startsWith("/dashboard/payroll")) return "payroll";
   if (pathname.startsWith("/dashboard/subscription")) return "subscription";

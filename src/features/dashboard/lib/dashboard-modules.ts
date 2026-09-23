@@ -50,9 +50,9 @@ export const DASHBOARD_MODULE_OPTIONS: DashboardModuleOption[] = [
     group: "Follow-ups",
   },
   {
-    id: "reminders",
-    label: "Reminders",
-    description: "Service, payments, renewals due today",
+    id: "renewals",
+    label: "Renewals",
+    description: "Service, payments, and contract renewals due today",
     group: "Follow-ups",
   },
 ];
