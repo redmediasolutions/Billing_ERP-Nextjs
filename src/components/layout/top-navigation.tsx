@@ -21,6 +21,7 @@ import {
   Search,
   ShieldCheck,
   BellRing,
+  BadgeCheck,
   Store,
   Building2,
 } from "lucide-react";
@@ -50,6 +51,7 @@ const BASE_MODULES = [
   { label: "Bookings", href: "/dashboard/bookings", icon: CalendarDays, group: "Sales" },
   { label: "Warranty", href: "/dashboard/warranty", icon: ShieldCheck, group: "Sales" },
   { label: "Renewals", href: "/dashboard/renewals", icon: BellRing, group: "Sales" },
+  { label: "Memberships", href: "/dashboard/memberships", icon: BadgeCheck, group: "Sales" },
   { label: "Items", href: "/dashboard/items", icon: Package, group: "Catalog" },
   { label: "Inventory", href: "/dashboard/inventory", icon: Warehouse, group: "Catalog" },
   { label: "Vendors", href: "/dashboard/vendors", icon: Truck, group: "Operations" },

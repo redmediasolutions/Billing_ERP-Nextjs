@@ -14,20 +14,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Sheet } from "@/components/ui/sheet";
 import {
-  Sheet,
-  SheetContent,
+  ResizableSheetContent,
   SheetDescription,
   SheetFooter,
   SheetHeader,
   SheetTitle,
-} from "@/components/ui/sheet";
+} from "@/components/ui/resizable-sheet-content";
 import { Textarea } from "@/components/ui/textarea";
+import { CustomerPickerField } from "@/features/customers/components/customer-picker-field";
 import {
   useCreateCustomer,
-  useCustomers,
 } from "@/features/customers/hooks/use-customers";
 import { customerDisplayName } from "@/features/customers/customer-display";
+import type { Customer } from "@/features/customers/types";
 import { useInvoices } from "@/features/invoices/hooks/use-invoices";
 import { useProducts } from "@/features/products/hooks/use-products";
 import { useStocks } from "@/features/stocks/hooks/use-stocks";
@@ -118,7 +119,6 @@ export function WarrantyFormSheet({
   onClose: () => void;
   onSave: (input: WarrantyInput) => Promise<void>;
 }) {
-  const { data: customers = [] } = useCustomers();
   const createCustomer = useCreateCustomer();
   const { data: products = [] } = useProducts();
   const { data: invoices = [] } = useInvoices();
@@ -231,19 +231,17 @@ export function WarrantyFormSheet({
     });
   }
 
-  function applyCustomer(customerId: number | null) {
-    if (!customerId) {
+  function applyCustomer(customer: Customer | null) {
+    if (!customer) {
       setValue("customer_ref", null);
       return;
     }
-    const match = customers.find((customer) => customer.id === customerId);
-    if (!match) return;
     setForm((current) => ({
       ...current,
-      customer_ref: match.id,
-      customer_name: customerDisplayName(match) || current.customer_name,
-      phone: match.customer_phone || current.phone,
-      email: match.customer_email || current.email,
+      customer_ref: customer.id,
+      customer_name: customerDisplayName(customer) || current.customer_name,
+      phone: customer.customer_phone || current.phone,
+      email: customer.customer_email || current.email,
     }));
     setSaveAsCustomer(false);
   }
@@ -369,7 +367,14 @@ export function WarrantyFormSheet({
 
   return (
     <Sheet open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <SheetContent side="right" className="flex w-full flex-col sm:max-w-xl">
+      <ResizableSheetContent
+        side="right"
+        defaultWidth={560}
+        minWidth={400}
+        maxWidth={960}
+        storageKey="warranty-sheet-width"
+        className="flex w-full flex-col"
+      >
         <SheetHeader>
           <SheetTitle>
             {isEditing ? "Edit warranty" : "Register warranty"}
@@ -462,30 +467,25 @@ export function WarrantyFormSheet({
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label>Customer</Label>
-              <Select
-                value={form.customer_ref ? String(form.customer_ref) : "none"}
-                onValueChange={(value) =>
-                  applyCustomer(value === "none" ? null : Number(value))
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select customer" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Walk-in / new</SelectItem>
-                  {customers.map((customer) => (
-                    <SelectItem key={customer.id} value={String(customer.id)}>
-                      {customerDisplayName(customer)}
-                      {customer.customer_phone
-                        ? ` · ${customer.customer_phone}`
-                        : ""}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <CustomerPickerField
+              label="Customer"
+              value={form.customer_ref ? String(form.customer_ref) : ""}
+              onChange={(id) => {
+                if (!id) applyCustomer(null);
+              }}
+              onCustomerSelect={(customer) => applyCustomer(customer)}
+              initialCustomer={
+                warranty?.customer_ref
+                  ? {
+                      id: warranty.customer_ref,
+                      customer_name: warranty.customer_name || "",
+                      customer_display_name: warranty.display_customer_name,
+                      customer_phone: warranty.phone,
+                      customer_email: warranty.email,
+                    }
+                  : null
+              }
+            />
             <div className="space-y-2">
               <Label htmlFor="phone">Phone</Label>
               <Input
@@ -752,7 +752,7 @@ export function WarrantyFormSheet({
             </Button>
           </SheetFooter>
         </form>
-      </SheetContent>
+      </ResizableSheetContent>
     </Sheet>
   );
 }

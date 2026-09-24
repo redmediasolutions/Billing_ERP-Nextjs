@@ -13,14 +13,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Sheet } from "@/components/ui/sheet";
 import {
-  Sheet,
-  SheetContent,
+  ResizableSheetContent,
   SheetDescription,
   SheetFooter,
   SheetHeader,
   SheetTitle,
-} from "@/components/ui/sheet";
+} from "@/components/ui/resizable-sheet-content";
 import { Textarea } from "@/components/ui/textarea";
 import { useEmployees } from "@/features/employees/hooks/use-employees";
 import { useItems } from "@/features/items/hooks/use-items";
@@ -117,7 +117,14 @@ export function ResourceFormSheet({
 
   return (
     <Sheet open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <SheetContent side="right" className="flex w-full flex-col sm:max-w-lg">
+      <ResizableSheetContent
+        side="right"
+        defaultWidth={480}
+        minWidth={380}
+        maxWidth={800}
+        storageKey="booking-resources-sheet-width"
+        className="flex w-full flex-col"
+      >
         <SheetHeader>
           <SheetTitle>{resource ? "Edit resource" : "New resource"}</SheetTitle>
           <SheetDescription>
@@ -312,7 +319,7 @@ export function ResourceFormSheet({
             </Button>
           </SheetFooter>
         </form>
-      </SheetContent>
+      </ResizableSheetContent>
     </Sheet>
   );
 }

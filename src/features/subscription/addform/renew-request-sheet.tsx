@@ -5,14 +5,14 @@ import { Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Sheet } from "@/components/ui/sheet";
 import {
-  Sheet,
-  SheetContent,
+  ResizableSheetContent,
   SheetDescription,
   SheetFooter,
   SheetHeader,
   SheetTitle,
-} from "@/components/ui/sheet";
+} from "@/components/ui/resizable-sheet-content";
 import { Textarea } from "@/components/ui/textarea";
 import { platformBilling } from "@/lib/platform-billing";
 
@@ -68,7 +68,12 @@ export function RenewRequestSheet({ open, onOpenChange, current }: Props) {
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="sm:max-w-md">
+      <ResizableSheetContent
+        defaultWidth={440}
+        minWidth={360}
+        maxWidth={720}
+        storageKey="subscription-renew-sheet-width"
+      >
         <SheetHeader>
           <SheetTitle>Request licence renewal</SheetTitle>
           <SheetDescription>
@@ -153,7 +158,7 @@ export function RenewRequestSheet({ open, onOpenChange, current }: Props) {
             </SheetFooter>
           </>
         )}
-      </SheetContent>
+      </ResizableSheetContent>
     </Sheet>
   );
 }

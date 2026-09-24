@@ -6,14 +6,14 @@ import { Info, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Sheet } from "@/components/ui/sheet";
 import {
-  Sheet,
-  SheetContent,
+  ResizableSheetContent,
   SheetDescription,
   SheetFooter,
   SheetHeader,
   SheetTitle,
-} from "@/components/ui/sheet";
+} from "@/components/ui/resizable-sheet-content";
 
 import { useAddStock } from "../hooks/use-inventory";
 import type { Item } from "@/features/items/types";
@@ -92,7 +92,14 @@ export function AddStockSheet({
 
   return (
     <Sheet open={open} onOpenChange={(isOpen) => !isOpen && handleClose()}>
-      <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-lg">
+      <ResizableSheetContent
+        side="right"
+        defaultWidth={480}
+        minWidth={380}
+        maxWidth={800}
+        storageKey="inventory-add-stock-sheet-width"
+        className="w-full overflow-y-auto"
+      >
         <SheetHeader>
           <SheetTitle>Add Stock</SheetTitle>
           <SheetDescription>
@@ -175,7 +182,7 @@ export function AddStockSheet({
             </Button>
           </SheetFooter>
         </form>
-      </SheetContent>
+      </ResizableSheetContent>
     </Sheet>
   );
 }

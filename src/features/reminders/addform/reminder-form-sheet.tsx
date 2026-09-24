@@ -22,11 +22,9 @@ import {
   SheetTitle,
 } from "@/components/ui/resizable-sheet-content";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  useCreateCustomer,
-  useCustomers,
-} from "@/features/customers/hooks/use-customers";
+import { CustomerPickerField } from "@/features/customers/components/customer-picker-field";
 import { customerDisplayName } from "@/features/customers/customer-display";
+import { useCreateCustomer } from "@/features/customers/hooks/use-customers";
 import { useEmployees } from "@/features/employees/hooks/use-employees";
 import { useInvoices } from "@/features/invoices/hooks/use-invoices";
 import { useItems } from "@/features/items/hooks/use-items";
@@ -108,7 +106,6 @@ export function ReminderFormSheet({
   onClose: () => void;
   onSave: (input: ReminderInput) => Promise<void>;
 }) {
-  const { data: customers = [] } = useCustomers();
   const createCustomer = useCreateCustomer();
   const { data: employees = [] } = useEmployees();
   const { data: invoices = [] } = useInvoices();
@@ -379,35 +376,37 @@ export function ReminderFormSheet({
 
             <FormSection title="Customer & assignment">
               <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <Label>Customer</Label>
-              <select
-                value={form.customer_ref ?? ""}
-                onChange={(event) => {
-                  const id = event.target.value
-                    ? Number(event.target.value)
-                    : null;
-                  const customer = customers.find((row) => row.id === id);
-                  updateField("customer_ref", id);
-                  if (customer) {
-                    updateField(
-                      "customer_name",
-                      customerDisplayName(customer) || customer.customer_name
-                    );
-                    updateField("phone", customer.customer_phone || "");
-                    updateField("email", customer.customer_email || "");
-                  }
-                }}
-                className={selectClassName}
-              >
-                <option value="">Walk-in / manual</option>
-                {customers.map((customer) => (
-                  <option key={customer.id} value={customer.id}>
-                    {customerDisplayName(customer) || customer.customer_name}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <CustomerPickerField
+              label="Customer"
+              value={form.customer_ref ? String(form.customer_ref) : ""}
+              onChange={(id) => {
+                if (!id) updateField("customer_ref", null);
+              }}
+              onCustomerSelect={(customer) => {
+                if (!customer) {
+                  updateField("customer_ref", null);
+                  return;
+                }
+                updateField("customer_ref", customer.id);
+                updateField(
+                  "customer_name",
+                  customerDisplayName(customer) || customer.customer_name
+                );
+                updateField("phone", customer.customer_phone || "");
+                updateField("email", customer.customer_email || "");
+              }}
+              initialCustomer={
+                reminder?.customer_ref
+                  ? {
+                      id: reminder.customer_ref,
+                      customer_name: reminder.customer_name || "",
+                      customer_display_name: reminder.display_customer_name,
+                      customer_phone: reminder.phone,
+                      customer_email: reminder.email,
+                    }
+                  : null
+              }
+            />
 
             <div className="space-y-1.5">
               <Label>Assign to</Label>

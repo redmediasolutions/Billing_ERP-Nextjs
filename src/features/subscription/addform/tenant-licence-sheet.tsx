@@ -13,14 +13,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Sheet } from "@/components/ui/sheet";
 import {
-  Sheet,
-  SheetContent,
+  ResizableSheetContent,
   SheetDescription,
   SheetFooter,
   SheetHeader,
   SheetTitle,
-} from "@/components/ui/sheet";
+} from "@/components/ui/resizable-sheet-content";
 import { Textarea } from "@/components/ui/textarea";
 import { platformBilling } from "@/lib/platform-billing";
 
@@ -173,7 +173,12 @@ export function TenantLicenceSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="sm:max-w-md">
+      <ResizableSheetContent
+        defaultWidth={440}
+        minWidth={360}
+        maxWidth={720}
+        storageKey="subscription-licence-sheet-width"
+      >
         <SheetHeader>
           <SheetTitle>
             {editing ? "Update tenant licence" : "Assign tenant licence"}
@@ -373,7 +378,7 @@ export function TenantLicenceSheet({
             Save licence
           </Button>
         </SheetFooter>
-      </SheetContent>
+      </ResizableSheetContent>
     </Sheet>
   );
 }

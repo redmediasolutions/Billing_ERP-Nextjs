@@ -55,6 +55,12 @@ export const DASHBOARD_MODULE_OPTIONS: DashboardModuleOption[] = [
     description: "Service, payments, and contract renewals due today",
     group: "Follow-ups",
   },
+  {
+    id: "memberships",
+    label: "Memberships",
+    description: "Active members, expiring plans, check-ins today",
+    group: "Sales",
+  },
 ];
 
 export const DEFAULT_DASHBOARD_MODULES: DashboardModuleId[] =

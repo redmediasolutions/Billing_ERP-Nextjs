@@ -83,6 +83,14 @@ export const moduleMenus = {
     { label: "Open claims", href: "/dashboard/warranty?filter=open_claims&view=claims" },
   ],
 
+  memberships: [
+    { label: "Members", href: "/dashboard/memberships" },
+    { label: "Plans", href: "/dashboard/memberships?view=plans" },
+    { label: "Active", href: "/dashboard/memberships?filter=active" },
+    { label: "Expiring", href: "/dashboard/memberships?filter=expiring" },
+    { label: "Expired", href: "/dashboard/memberships?filter=expired" },
+  ],
+
   renewals: [
     { label: "All renewals", href: "/dashboard/renewals" },
     { label: "Due today", href: "/dashboard/renewals?filter=today" },
@@ -138,6 +146,7 @@ export function getCurrentModule(pathname: string): keyof typeof moduleMenus {
   if (pathname.startsWith("/dashboard/enquiries")) return "enquiries";
   if (pathname.startsWith("/dashboard/bookings")) return "bookings";
   if (pathname.startsWith("/dashboard/warranty")) return "warranty";
+  if (pathname.startsWith("/dashboard/memberships")) return "memberships";
   if (
     pathname.startsWith("/dashboard/renewals") ||
     pathname.startsWith("/dashboard/reminders")

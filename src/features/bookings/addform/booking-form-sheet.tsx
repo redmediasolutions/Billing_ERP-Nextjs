@@ -13,20 +13,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Sheet } from "@/components/ui/sheet";
 import {
-  Sheet,
-  SheetContent,
+  ResizableSheetContent,
   SheetDescription,
   SheetFooter,
   SheetHeader,
   SheetTitle,
-} from "@/components/ui/sheet";
+} from "@/components/ui/resizable-sheet-content";
 import { Textarea } from "@/components/ui/textarea";
+import { CustomerPickerField } from "@/features/customers/components/customer-picker-field";
+import { matchCustomerByPhone } from "@/features/customers/lib/match-customer-by-phone";
 import {
   useCreateCustomer,
-  useCustomers,
 } from "@/features/customers/hooks/use-customers";
 import { customerDisplayName } from "@/features/customers/customer-display";
+import type { Customer } from "@/features/customers/types";
 import { useEmployees } from "@/features/employees/hooks/use-employees";
 import { useItems } from "@/features/items/hooks/use-items";
 
@@ -170,7 +172,6 @@ export function BookingFormSheet({
   onClose: () => void;
   onSave: (input: BookingInput) => Promise<void>;
 }) {
-  const { data: customers = [] } = useCustomers();
   const createCustomer = useCreateCustomer();
   const { data: employees = [] } = useEmployees();
   const { items } = useItems();
@@ -241,40 +242,26 @@ export function BookingFormSheet({
     }));
   }
 
-  function applyCustomer(customerId: number | null) {
-    if (!customerId) {
+  function applyCustomer(customer: Customer | null) {
+    if (!customer) {
       setValue("customer_ref", null);
       return;
     }
-    const match = customers.find((customer) => customer.id === customerId);
-    if (!match) return;
     setForm((current) => ({
       ...current,
-      customer_ref: match.id,
-      customer_name: customerDisplayName(match) || current.customer_name,
-      phone: match.customer_phone || current.phone,
-      email: match.customer_email || current.email,
+      customer_ref: customer.id,
+      customer_name: customerDisplayName(customer) || current.customer_name,
+      phone: customer.customer_phone || current.phone,
+      email: customer.customer_email || current.email,
     }));
     setSaveAsCustomer(false);
   }
 
-  function applyPhone(phone: string) {
-    const digits = phone.replace(/\D/g, "");
-    const match = customers.find(
-      (customer) =>
-        customer.customer_phone &&
-        customer.customer_phone.replace(/\D/g, "") === digits &&
-        digits.length >= 8
-    );
-    setForm((current) => ({
-      ...current,
-      phone,
-      customer_ref: match ? match.id : current.customer_ref,
-      customer_name: match
-        ? customerDisplayName(match) || current.customer_name
-        : current.customer_name,
-      email: match ? match.customer_email || current.email : current.email,
-    }));
+  async function applyPhone(phone: string) {
+    setForm((current) => ({ ...current, phone }));
+    const match = await matchCustomerByPhone(phone);
+    if (!match) return;
+    applyCustomer(match);
   }
 
   function patchLine(index: number, patch: Partial<BookingLineInput>) {
@@ -431,7 +418,14 @@ export function BookingFormSheet({
 
   return (
     <Sheet open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <SheetContent side="right" className="flex w-full flex-col sm:max-w-2xl">
+      <ResizableSheetContent
+        side="right"
+        defaultWidth={720}
+        minWidth={440}
+        maxWidth={1100}
+        storageKey="bookings-sheet-width"
+        className="flex w-full flex-col"
+      >
         <SheetHeader>
           <SheetTitle>
             {isEditing ? "Edit booking" : "New booking"}
@@ -476,30 +470,25 @@ export function BookingFormSheet({
                 autoFocus={!isEditing}
               />
             </div>
-            <div className="space-y-2">
-              <Label>Existing customer</Label>
-              <Select
-                value={form.customer_ref ? String(form.customer_ref) : "none"}
-                onValueChange={(value) =>
-                  applyCustomer(value === "none" ? null : Number(value))
-                }
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Link customer" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">New / unlinked</SelectItem>
-                  {customers.map((customer) => (
-                    <SelectItem key={customer.id} value={String(customer.id)}>
-                      {customerDisplayName(customer)}
-                      {customer.customer_phone
-                        ? ` · ${customer.customer_phone}`
-                        : ""}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <CustomerPickerField
+              label="Existing customer"
+              value={form.customer_ref ? String(form.customer_ref) : ""}
+              onChange={(id) => {
+                if (!id) applyCustomer(null);
+              }}
+              onCustomerSelect={(customer) => applyCustomer(customer)}
+              initialCustomer={
+                booking?.customer_ref
+                  ? {
+                      id: booking.customer_ref,
+                      customer_name: booking.customer_name || "",
+                      customer_display_name: booking.display_customer_name,
+                      customer_phone: booking.phone,
+                      customer_email: booking.email,
+                    }
+                  : null
+              }
+            />
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
@@ -921,7 +910,7 @@ export function BookingFormSheet({
             </Button>
           </SheetFooter>
         </form>
-      </SheetContent>
+      </ResizableSheetContent>
     </Sheet>
   );
 }

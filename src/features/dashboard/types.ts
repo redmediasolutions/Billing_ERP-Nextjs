@@ -7,6 +7,7 @@ export type DashboardModuleId =
   | "bookings"
   | "warranty"
   | "renewals"
+  | "memberships"
   | "expenses";
 
 export interface DashboardModuleOption {

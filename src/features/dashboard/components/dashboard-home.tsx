@@ -34,6 +34,7 @@ import { useEnquirySummary } from "@/features/enquiries/hooks/use-enquiries";
 import { useBookingSummary } from "@/features/bookings/hooks/use-bookings";
 import { useWarrantySummary } from "@/features/warranty/hooks/use-warranty";
 import { useReminderSummary } from "@/features/reminders/hooks/use-reminders";
+import { useMembershipSummary } from "@/features/memberships/hooks/use-memberships";
 
 import { DashboardCustomizeDialog } from "./dashboard-customize-dialog";
 import { useDashboardLayout } from "../hooks/use-dashboard-layout";
@@ -83,6 +84,7 @@ export function DashboardHome() {
   const { data: bookingSummary } = useBookingSummary();
   const { data: warrantySummary } = useWarrantySummary();
   const { data: reminderSummary } = useReminderSummary();
+  const { data: membershipSummary } = useMembershipSummary();
   const { summary, loading: reportsLoading } = useReportSummary();
 
   const statsLoading =
@@ -250,6 +252,11 @@ export function DashboardHome() {
       label: "Renewals due today",
       value: reminderSummary?.due_today ?? 0,
       href: "/dashboard/renewals?filter=today",
+    },
+    isModuleEnabled(enabled, "memberships") && {
+      label: "Active members",
+      value: membershipSummary?.active ?? 0,
+      href: "/dashboard/memberships?filter=active",
     },
   ].filter(Boolean) as Array<{
     label: string;

@@ -14,14 +14,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Sheet } from "@/components/ui/sheet";
 import {
-  Sheet,
-  SheetContent,
+  ResizableSheetContent,
   SheetDescription,
   SheetFooter,
   SheetHeader,
   SheetTitle,
-} from "@/components/ui/sheet";
+} from "@/components/ui/resizable-sheet-content";
 import { Textarea } from "@/components/ui/textarea";
 import { useEmployees } from "@/features/employees/hooks/use-employees";
 import { useItems } from "@/features/items/hooks/use-items";
@@ -180,7 +180,14 @@ export function ClaimFormSheet({
 
   return (
     <Sheet open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <SheetContent side="right" className="flex w-full flex-col sm:max-w-xl">
+      <ResizableSheetContent
+        side="right"
+        defaultWidth={560}
+        minWidth={400}
+        maxWidth={960}
+        storageKey="warranty-claims-sheet-width"
+        className="flex w-full flex-col"
+      >
         <SheetHeader>
           <SheetTitle>{isEditing ? "Edit claim" : "New warranty claim"}</SheetTitle>
           <SheetDescription>
@@ -460,7 +467,7 @@ export function ClaimFormSheet({
             </Button>
           </SheetFooter>
         </form>
-      </SheetContent>
+      </ResizableSheetContent>
     </Sheet>
   );
 }

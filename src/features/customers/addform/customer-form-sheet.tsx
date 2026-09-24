@@ -7,14 +7,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Sheet } from "@/components/ui/sheet";
 import {
-  Sheet,
-  SheetContent,
+  ResizableSheetContent,
   SheetDescription,
   SheetFooter,
   SheetHeader,
   SheetTitle,
-} from "@/components/ui/sheet";
+} from "@/components/ui/resizable-sheet-content";
 import { Separator } from "@/components/ui/separator";
 import type { Customer, CustomerInput } from "../types";
 
@@ -103,7 +103,13 @@ export function CustomerFormSheet({
 
   return (
     <Sheet open={open} onOpenChange={(v) => !v && onClose()}>
-      <SheetContent className="flex flex-col w-full sm:max-w-xl p-0 gap-0">
+      <ResizableSheetContent
+        defaultWidth={560}
+        minWidth={400}
+        maxWidth={960}
+        storageKey="customers-sheet-width"
+        className="flex w-full flex-col gap-0 p-0"
+      >
         <SheetHeader className="p-6 pb-4 border-b">
           <SheetTitle>
             {customer ? "Edit Customer" : "Add New Customer"}
@@ -306,7 +312,7 @@ export function CustomerFormSheet({
             </Button>
           </SheetFooter>
         </form>
-      </SheetContent>
+      </ResizableSheetContent>
     </Sheet>
   );
 }
