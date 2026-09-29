@@ -72,7 +72,6 @@ export async function createMembershipInvoice(
     order_type: "",
     table_name: "",
     is_draft: false,
-    sales_channel: "walk_in",
     line_items: [line],
   };
 

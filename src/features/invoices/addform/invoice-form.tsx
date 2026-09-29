@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, FileText, Loader2, Trash2, UserRound } from "lucide-react";
+import { ArrowLeft, Loader2, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
@@ -23,9 +23,11 @@ import { CustomerPickerField } from "@/features/customers/components/customer-pi
 import { checkStockAvailability } from "@/features/inventory/lib/stock-validation";
 import type { Customer } from "@/features/customers/types";
 
+import { isPosInvoice } from "@/features/documents/lib/document-utils";
 import {
   useCreateInvoice,
   useInvoice,
+  useInvoices,
   useUpdateInvoice,
 } from "../hooks/use-invoices";
 import type {
@@ -38,6 +40,22 @@ import { catalogSellPrice, toDateInputValue } from "@/lib/catalog-price";
 
 function localDate() {
   return new Date().toISOString().slice(0, 10);
+}
+
+/** Next ERP invoice number for the current year, e.g. INV-2026-006. */
+function nextInvoiceNumber(invoices: Invoice[]) {
+  const year = new Date().getFullYear();
+  const pattern = new RegExp(`^INV-${year}-(\\d+)$`, "i");
+  let max = 0;
+
+  for (const invoice of invoices) {
+    const match = pattern.exec((invoice.invoice_number || "").trim());
+    if (!match) continue;
+    const sequence = Number.parseInt(match[1], 10);
+    if (Number.isFinite(sequence) && sequence > max) max = sequence;
+  }
+
+  return `INV-${year}-${String(max + 1).padStart(3, "0")}`;
 }
 
 function newLineItem(item: CatalogItem): InvoiceLineItem {
@@ -134,10 +152,10 @@ export function InvoiceForm({ invoiceId }: InvoiceFormProps) {
   const { data: existing, isLoading: loadingExisting } = useInvoice(
     invoiceId ?? 0
   );
+  const { data: invoiceList, isError: invoiceListError } = useInvoices();
 
-  const [invoiceNumber, setInvoiceNumber] = useState(
-    `INV-${new Date().getFullYear()}-`
-  );
+  const [invoiceNumber, setInvoiceNumber] = useState("");
+  const [invoiceNumberTouched, setInvoiceNumberTouched] = useState(false);
   const [customerId, setCustomerId] = useState("");
   const [billingAddress, setBillingAddress] = useState("");
   const [deliveryAddress, setDeliveryAddress] = useState("");
@@ -171,6 +189,12 @@ export function InvoiceForm({ invoiceId }: InvoiceFormProps) {
     setLineItems(mapLineItems(existing.line_items ?? []));
     setInitializedForId(invoiceId);
   }, [invoiceId, existing, initializedForId]);
+
+  useEffect(() => {
+    if (isEditing || invoiceNumberTouched) return;
+    if (!invoiceList && !invoiceListError) return;
+    setInvoiceNumber(nextInvoiceNumber(invoiceList ?? []));
+  }, [isEditing, invoiceList, invoiceListError, invoiceNumberTouched]);
 
   const totals = useMemo(() => {
     const subtotal = lineItems.reduce(
@@ -301,9 +325,12 @@ export function InvoiceForm({ invoiceId }: InvoiceFormProps) {
         order_type: orderType,
         table_name: tableName,
         is_draft: isDraft,
-        sales_channel: existing?.sales_channel || "walk_in",
         line_items: lineItems,
       };
+
+      if (existing && isPosInvoice(existing) && existing.sales_channel) {
+        payload.sales_channel = existing.sales_channel;
+      }
 
       if (isEditing && invoiceId) {
         await updateInvoice.mutateAsync({ id: invoiceId, input: payload });
@@ -386,17 +413,9 @@ export function InvoiceForm({ invoiceId }: InvoiceFormProps) {
         </div>
       </div>
 
-      {/* Details Grid */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* Customer Info Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <UserRound className="h-5 w-5 text-muted-foreground" />
-              Customer Info
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-5">
+      <Card>
+        <CardContent className="grid grid-cols-1 gap-x-3 gap-y-3 p-4 sm:grid-cols-2 lg:grid-cols-12 lg:items-end">
+          <div className="sm:col-span-2 lg:col-span-4">
             <CustomerPickerField
               value={customerId}
               initialCustomer={
@@ -414,85 +433,87 @@ export function InvoiceForm({ invoiceId }: InvoiceFormProps) {
                 setDeliveryAddress(customer?.customer_shipping_address || "");
               }}
             />
+          </div>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <AddressCard
-                title="Billing Address"
-                value={billingAddress}
+          <div className="lg:col-span-2">
+            <Field label="Invoice Number *">
+              <Input
+                value={invoiceNumber}
+                onChange={(event) => {
+                  setInvoiceNumberTouched(true);
+                  setInvoiceNumber(event.target.value);
+                }}
+                placeholder={
+                  isEditing ? "Invoice number" : "Assigning next number..."
+                }
               />
+            </Field>
+          </div>
 
-              <AddressCard
-                title="Delivery Address"
-                value={deliveryAddress}
+          <div className="lg:col-span-2">
+            <Field label="Order Type">
+              <select
+                value={orderType}
+                onChange={(event) => setOrderType(event.target.value)}
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option value="SALE">Sale</option>
+                <option value="SERVICE">Service</option>
+              </select>
+            </Field>
+          </div>
+
+          <div className="lg:col-span-2">
+            <Field label="Invoice Date">
+              <Input
+                type="date"
+                value={invoiceDate}
+                onChange={(event) => setInvoiceDate(event.target.value)}
               />
-            </div>
-          </CardContent>
-        </Card>
+            </Field>
+          </div>
 
-        {/* Invoice Details Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <FileText className="h-5 w-5 text-muted-foreground" />
-              Invoice Details
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <Field label="Invoice Number *">
-                <Input
-                  value={invoiceNumber}
-                  onChange={(event) => setInvoiceNumber(event.target.value)}
-                />
-              </Field>
+          <div className="lg:col-span-2">
+            <Field label="Due Date">
+              <Input
+                type="date"
+                value={dueDate}
+                onChange={(event) => setDueDate(event.target.value)}
+              />
+            </Field>
+          </div>
 
-              <Field label="Order Type">
-                <select
-                  value={orderType}
-                  onChange={(event) => setOrderType(event.target.value)}
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  <option value="SALE">Sale</option>
-                  <option value="SERVICE">Service</option>
-                </select>
-              </Field>
+          <div className="sm:col-span-2 lg:col-span-3">
+            <AddressLine title="Billing Address" value={billingAddress} />
+          </div>
 
-              <Field label="Invoice Date">
-                <Input
-                  type="date"
-                  value={invoiceDate}
-                  onChange={(event) => setInvoiceDate(event.target.value)}
-                />
-              </Field>
+          <div className="sm:col-span-2 lg:col-span-3">
+            <AddressLine title="Delivery Address" value={deliveryAddress} />
+          </div>
 
-              <Field label="Due Date">
-                <Input
-                  type="date"
-                  value={dueDate}
-                  onChange={(event) => setDueDate(event.target.value)}
-                />
-              </Field>
+          <div className="lg:col-span-2">
+            <Field label="Table Name">
+              <Input
+                value={tableName}
+                onChange={(event) => setTableName(event.target.value)}
+                placeholder="Optional"
+              />
+            </Field>
+          </div>
 
-              <Field label="Table Name">
-                <Input
-                  value={tableName}
-                  onChange={(event) => setTableName(event.target.value)}
-                  placeholder="Optional"
-                />
-              </Field>
-            </div>
-
+          <div className="lg:col-span-4">
             <Field label="Notes">
               <Textarea
                 value={notes}
                 onChange={(event) => setNotes(event.target.value)}
                 placeholder="Invoice notes..."
-                rows={3}
+                rows={1}
+                className="min-h-9 resize-y py-1.5"
               />
             </Field>
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Line Items Table */}
       <Card>
@@ -705,7 +726,7 @@ function Field({
   );
 }
 
-function AddressCard({
+function AddressLine({
   title,
   value,
 }: {
@@ -713,13 +734,16 @@ function AddressCard({
   value?: string | null;
 }) {
   return (
-    <div className="rounded-md border bg-muted/40 p-3 space-y-1">
-      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-        {title}
-      </p>
-      <p className="text-xs text-foreground leading-relaxed">
-        {value || "Select a customer to populate address"}
-      </p>
+    <div className="space-y-1.5">
+      <Label>{title}</Label>
+      <div
+        className="flex h-9 items-center rounded-md border bg-muted/40 px-3"
+        title={value || undefined}
+      >
+        <p className="truncate text-sm text-foreground">
+          {value || "Select a customer"}
+        </p>
+      </div>
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { Search } from "lucide-react";
 import { Tabs } from "@/features/pos/ui/tabs";
 import { Input } from "@/features/pos/ui/input";
 import { InvoicesTable } from "@/features/pos/invoices/components/InvoicesTable";
+import { isPosInvoice } from "@/features/documents/lib/document-utils";
 import { useInvoices } from "@/features/invoices/hooks/use-invoices";
 import { matchesSearch } from "@/lib/erp-search";
 import { useUrlSearchParam } from "@/lib/use-url-search";
@@ -18,6 +19,8 @@ export function PosInvoicesPageContent() {
 
   const filtered = useMemo(() => {
     return invoices.filter((invoice) => {
+      if (!isPosInvoice(invoice)) return false;
+
       const matchesChannel =
         filter === "all" || invoice.sales_channel === filter;
 

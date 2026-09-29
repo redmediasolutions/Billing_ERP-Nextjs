@@ -5,10 +5,14 @@ import { Badge } from "@/features/pos/ui/badge";
 import { Skeleton } from "@/features/pos/ui/skeleton";
 import { money } from "@/features/pos/lib/money";
 import { formatDate, formatTime } from "@/features/pos/lib/utils";
+import { isPosInvoice } from "@/features/documents/lib/document-utils";
 import type { Invoice } from "@/features/invoices/types";
 import "./InvoicesTable.css";
 
-function ChannelBadge({ channel }: { channel?: Invoice["sales_channel"] }) {
+function ChannelBadge({ invoice }: { invoice: Invoice }) {
+  if (!isPosInvoice(invoice)) return null;
+
+  const channel = invoice.sales_channel;
   if (channel === "cloud_kitchen") {
     return (
       <Badge variant="neutral" className="invoice-channel-badge">
@@ -33,7 +37,7 @@ function InvoiceRow({ invoice }: { invoice: Invoice }) {
         <div className="invoice-card-main">
           <div className="invoice-card-number mono">{invoice.invoice_number}</div>
           <div className="invoice-card-meta">
-            <ChannelBadge channel={invoice.sales_channel} />
+            <ChannelBadge invoice={invoice} />
             <span className="invoice-card-date">
               {formatDate(when)}
               {time ? ` · ${time}` : ""}

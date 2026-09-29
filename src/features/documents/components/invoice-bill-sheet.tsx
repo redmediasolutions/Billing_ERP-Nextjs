@@ -2,7 +2,11 @@
 
 import type { Invoice } from "@/features/invoices/types";
 import { DocumentBrand } from "./document-brand";
-import { formatDocDate, formatDocMoney } from "../lib/document-utils";
+import {
+  formatDocDate,
+  formatDocMoney,
+  isPosInvoice,
+} from "../lib/document-utils";
 
 export function InvoiceBillSheet({
   invoice,
@@ -80,7 +84,7 @@ export function InvoiceBillSheet({
           {invoice.order_type && (
             <Row label="Order type" value={invoice.order_type} />
           )}
-          {invoice.sales_channel && (
+          {isPosInvoice(invoice) && invoice.sales_channel && (
             <Row
               label="Channel"
               value={
