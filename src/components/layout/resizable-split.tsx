@@ -119,7 +119,7 @@ export function ResizableSplit({
       </div>
 
       <div
-        className="no-print sticky top-16 h-[calc(100vh-4rem)] min-h-[520px] w-full shrink-0 overflow-hidden rounded-xl border border-border bg-background lg:w-auto"
+        className="no-print fixed inset-0 z-[60] flex h-auto min-h-0 w-full flex-col overflow-hidden bg-background lg:sticky lg:inset-auto lg:top-16 lg:z-10 lg:h-[calc(100vh-4rem)] lg:min-h-[520px] lg:w-auto lg:shrink-0 lg:rounded-xl lg:border lg:border-border"
       >
         <div className="h-full w-full lg:hidden">{right}</div>
         <div className="hidden h-full lg:block" style={{ width: rightWidth }}>

@@ -100,3 +100,13 @@
     text-align: left;
   }
 }
+
+@media (max-width: 767px) {
+  [data-slot="table-container"] {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  [data-slot="table"]:has(th + th + th) {
+    min-width: 40rem;
+  }
+}

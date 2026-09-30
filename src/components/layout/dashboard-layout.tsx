@@ -20,7 +20,7 @@ export default function DashboardLayout({
       <SubscriptionNagDialog />
       <SubscriptionLockScreen />
 
-      <main className="w-full px-6 py-8 text-left lg:px-8 xl:px-10">
+      <main className="w-full min-w-0 overflow-x-clip px-4 py-5 text-left sm:px-6 sm:py-8 lg:px-8 xl:px-10">
         {children}
       </main>
     </div>

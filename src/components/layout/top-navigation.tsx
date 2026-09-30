@@ -90,6 +90,8 @@ export function TopNavigation() {
   const currentModule = getCurrentModule(pathname);
   const topMenu = moduleMenus[currentModule] ?? [];
   const isDashboardHome = pathname === "/dashboard";
+  const showMobileSubnav =
+    topMenu.length > 0 && !pathname.startsWith("/dashboard/pos");
   const { data: tenant } = useTenant();
   const { isPlatformAdmin } = usePlatformAdmin();
   const businessName = tenant?.business_name || "Billing ERP";
@@ -175,7 +177,7 @@ export function TopNavigation() {
             <Button
               variant="ghost"
               onClick={() => setOpen((v) => !v)}
-              className="flex max-w-[220px] items-center gap-2"
+              className="flex max-w-[min(220px,52vw)] items-center gap-2 px-2"
               aria-expanded={open}
               aria-haspopup="menu"
             >
@@ -197,7 +199,7 @@ export function TopNavigation() {
             )}
 
             {!posOnly && open && (
-              <div className="absolute mt-2 w-[22rem] rounded-2xl border border-border bg-popover p-3 shadow-xl">
+              <div className="absolute left-0 mt-2 w-[min(22rem,calc(100vw-1.5rem))] rounded-2xl border border-border bg-popover p-3 shadow-xl">
                 <div className="relative mb-3">
                   <Search
                     size={16}
@@ -301,6 +303,31 @@ export function TopNavigation() {
           <ProfileMenu />
         </div>
       </div>
+
+      {showMobileSubnav && (
+        <nav
+          className="flex gap-1 overflow-x-auto px-3 pb-2 md:hidden"
+          aria-label="Section"
+        >
+          {topMenu.map((item) => {
+            const active = isNavLinkActive(pathname, searchParams, item.href);
+
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`shrink-0 rounded-full px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors ${
+                  active
+                    ? "bg-accent text-foreground"
+                    : "text-muted-foreground hover:bg-accent/60 hover:text-foreground"
+                }`}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
+      )}
     </header>
   );
 }

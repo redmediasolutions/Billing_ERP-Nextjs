@@ -165,7 +165,8 @@ export function InvoicesDashboard() {
                 Invoices
               </h1>
               <p className="text-sm text-muted-foreground">
-                Click a row to preview. Drag the divider to resize.
+                Click a row to preview.
+                <span className="hidden lg:inline"> Drag the divider to resize.</span>
               </p>
             </div>
 
