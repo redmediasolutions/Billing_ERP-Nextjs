@@ -1,0 +1,43 @@
+---
+import Base from "../../layouts/Base.astro";
+import { groups, modules } from "../../data/site";
+---
+
+<Base
+  title="Modules"
+  description="Every Billing ERP module: POS, invoices, estimates, customers, enquiries, bookings, warranty, renewals, memberships, items, inventory, vendors, expenses, employees, payroll, and reports."
+>
+  <section class="section" style="padding-bottom: 1rem;">
+    <div class="section-head">
+      <span class="index-label">Index</span>
+      <div>
+        <h1 class="h1" style="font-size: clamp(3rem, 6vw, 5.4rem);">The whole desk, <em>named.</em></h1>
+        <p class="lede" style="margin-top: 1rem;">
+          Sales, catalog, operations, and people. Open a module for the screens it contains and how the work moves.
+        </p>
+      </div>
+    </div>
+  </section>
+  <section class="section" style="padding-top: 0;">
+    {
+      groups.map((group) => (
+        <div style="margin-bottom: 2.5rem;">
+          <p class="index-label" style="margin-bottom: 0.4rem;">{group}</p>
+          <div class="module-index">
+            {modules
+              .filter((item) => item.group === group)
+              .map((item) => (
+                <a class="mod-row" href={`/modules/${item.slug}`}>
+                  <span class="num">{item.index}</span>
+                  <span class="group-name">{item.group}</span>
+                  <span class="mod-title">{item.title}</span>
+                  <span class="summary">{item.summary}</span>
+                  <span class="arrow" aria-hidden="true">→</span>
+                </a>
+              ))}
+          </div>
+        </div>
+      ))
+    }
+  </section>
+</Base>

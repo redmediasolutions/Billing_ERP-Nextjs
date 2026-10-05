@@ -1,0 +1,72 @@
+---
+import Base from "../../layouts/Base.astro";
+import { modules, waHref, type Module } from "../../data/site";
+
+export function getStaticPaths() {
+  return modules.map((module) => ({
+    params: { slug: module.slug },
+    props: { module },
+  }));
+}
+
+interface Props {
+  module: Module;
+}
+
+const { module } = Astro.props;
+const order = modules.findIndex((item) => item.slug === module.slug);
+const prev = modules[(order - 1 + modules.length) % modules.length];
+const next = modules[(order + 1) % modules.length];
+---
+
+<Base title={module.title} description={module.lead}>
+  <header class="mod-hero">
+    <div class="num-xl">{module.index}</div>
+    <div>
+      <p class="crumbs">
+        <a href="/modules">Modules</a>
+        <span aria-hidden="true"> / </span>
+        <span>{module.group}</span>
+      </p>
+      <p class="eyebrow"><i></i>{module.kicker}</p>
+      <h1 style="margin-top: 0.6rem;">{module.title}</h1>
+      <p class="lede" style="margin-top: 1.1rem; font-size: 1.15rem;">{module.lead}</p>
+      <div class="screen-row" aria-label="Screens in this module">
+        {module.screens.map((screen) => <span class="chip">{screen}</span>)}
+      </div>
+    </div>
+  </header>
+
+  <div class="mod-body">
+    <article class="essay">
+      {
+        module.sections.map((section) => (
+          <section class="block reveal">
+            <h3>{section.heading}</h3>
+            <p>{section.body}</p>
+          </section>
+        ))
+      }
+    </article>
+    <aside class="spec">
+      <h2>On the desk</h2>
+      <ol>
+        {module.points.map((point) => <li>{point}</li>)}
+      </ol>
+      <p style="margin-top: 1.6rem;">
+        <a class="header-cta" href={waHref}>Ask about {module.title}</a>
+      </p>
+    </aside>
+  </div>
+
+  <nav class="pager" aria-label="Adjacent modules">
+    <a href={`/modules/${prev.slug}`}>
+      <small>Previous</small>
+      <strong>{prev.title}</strong>
+    </a>
+    <a class="next" href={`/modules/${next.slug}`}>
+      <small>Next</small>
+      <strong>{next.title}</strong>
+    </a>
+  </nav>
+</Base>

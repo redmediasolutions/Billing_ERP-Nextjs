@@ -1,0 +1,21 @@
+---
+import { waHref } from "../data/site";
+
+const path = Astro.url.pathname;
+---
+
+<header class="header" data-header>
+  <a class="brand" href="/" aria-label="Billing ERP, home">
+    <span class="mark" aria-hidden="true">B</span>
+    <span class="brand-name">Billing ERP</span>
+  </a>
+  <nav class="nav" aria-label="Primary">
+    <a href="/modules" aria-current={path.startsWith("/modules") ? "page" : undefined}>Modules</a>
+    <a href="/plans" aria-current={path.startsWith("/plans") ? "page" : undefined}>Plans</a>
+    <a href={waHref}>Talk to us</a>
+  </nav>
+  <a class="header-cta" href={waHref}>WhatsApp</a>
+  <button class="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false" data-menu>
+    <span></span>
+  </button>
+</header>

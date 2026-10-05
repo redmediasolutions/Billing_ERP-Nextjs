@@ -1,0 +1,182 @@
+---
+import Base from "../layouts/Base.astro";
+import { modules, plans, waHref } from "../data/site";
+
+const ticker = [...modules, ...modules];
+---
+
+<Base
+  title="Billing ERP"
+  description="Billing ERP for Indian counters: GST invoices, POS, inventory, bookings, warranty, payroll, and the follow-up after the sale."
+>
+  <section class="hero">
+    <div class="hero-copy">
+      <p class="eyebrow rise"><i></i> India · GST · one desk</p>
+      <h1 class="rise d1">
+        The counter,<br />
+        the ledger,<br />
+        <em>the follow-up.</em>
+      </h1>
+      <p class="lede rise d2">
+        Billing ERP is the software a shop actually keeps open: walk-in bills, tax invoices, serial stock, the people on payroll, and the call that is due before the warranty lapses.
+      </p>
+      <div class="hero-actions rise d3">
+        <a class="header-cta" href="/modules">Read the modules</a>
+        <a class="link-quiet" href={waHref}>Ask for a walkthrough</a>
+      </div>
+    </div>
+    <aside class="bill" aria-label="Sample invoice">
+      <div class="bill-top">
+        <div class="bill-kicker">Tax invoice</div>
+        <div class="bill-no">INV–2041</div>
+        <div class="bill-meta">
+          <span>Walk-in · 01 Oct 2026</span>
+          <span>GSTIN on the customer · HSN on the line</span>
+        </div>
+      </div>
+      <div class="bill-lines">
+        <div class="bill-row">
+          <span>Compressor, 1.5 TR<small>PCS · HSN 8414 · 18%</small></span>
+          <span>₹18,400</span>
+        </div>
+        <div class="bill-row">
+          <span>Installation<small>SERVICE · same bill</small></span>
+          <span>₹2,500</span>
+        </div>
+        <div class="bill-row">
+          <span>Copper line set<small>MTR · serial stock</small></span>
+          <span>₹1,860</span>
+        </div>
+        <div class="bill-row">
+          <span>Next service<small>Renewal · 180 days</small></span>
+          <span>Queued</span>
+        </div>
+      </div>
+      <div class="bill-total">
+        <span>Total</span>
+        <strong>₹26,817</strong>
+      </div>
+    </aside>
+  </section>
+
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee-track">
+      {
+        ticker.map((item) => (
+          <span>
+            <b>{item.index}</b> {item.title} <i class="dot"></i>
+          </span>
+        ))
+      }
+    </div>
+  </div>
+
+  <section class="section">
+    <div class="section-head">
+      <span class="index-label">02 — A day</span>
+      <p class="statement reveal">Morning on the counter. Afternoon on paper. <em>Evening on the phone.</em></p>
+    </div>
+    <div class="chapters">
+      <article class="chapter reveal">
+        <span class="chapter-no">01</span>
+        <h3>The counter</h3>
+        <p>POS takes a walk-in or a cloud-kitchen rate, keeps the cart usable on a phone, and leaves a bill you can reopen. Items already know their HSN, tax, and unit.</p>
+      </article>
+      <article class="chapter reveal">
+        <span class="chapter-no">02</span>
+        <h3>The paper</h3>
+        <p>Estimates hold the price while it is still a proposal. Invoices finalize it. Archive a wrong bill and the stock it consumed comes back. Expenses record the money going out, tax included.</p>
+      </article>
+      <article class="chapter reveal">
+        <span class="chapter-no">03</span>
+        <h3>The return</h3>
+        <p>Enquiries, bookings, warranty, renewals, and memberships are the work after the sale. Each has a date, a status, and a person — and the home screen can show what is due today.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top: 0;">
+    <div class="section-head">
+      <span class="index-label">03 — Index</span>
+      <div>
+        <p class="statement">Seventeen modules. <em>Each one has a page.</em></p>
+        <p class="lede" style="margin-top: 1rem;">
+          The same names you see inside the product. Open any row for how that desk actually works.
+        </p>
+      </div>
+    </div>
+    <div class="module-index">
+      {
+        modules.map((item) => (
+          <a class="mod-row" href={`/modules/${item.slug}`}>
+            <span class="num">{item.index}</span>
+            <span class="group-name">{item.group}</span>
+            <span class="mod-title">{item.title}</span>
+            <span class="summary">{item.summary}</span>
+            <span class="arrow" aria-hidden="true">→</span>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="section plans">
+    <div class="section-head">
+      <span class="index-label">04 — Plans</span>
+      <div>
+        <p class="statement" style="color: #fafafa;">Priced in rupees. <em>Scoped like the shop.</em></p>
+        <p style="margin-top: 1rem;">Yearly billing is roughly ten months. Enterprise is a conversation, not a checkout button.</p>
+      </div>
+    </div>
+    <table class="plan-table">
+      <thead>
+        <tr>
+          <th>Plan</th>
+          <th>Monthly</th>
+          <th>Includes</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          plans.map((plan) => (
+            <tr class={plan.featured ? "featured" : undefined}>
+              <td>
+                <div class="plan-name">
+                  {plan.name}
+                  {plan.featured && <span class="mark-rec">Common</span>}
+                </div>
+                <div style="color:#a1a1aa;margin-top:0.35rem;">{plan.tagline}</div>
+              </td>
+              <td class="plan-price">
+                {plan.price}
+                {plan.cadence && <small>{plan.cadence}</small>}
+                <small>{plan.yearly}</small>
+              </td>
+              <td>
+                <ul class="plan-features">
+                  {plan.features.map((feature) => (
+                    <li>{feature}</li>
+                  ))}
+                </ul>
+              </td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+    <p style="margin-top: 1.6rem;">
+      <a class="header-cta cta-light" href={waHref}>Ask which plan fits</a>
+    </p>
+  </section>
+
+  <section class="close">
+    <div class="close-copy">
+      <p class="index-label">05 — A walkthrough</p>
+      <h2 class="h1">Bring one real bill. <em>We’ll run it through.</em></h2>
+    </div>
+    <div class="close-side">
+      <p class="lede">WhatsApp is the fastest way in. Tell us the kind of counter — retail, workshop, clinic, kitchen, gym — and which modules you actually need open on day one.</p>
+      <a class="phone-xl" href={waHref}>+91 95915 91783</a>
+    </div>
+  </section>
+</Base>

@@ -1,0 +1,39 @@
+---
+import { groups, modules, phoneDisplay, waHref } from "../data/site";
+---
+
+<footer class="footer">
+  <div class="footer-grid">
+    <div>
+      <a class="brand" href="/">
+        <span class="mark" aria-hidden="true">B</span>
+        <span class="brand-name">Billing ERP</span>
+      </a>
+      <p class="lede" style="margin-top: 1rem;">
+        Billing, stock, people, and the follow-up after the sale. Built for counters in India.
+      </p>
+    </div>
+    <div class="footer-cols">
+      {
+        groups.map((group) => (
+          <div>
+            <h4>{group}</h4>
+            <ul>
+              {modules
+                .filter((item) => item.group === group)
+                .map((item) => (
+                  <li>
+                    <a href={`/modules/${item.slug}`}>{item.title}</a>
+                  </li>
+                ))}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+  <div class="footer-end">
+    <span>© {new Date().getFullYear()} Billing ERP</span>
+    <a href={waHref}>{phoneDisplay}</a>
+  </div>
+</footer>
