@@ -5,31 +5,16 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   ChevronDown,
-  ClipboardList,
-  LayoutDashboard,
-  ReceiptText,
-  Users,
-  Package,
-  Warehouse,
-  Truck,
-  UserCog,
-  Wallet,
-  IndianRupee,
-  PhoneCall,
-  CalendarDays,
-  FileText,
   Search,
-  ShieldCheck,
-  BellRing,
-  BadgeCheck,
-  Store,
-  Building2,
+  Star,
 } from "lucide-react";
 
 import {
   moduleMenus,
   getCurrentModule,
 } from "./navigation";
+import { useMobileNavPrefs } from "./mobile-nav-prefs";
+import { NAV_MODULE_GROUPS } from "./nav-modules";
 
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -39,43 +24,6 @@ import { buildSearchUrl, isNavLinkActive } from "@/lib/erp-search";
 import { BusinessLogo } from "@/features/tenant/components/business-logo";
 import { useTenant } from "@/features/tenant/hooks/use-tenant";
 import { isPosOnlyTenant } from "@/lib/pos-only-tenants";
-import { usePlatformAdmin } from "@/hooks/use-platform-admin";
-
-const BASE_MODULES = [
-  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard, group: "Home" },
-  { label: "POS Billing", href: "/dashboard/pos", icon: Store, group: "Sales" },
-  { label: "Invoices", href: "/dashboard/invoices", icon: ReceiptText, group: "Sales" },
-  { label: "Estimates", href: "/dashboard/estimates", icon: ClipboardList, group: "Sales" },
-  { label: "Customers", href: "/dashboard/customers", icon: Users, group: "Sales" },
-  { label: "Enquiries", href: "/dashboard/enquiries", icon: PhoneCall, group: "Sales" },
-  { label: "Bookings", href: "/dashboard/bookings", icon: CalendarDays, group: "Sales" },
-  { label: "Warranty", href: "/dashboard/warranty", icon: ShieldCheck, group: "Sales" },
-  { label: "Renewals", href: "/dashboard/renewals", icon: BellRing, group: "Sales" },
-  { label: "Memberships", href: "/dashboard/memberships", icon: BadgeCheck, group: "Sales" },
-  { label: "Items", href: "/dashboard/items", icon: Package, group: "Catalog" },
-  { label: "Inventory", href: "/dashboard/inventory", icon: Warehouse, group: "Catalog" },
-  { label: "Vendors", href: "/dashboard/vendors", icon: Truck, group: "Operations" },
-  { label: "Expenses", href: "/dashboard/expenses", icon: IndianRupee, group: "Operations" },
-  { label: "Employees", href: "/dashboard/employees", icon: UserCog, group: "People" },
-  { label: "Payroll", href: "/dashboard/payroll", icon: Wallet, group: "People" },
-  { label: "Reports", href: "/dashboard/pos/reports", icon: FileText, group: "Operations" },
-];
-
-const PLATFORM_MODULE = {
-  label: "Tenant licences",
-  href: "/dashboard/platform/licenses",
-  icon: Building2,
-  group: "Platform" as const,
-};
-
-const MODULE_GROUPS = [
-  "Home",
-  "Sales",
-  "Catalog",
-  "Operations",
-  "People",
-  "Platform",
-] as const;
 
 export function TopNavigation() {
   const pathname = usePathname();
@@ -90,31 +38,19 @@ export function TopNavigation() {
   const currentModule = getCurrentModule(pathname);
   const topMenu = moduleMenus[currentModule] ?? [];
   const isDashboardHome = pathname === "/dashboard";
-  const showMobileSubnav =
-    topMenu.length > 0 && !pathname.startsWith("/dashboard/pos");
   const { data: tenant } = useTenant();
-  const { isPlatformAdmin } = usePlatformAdmin();
+  const { modules, favorites, toggleFavorite } = useMobileNavPrefs();
   const businessName = tenant?.business_name || "Billing ERP";
   const posOnly = isPosOnlyTenant(tenant?.id);
 
-  const modules = useMemo(
-    () =>
-      isPlatformAdmin ? [...BASE_MODULES, PLATFORM_MODULE] : BASE_MODULES,
-    [isPlatformAdmin]
-  );
-
   const activeModule = useMemo(() => {
-    const match = modules.find((item) => {
-      if (item.href === "/dashboard") {
-        return pathname === "/dashboard";
-      }
-
-      return (
-        pathname === item.href || pathname.startsWith(`${item.href}/`)
-      );
-    });
-
-    return match ?? modules[0];
+    const matches = modules.filter((item) =>
+      item.href === "/dashboard"
+        ? pathname === "/dashboard"
+        : pathname === item.href || pathname.startsWith(`${item.href}/`)
+    );
+    matches.sort((a, b) => b.href.length - a.href.length);
+    return matches[0] ?? modules[0];
   }, [pathname, modules]);
 
   const ActiveModuleIcon = activeModule.icon;
@@ -149,14 +85,35 @@ export function TopNavigation() {
     const term = moduleSearch.trim().toLowerCase();
     if (!term) return modules;
     return modules.filter((item) => item.label.toLowerCase().includes(term));
-  }, [moduleSearch]);
+  }, [moduleSearch, modules]);
+
+  const favoriteModules = useMemo(
+    () =>
+      favorites
+        .map((href) => filteredModules.find((item) => item.href === href))
+        .filter((item) => item != null),
+    [favorites, filteredModules]
+  );
+
+  const otherModules = useMemo(
+    () => filteredModules.filter((item) => !favorites.includes(item.href)),
+    [favorites, filteredModules]
+  );
 
   const groupedModules = useMemo(() => {
-    return MODULE_GROUPS.map((group) => ({
-      group,
-      items: filteredModules.filter((item) => item.group === group),
-    })).filter((section) => section.items.length > 0);
-  }, [filteredModules]);
+    const sections = [];
+
+    if (favoriteModules.length > 0) {
+      sections.push({ group: "Favorites", items: favoriteModules });
+    }
+
+    for (const group of NAV_MODULE_GROUPS) {
+      const items = otherModules.filter((item) => item.group === group);
+      if (items.length > 0) sections.push({ group, items });
+    }
+
+    return sections;
+  }, [favoriteModules, otherModules]);
 
   function submitGlobalSearch(event: React.FormEvent) {
     event.preventDefault();
@@ -166,7 +123,7 @@ export function TopNavigation() {
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/70">
       <div className="flex h-14 items-center gap-3 px-4 lg:px-6">
-        <div className="flex min-w-0 flex-1 items-center gap-3">
+        <div className="hidden min-w-0 flex-1 items-center gap-3 md:flex">
           <div className="relative shrink-0" ref={menuRef}>
             {posOnly ? (
               <div className="flex max-w-[220px] items-center gap-2 px-3 py-2">
@@ -200,7 +157,7 @@ export function TopNavigation() {
 
             {!posOnly && open && (
               <div className="absolute left-0 mt-2 w-[min(22rem,calc(100vw-1.5rem))] rounded-2xl border border-border bg-popover p-3 shadow-xl">
-                <div className="relative mb-3">
+                <div className="relative mb-2">
                   <Search
                     size={16}
                     className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
@@ -212,50 +169,81 @@ export function TopNavigation() {
                     className="h-9 pl-9"
                   />
                 </div>
+                <p className="mb-2 px-1 text-[11px] leading-4 text-muted-foreground">
+                  Star up to 4 for the bottom bar. Remove one before adding another. The rest stay in this list.
+                </p>
 
                 {groupedModules.length === 0 ? (
                   <p className="px-2 py-3 text-sm text-muted-foreground">
                     No modules match your search.
                   </p>
                 ) : (
-                  <div className="max-h-[min(28rem,70vh)] space-y-3 overflow-y-auto pr-1">
-                    {groupedModules.map((section) => (
-                      <div key={section.group}>
-                        <p className="mb-1 px-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                          {section.group}
-                        </p>
-                        <div className="grid grid-cols-2 gap-0.5">
-                          {section.items.map((item) => {
-                            const Icon = item.icon;
-                            const active =
-                              item.href === "/dashboard"
-                                ? pathname === "/dashboard"
-                                : pathname === item.href ||
-                                  pathname.startsWith(`${item.href}/`);
+                    <div className="max-h-[min(28rem,70vh)] space-y-3 overflow-y-auto pr-1">
+                      {groupedModules.map((section) => (
+                        <div key={section.group}>
+                          <p className="mb-1 px-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                            {section.group}
+                          </p>
+                          <div className="grid grid-cols-2 gap-0.5">
+                            {section.items.map((item) => {
+                              const Icon = item.icon;
+                              const active =
+                                item.href === "/dashboard"
+                                  ? pathname === "/dashboard"
+                                  : pathname === item.href ||
+                                    pathname.startsWith(`${item.href}/`);
+                              const isFavorite = favorites.includes(item.href);
+                              const barFull = favorites.length >= 4 && !isFavorite;
 
-                            return (
-                              <Link
-                                key={item.href}
-                                href={item.href}
-                                onClick={() => {
-                                  setOpen(false);
-                                  setModuleSearch("");
-                                }}
-                                className={`flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm transition-colors ${
-                                  active
-                                    ? "bg-primary text-primary-foreground"
-                                    : "hover:bg-accent hover:text-accent-foreground"
-                                }`}
-                              >
-                                <Icon size={15} className="shrink-0" />
-                                <span className="truncate">{item.label}</span>
-                              </Link>
-                            );
-                          })}
+                              return (
+                                <div
+                                  key={item.href}
+                                  className={`flex items-center rounded-lg ${
+                                    active
+                                      ? "bg-primary text-primary-foreground"
+                                      : "hover:bg-accent hover:text-accent-foreground"
+                                  }`}
+                                >
+                                  <Link
+                                    href={item.href}
+                                    onClick={() => {
+                                      setOpen(false);
+                                      setModuleSearch("");
+                                    }}
+                                    className="flex min-w-0 flex-1 items-center gap-2 px-2 py-1.5 text-sm"
+                                  >
+                                    <Icon size={15} className="shrink-0" />
+                                    <span className="truncate">{item.label}</span>
+                                  </Link>
+                                  <button
+                                    type="button"
+                                    aria-label={
+                                      isFavorite
+                                        ? `Remove ${item.label} from the bottom bar`
+                                        : `Pin ${item.label} to the bottom bar`
+                                    }
+                                    aria-pressed={isFavorite}
+                                    disabled={barFull}
+                                    title={
+                                      barFull
+                                        ? "The bottom bar already has 4 modules"
+                                        : undefined
+                                    }
+                                    className="mr-1 grid size-7 shrink-0 place-items-center rounded-md disabled:opacity-40"
+                                    onClick={() => toggleFavorite(item.href)}
+                                  >
+                                    <Star
+                                      size={14}
+                                      fill={isFavorite ? "currentColor" : "none"}
+                                    />
+                                  </button>
+                                </div>
+                              );
+                            })}
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
                 )}
               </div>
             )}
@@ -282,7 +270,7 @@ export function TopNavigation() {
           </nav>
         </div>
 
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="ml-auto flex shrink-0 items-center gap-2">
           <form
             onSubmit={submitGlobalSearch}
             className="relative hidden lg:block"
@@ -304,30 +292,6 @@ export function TopNavigation() {
         </div>
       </div>
 
-      {showMobileSubnav && (
-        <nav
-          className="flex gap-1 overflow-x-auto px-3 pb-2 md:hidden"
-          aria-label="Section"
-        >
-          {topMenu.map((item) => {
-            const active = isNavLinkActive(pathname, searchParams, item.href);
-
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`shrink-0 rounded-full px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors ${
-                  active
-                    ? "bg-accent text-foreground"
-                    : "text-muted-foreground hover:bg-accent/60 hover:text-foreground"
-                }`}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
-      )}
     </header>
   );
 }

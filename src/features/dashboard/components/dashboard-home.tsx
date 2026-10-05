@@ -19,6 +19,10 @@ import {
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+import {
+  collectionLabel,
+  collectionStatus,
+} from "@/features/invoices/lib/invoice-payment";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useBrands } from "@/features/brands/hooks/use-brands";
@@ -100,9 +104,13 @@ export function DashboardHome() {
     const finalizedInvoices = invoices.filter((invoice) => !invoice.is_draft);
     const draftInvoices = invoices.filter((invoice) => invoice.is_draft);
     const revenue = finalizedInvoices.reduce(
-      (sum, invoice) => sum + invoice.rounded_total,
+      (sum, invoice) => sum + Number(invoice.amount_paid || 0),
       0
     );
+    const outstanding = finalizedInvoices.reduce((sum, invoice) => {
+      const payable = Number(invoice.rounded_total || invoice.grand_total || 0);
+      return sum + Math.max(0, payable - Number(invoice.amount_paid || 0));
+    }, 0);
 
     const availableStock = stocks.filter((item) => item.status === "available");
     const soldStock = stocks.filter((item) => item.status === "sold");
@@ -120,6 +128,7 @@ export function DashboardHome() {
 
     return {
       revenue,
+      outstanding,
       finalizedCount: finalizedInvoices.length,
       draftCount: draftInvoices.length,
       availableStockCount: availableStock.length,
@@ -133,9 +142,11 @@ export function DashboardHome() {
   const allPrimaryStats: StatDef[] = [
     {
       module: "sales",
-      title: "Total Revenue",
+      title: "Collected",
       value: statsLoading ? "—" : money.format(metrics.revenue),
-      hint: `${metrics.finalizedCount} finalized invoices`,
+      hint: statsLoading
+        ? "Received on finalized invoices"
+        : `${money.format(metrics.outstanding)} still to collect`,
       icon: IndianRupee,
     },
     {
@@ -407,10 +418,8 @@ export function DashboardHome() {
                         </p>
                       </div>
                       <div className="flex shrink-0 items-center gap-3">
-                        <Badge
-                          variant={invoice.is_draft ? "secondary" : "default"}
-                        >
-                          {invoice.is_draft ? "Draft" : "Finalized"}
+                        <Badge variant="secondary">
+                          {collectionLabel(collectionStatus(invoice))}
                         </Badge>
                         <span className="font-medium">
                           {money.format(invoice.rounded_total)}

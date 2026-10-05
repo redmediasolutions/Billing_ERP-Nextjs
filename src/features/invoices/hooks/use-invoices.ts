@@ -6,7 +6,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { invoicesService } from "../services/invoices.service";
-import type { InvoiceInput } from "../types";
+import type { InvoiceInput, InvoicePaymentInput } from "../types";
 
 export const invoiceKeys = {
   all: ["invoices"] as const,
@@ -69,6 +69,47 @@ export function useUpdateInvoice() {
       queryClient.invalidateQueries({
         queryKey: ["inventory"],
       });
+    },
+  });
+}
+
+function invalidateInvoice(queryClient: ReturnType<typeof useQueryClient>, id?: number) {
+  queryClient.invalidateQueries({ queryKey: invoiceKeys.all });
+  if (id) {
+    queryClient.invalidateQueries({ queryKey: invoiceKeys.detail(id) });
+  }
+}
+
+export function useRecordPayment() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      id,
+      input,
+    }: {
+      id: number;
+      input: InvoicePaymentInput;
+    }) => invoicesService.recordPayment(id, input),
+    onSuccess: (_data, variables) => {
+      invalidateInvoice(queryClient, variables.id);
+    },
+  });
+}
+
+export function useDeletePayment() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      invoiceId,
+      paymentId,
+    }: {
+      invoiceId: number;
+      paymentId: number;
+    }) => invoicesService.removePayment(invoiceId, paymentId),
+    onSuccess: (_data, variables) => {
+      invalidateInvoice(queryClient, variables.invoiceId);
     },
   });
 }

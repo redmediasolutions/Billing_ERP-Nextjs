@@ -111,6 +111,12 @@ function flattenInvoice(invoice: Invoice): Array<Record<string, unknown>> {
     "Invoice Date": toIsoDate(invoice.invoice_date),
     "Due Date": toIsoDate(invoice.due_date),
     Status: invoice.is_draft ? "Draft" : "Finalized",
+    "Amount Received": invoice.amount_paid || 0,
+    "Balance Due": Math.max(
+      0,
+      Number(invoice.rounded_total || invoice.grand_total || 0) -
+        Number(invoice.amount_paid || 0)
+    ),
     "Sales Channel": invoice.sales_channel || "",
     "Order Type": invoice.order_type || "",
     "Customer Name": invoice.customer_name || "",

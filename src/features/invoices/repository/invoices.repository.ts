@@ -1,5 +1,5 @@
 import { apiRequest } from "@/lib/api";
-import type { Invoice, InvoiceInput } from "../types";
+import type { Invoice, InvoiceInput, InvoicePaymentInput } from "../types";
 
 export const invoicesRepository = {
   list: () => apiRequest<Invoice[]>("/invoices"),
@@ -21,6 +21,17 @@ export const invoicesRepository = {
 
   remove: (id: number) =>
     apiRequest<void>(`/invoices/${id}`, {
+      method: "DELETE",
+    }),
+
+  recordPayment: (id: number, input: InvoicePaymentInput) =>
+    apiRequest<Invoice>(`/invoices/${id}/payments`, {
+      method: "POST",
+      body: JSON.stringify(input),
+    }),
+
+  removePayment: (invoiceId: number, paymentId: number) =>
+    apiRequest<Invoice>(`/invoices/${invoiceId}/payments/${paymentId}`, {
       method: "DELETE",
     }),
 };

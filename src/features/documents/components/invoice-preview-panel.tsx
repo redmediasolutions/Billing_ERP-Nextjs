@@ -10,6 +10,10 @@ import { downloadElementAsPdf } from "@/lib/pdf-download";
 import { InvoiceBillSheet } from "./invoice-bill-sheet";
 import { InvoiceReceiptSheet } from "./invoice-receipt-sheet";
 import { isPosInvoice } from "../lib/document-utils";
+import {
+  collectionLabel,
+  collectionStatus,
+} from "@/features/invoices/lib/invoice-payment";
 
 export function InvoicePreviewPanel({
   invoiceId,
@@ -67,8 +71,8 @@ export function InvoicePreviewPanel({
 
         <div className="flex items-center gap-1">
           {invoice && (
-            <Badge variant={invoice.is_draft ? "secondary" : "default"}>
-              {invoice.is_draft ? "Draft" : "Finalized"}
+            <Badge variant="secondary">
+              {collectionLabel(collectionStatus(invoice))}
             </Badge>
           )}
           {onClose && (

@@ -180,6 +180,24 @@ export function InvoiceBillSheet({
               {formatDocMoney(invoice.rounded_total)}
             </span>
           </div>
+          {!invoice.is_draft && (
+            <>
+              <TotalRow
+                label="Amount received"
+                value={formatDocMoney(invoice.amount_paid || 0)}
+              />
+              <TotalRow
+                label="Balance due"
+                value={formatDocMoney(
+                  Math.max(
+                    0,
+                    Number(invoice.rounded_total || invoice.grand_total || 0) -
+                      Number(invoice.amount_paid || 0)
+                  )
+                )}
+              />
+            </>
+          )}
         </div>
       </section>
 

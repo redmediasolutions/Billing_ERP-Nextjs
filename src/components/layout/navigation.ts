@@ -48,6 +48,8 @@ export const moduleMenus = {
     { label: "New Invoice", href: "/dashboard/invoices/new" },
     { label: "Drafts", href: "/dashboard/invoices?status=draft" },
     { label: "Finalized", href: "/dashboard/invoices?status=finalized" },
+    { label: "Partially paid", href: "/dashboard/invoices?status=partial" },
+    { label: "Paid", href: "/dashboard/invoices?status=paid" },
     { label: "Overdue", href: "/dashboard/invoices?status=overdue" },
     { label: "Reports", href: "/dashboard/pos/reports" },
   ],

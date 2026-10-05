@@ -39,8 +39,37 @@ export interface Invoice {
   table_name: string | null;
   is_draft: boolean;
   sales_channel?: SalesChannel;
+  amount_paid: number;
+  payments?: InvoicePayment[];
   created_at: string;
   line_items?: InvoiceLineItem[];
+}
+
+export type PaymentMethod =
+  | "cash"
+  | "upi"
+  | "card"
+  | "bank"
+  | "cheque"
+  | "other";
+
+export interface InvoicePayment {
+  id: number;
+  invoice_id: number;
+  amount: number;
+  paid_on: string;
+  method: PaymentMethod;
+  reference: string | null;
+  notes: string | null;
+  created_at: string;
+}
+
+export interface InvoicePaymentInput {
+  amount: number;
+  paid_on: string;
+  method: PaymentMethod;
+  reference?: string;
+  notes?: string;
 }
 
 export interface InvoiceInput {

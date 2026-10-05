@@ -1,6 +1,8 @@
 import { ReactNode, Suspense } from "react";
 import { TopNavigation } from "./top-navigation";
 import { PosOnlyGuard } from "./pos-only-guard";
+import { MobileBottomNav } from "./mobile-bottom-nav";
+import { MobileNavPrefsProvider } from "./mobile-nav-prefs";
 import { SubscriptionBanner } from "@/features/subscription/components/subscription-banner";
 import { SubscriptionLockScreen } from "@/features/subscription/components/subscription-lock-screen";
 import { SubscriptionNagDialog } from "@/features/subscription/components/subscription-nag-dialog";
@@ -11,18 +13,21 @@ export default function DashboardLayout({
   children: ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <Suspense fallback={<div className="h-16 border-b border-border" />}>
-        <TopNavigation />
-      </Suspense>
-      <PosOnlyGuard />
-      <SubscriptionBanner />
-      <SubscriptionNagDialog />
-      <SubscriptionLockScreen />
+    <MobileNavPrefsProvider>
+      <div className="min-h-screen bg-background text-foreground">
+        <Suspense fallback={<div className="h-16 border-b border-border" />}>
+          <TopNavigation />
+        </Suspense>
+        <PosOnlyGuard />
+        <SubscriptionBanner />
+        <SubscriptionNagDialog />
+        <SubscriptionLockScreen />
 
-      <main className="w-full min-w-0 overflow-x-clip px-4 py-5 text-left sm:px-6 sm:py-8 lg:px-8 xl:px-10">
-        {children}
-      </main>
-    </div>
+        <main className="dashboard-main w-full min-w-0 overflow-x-clip px-4 py-5 text-left sm:px-6 sm:py-8 lg:px-8 xl:px-10">
+          {children}
+        </main>
+        <MobileBottomNav />
+      </div>
+    </MobileNavPrefsProvider>
   );
 }

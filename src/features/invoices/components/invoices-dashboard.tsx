@@ -3,12 +3,15 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
+  AlertTriangle,
   Download,
   Edit3,
   FileText,
+  IndianRupee,
   Loader2,
   Search,
   Trash2,
+  Wallet,
 } from "lucide-react";
 
 import { ConfirmDialog } from "@/components/confirm-dialog";
@@ -37,26 +40,27 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import { RecordPaymentSheet } from "../addform/record-payment-sheet";
 import {
   useInvoices,
   useDeleteInvoice,
 } from "../hooks/use-invoices";
+import {
+  collectionLabel,
+  collectionStatus,
+  invoiceBalance,
+  invoicePaid,
+  invoicePayable,
+  matchesCollectionFilter,
+  type InvoiceCollectionStatus,
+} from "../lib/invoice-payment";
+import type { Invoice } from "../types";
 
 const money = new Intl.NumberFormat("en-IN", {
   style: "currency",
   currency: "INR",
   maximumFractionDigits: 2,
 });
-
-function isOverdue(invoice: { due_date: string | null; is_draft: boolean }) {
-  if (invoice.is_draft || !invoice.due_date) return false;
-
-  const due = new Date(invoice.due_date);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  return due < today;
-}
 
 export function InvoicesDashboard() {
   const router = useRouter();
@@ -68,6 +72,7 @@ export function InvoicesDashboard() {
     id: number;
     number: string;
   } | null>(null);
+  const [paymentInvoice, setPaymentInvoice] = useState<Invoice | null>(null);
 
   const { data: invoices = [], isLoading, error } = useInvoices();
   const deleteInvoice = useDeleteInvoice();
@@ -82,18 +87,16 @@ export function InvoicesDashboard() {
 
       if (!matchesQuery) return false;
 
-      if (statusFilter === "draft") return invoice.is_draft;
-      if (statusFilter === "finalized") return !invoice.is_draft;
-      if (statusFilter === "overdue") return isOverdue(invoice);
-
-      return true;
+      return matchesCollectionFilter(invoice, statusFilter);
     });
   }, [invoices, search, statusFilter]);
 
-  const draftCount = invoices.filter((invoice) => invoice.is_draft).length;
-
-  const totalValue = filteredInvoices.reduce(
-    (sum, invoice) => sum + invoice.rounded_total,
+  const issued = invoices.filter((invoice) => !invoice.is_draft);
+  const collected = issued.reduce((sum, invoice) => sum + invoicePaid(invoice), 0);
+  const outstanding = issued.reduce((sum, invoice) => sum + invoiceBalance(invoice), 0);
+  const overdue = issued.reduce(
+    (sum, invoice) =>
+      collectionStatus(invoice) === "overdue" ? sum + invoiceBalance(invoice) : sum,
     0
   );
 
@@ -122,6 +125,14 @@ export function InvoicesDashboard() {
       ) : (
         <InvoiceListPane />
       )}
+
+      <RecordPaymentSheet
+        invoice={paymentInvoice}
+        open={paymentInvoice !== null}
+        onOpenChange={(next) => {
+          if (!next) setPaymentInvoice(null);
+        }}
+      />
 
       <CsvExportDialog
         open={exportOpen}
@@ -180,10 +191,25 @@ export function InvoicesDashboard() {
             </Button>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-            <Kpi label="Total Invoices" value={filteredInvoices.length} />
-            <Kpi label="Draft Invoices" value={draftCount} />
-            <Kpi label="Invoice Value" value={money.format(totalValue)} />
+          <div className="grid gap-4 sm:grid-cols-3">
+            <Kpi
+              label="Collected"
+              value={money.format(collected)}
+              hint="Received on finalized invoices"
+              icon={Wallet}
+            />
+            <Kpi
+              label="Outstanding"
+              value={money.format(outstanding)}
+              hint="Still to collect"
+              icon={IndianRupee}
+            />
+            <Kpi
+              label="Overdue"
+              value={money.format(overdue)}
+              hint="Balance past the due date"
+              icon={AlertTriangle}
+            />
           </div>
 
           <div className="relative w-full sm:max-w-sm">
@@ -301,24 +327,18 @@ export function InvoicesDashboard() {
                           </TableCell>
 
                           <TableCell className="font-semibold text-foreground">
-                            {money.format(
-                              invoice.rounded_total || invoice.grand_total
+                            <div>{money.format(invoicePayable(invoice))}</div>
+                            {!invoice.is_draft && (
+                              <p className="text-xs font-normal text-muted-foreground">
+                                Received {money.format(invoicePaid(invoice))}
+                                {" · "}
+                                Due {money.format(invoiceBalance(invoice))}
+                              </p>
                             )}
                           </TableCell>
 
                           <TableCell>
-                            <Badge
-                              variant={
-                                invoice.is_draft ? "secondary" : "default"
-                              }
-                              className={
-                                invoice.is_draft
-                                  ? ""
-                                  : "bg-emerald-600 text-white hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-700"
-                              }
-                            >
-                              {invoice.is_draft ? "Draft" : "Finalized"}
-                            </Badge>
+                            <CollectionBadge invoice={invoice} />
                           </TableCell>
 
                           <TableCell
@@ -326,6 +346,21 @@ export function InvoicesDashboard() {
                             onClick={(event) => event.stopPropagation()}
                           >
                             <div className="flex items-center justify-end gap-1">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                disabled={invoice.is_draft}
+                                title={
+                                  invoice.is_draft
+                                    ? "Finalize the invoice before recording a payment"
+                                    : "Record payment"
+                                }
+                                onClick={() => setPaymentInvoice(invoice)}
+                                className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                              >
+                                <Wallet className="h-4 w-4" />
+                                <span className="sr-only">Record payment</span>
+                              </Button>
                               <Button
                                 variant="ghost"
                                 size="icon"
@@ -372,24 +407,51 @@ export function InvoicesDashboard() {
 function Kpi({
   label,
   value,
+  hint,
+  icon: Icon,
 }: {
   label: string;
-  value: string | number;
+  value: string;
+  hint: string;
+  icon: typeof FileText;
 }) {
   return (
     <Card>
-      <CardContent className="flex items-center justify-between p-6">
+      <CardContent className="flex items-center justify-between gap-3 p-6">
         <div className="space-y-1">
           <p className="text-xs font-medium text-muted-foreground">{label}</p>
-          <p className="text-2xl font-bold tracking-tight text-foreground">
+          <p className="text-2xl font-bold tracking-tight text-foreground tabular-nums">
             {value}
           </p>
+          <p className="text-xs text-muted-foreground">{hint}</p>
         </div>
 
-        <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
-          <FileText className="h-6 w-6" />
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <Icon className="h-6 w-6" />
         </div>
       </CardContent>
     </Card>
   );
+}
+
+function CollectionBadge({ invoice }: { invoice: Invoice }) {
+  const status = collectionStatus(invoice);
+  return (
+    <Badge variant="secondary" className={badgeClass(status)}>
+      {collectionLabel(status)}
+    </Badge>
+  );
+}
+
+function badgeClass(status: InvoiceCollectionStatus) {
+  if (status === "paid") {
+    return "bg-emerald-600 text-white hover:bg-emerald-700";
+  }
+  if (status === "partial") {
+    return "bg-amber-500 text-white hover:bg-amber-600";
+  }
+  if (status === "overdue") {
+    return "bg-destructive text-white hover:bg-destructive/90";
+  }
+  return "";
 }

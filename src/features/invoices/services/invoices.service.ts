@@ -1,5 +1,11 @@
 import { invoicesRepository } from "../repository/invoices.repository";
-import type { Invoice, InvoiceInput, InvoiceLineItem } from "../types";
+import type {
+  Invoice,
+  InvoiceInput,
+  InvoiceLineItem,
+  InvoicePayment,
+  InvoicePaymentInput,
+} from "../types";
 
 function toNum(value: unknown, fallback = 0) {
   if (value === null || value === undefined || value === "") return fallback;
@@ -69,6 +75,9 @@ function normalizeInvoice(invoice: Invoice): Invoice {
   const grandTotal = toNum(invoice.grand_total) || linesTotal;
   const roundedTotal =
     toNum(invoice.rounded_total) || Math.round(grandTotal);
+  const payments = invoice.payments?.map(normalizePayment);
+  const paidFromLines =
+    payments?.reduce((sum, payment) => sum + payment.amount, 0) ?? 0;
 
   return {
     ...invoice,
@@ -77,8 +86,21 @@ function normalizeInvoice(invoice: Invoice): Invoice {
     tax_amount: taxAmount,
     grand_total: grandTotal,
     rounded_total: roundedTotal,
+    amount_paid: toNum(invoice.amount_paid) || paidFromLines,
+    payments,
     is_draft: Number(invoice.is_draft) === 1,
     line_items: lineItems,
+  };
+}
+
+function normalizePayment(payment: InvoicePayment): InvoicePayment {
+  return {
+    ...payment,
+    id: Number(payment.id),
+    invoice_id: Number(payment.invoice_id),
+    amount: toNum(payment.amount),
+    reference: payment.reference || null,
+    notes: payment.notes || null,
   };
 }
 
@@ -104,4 +126,14 @@ export const invoicesService = {
   },
 
   remove: (id: number) => invoicesRepository.remove(id),
+
+  async recordPayment(id: number, input: InvoicePaymentInput) {
+    const invoice = await invoicesRepository.recordPayment(id, input);
+    return normalizeInvoice(invoice);
+  },
+
+  async removePayment(invoiceId: number, paymentId: number) {
+    const invoice = await invoicesRepository.removePayment(invoiceId, paymentId);
+    return normalizeInvoice(invoice);
+  },
 };
