@@ -6,15 +6,19 @@ import {
   CalendarDays,
   ClipboardList,
   FileText,
+  HeartPulse,
   IndianRupee,
   LayoutDashboard,
   Package,
   PhoneCall,
+  Pill,
   ReceiptText,
   ShieldCheck,
+  Stethoscope,
   Store,
   Truck,
   UserCog,
+  UserRound,
   Users,
   Wallet,
   Warehouse,
@@ -30,6 +34,7 @@ export type NavModule = {
 
 export const NAV_MODULE_GROUPS = [
   "Home",
+  "Clinic",
   "Sales",
   "Catalog",
   "Operations",
@@ -57,6 +62,17 @@ export const BASE_NAV_MODULES: NavModule[] = [
   { label: "Reports", short: "Reports", href: "/dashboard/pos/reports", icon: FileText, group: "Operations" },
 ];
 
+// Clinic modules merged from Anwy Med. Shown only to tenants with
+// tenants.clinic_enabled = 1 (see navModulesFor).
+export const CLINIC_NAV_MODULES: NavModule[] = [
+  { label: "Clinic", short: "Clinic", href: "/dashboard/clinic", icon: HeartPulse, group: "Clinic" },
+  { label: "Patients", short: "Patients", href: "/dashboard/patients", icon: UserRound, group: "Clinic" },
+  { label: "Appointments", short: "Appts", href: "/dashboard/appointments", icon: CalendarDays, group: "Clinic" },
+  { label: "Consultations", short: "Consult", href: "/dashboard/consultations", icon: Stethoscope, group: "Clinic" },
+  { label: "Medicines", short: "Pharmacy", href: "/dashboard/medicines", icon: Pill, group: "Clinic" },
+  { label: "Clinic Services", short: "Services", href: "/dashboard/clinic-services", icon: ClipboardList, group: "Clinic" },
+];
+
 export const PLATFORM_NAV_MODULE: NavModule = {
   label: "Tenant licences",
   short: "Licences",
@@ -74,10 +90,15 @@ export const DEFAULT_FAVORITE_HREFS = [
 
 export const FAVORITE_SLOT_COUNT = 4;
 
-export function navModulesFor(isPlatformAdmin: boolean): NavModule[] {
-  return isPlatformAdmin
-    ? [...BASE_NAV_MODULES, PLATFORM_NAV_MODULE]
+export function navModulesFor(
+  isPlatformAdmin: boolean,
+  isClinic = false
+): NavModule[] {
+  const modules = isClinic
+    ? [...CLINIC_NAV_MODULES, ...BASE_NAV_MODULES]
     : BASE_NAV_MODULES;
+
+  return isPlatformAdmin ? [...modules, PLATFORM_NAV_MODULE] : modules;
 }
 
 export function capFavorites(

@@ -18,6 +18,12 @@ const MODULE_SEARCH_PATHS: Record<string, string> = {
   reports: "/dashboard/pos/invoices",
   subscription: "/dashboard/subscription",
   platform: "/dashboard/platform/licenses",
+  clinic: "/dashboard/patients",
+  patients: "/dashboard/patients",
+  appointments: "/dashboard/appointments",
+  consultations: "/dashboard/consultations",
+  medicines: "/dashboard/medicines",
+  clinicServices: "/dashboard/clinic-services",
 };
 
 export function getModuleSearchPath(pathname: string) {

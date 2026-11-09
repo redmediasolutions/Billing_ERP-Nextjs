@@ -27,5 +27,11 @@ export interface Tenant {
   subscription_status?: string | null;
   subscription_seats?: number | string | null;
   subscription_auto_renew?: boolean | number | string | null;
+
+  // Clinic modules (merged from Anwy Med). Added by
+  // migration/clinic/001_clinic_schema.sql; absent on older backends.
+  clinic_enabled?: boolean | number | null;
+  dr_name?: string | null;
+
   created_at: string;
 }
