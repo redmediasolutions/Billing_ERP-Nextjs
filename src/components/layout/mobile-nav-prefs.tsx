@@ -15,6 +15,7 @@ import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import { useAuth } from "@/hooks/use-auth";
 import { usePlatformAdmin } from "@/hooks/use-platform-admin";
+import { useIsClinicTenant } from "@/features/clinic/hooks/use-clinic";
 
 import { haptic } from "./haptics";
 import {
@@ -64,9 +65,10 @@ function writeLocal(uid: string, mobileNav: string[]) {
 export function MobileNavPrefsProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const { isPlatformAdmin } = usePlatformAdmin();
+  const { isClinic } = useIsClinicTenant();
   const modules = useMemo(
-    () => navModulesFor(isPlatformAdmin),
-    [isPlatformAdmin]
+    () => navModulesFor(isPlatformAdmin, isClinic),
+    [isPlatformAdmin, isClinic]
   );
   const allowed = useMemo(() => modules.map((item) => item.href), [modules]);
   const allowedKey = allowed.join("|");

@@ -118,6 +118,48 @@ export const moduleMenus = {
     { label: "Software licence", href: "/dashboard/subscription" },
   ],
 
+  // ---- Clinic (merged from Anwy Med)
+  clinic: [
+    { label: "Overview", href: "/dashboard/clinic" },
+    { label: "New Bill", href: "/dashboard/clinic/billing" },
+    { label: "Appointments", href: "/dashboard/appointments" },
+    { label: "Consultations", href: "/dashboard/consultations" },
+    { label: "Invoices", href: "/dashboard/invoices" },
+  ],
+
+  patients: [
+    { label: "All Patients", href: "/dashboard/patients" },
+    { label: "Register", href: "/dashboard/patients?create=1" },
+    { label: "Archived", href: "/dashboard/patients?view=archived" },
+  ],
+
+  appointments: [
+    { label: "Today", href: "/dashboard/appointments" },
+    { label: "Upcoming", href: "/dashboard/appointments?view=upcoming" },
+    { label: "All", href: "/dashboard/appointments?view=all" },
+    { label: "Book", href: "/dashboard/appointments?create=1" },
+  ],
+
+  consultations: [
+    { label: "All", href: "/dashboard/consultations" },
+    { label: "In progress", href: "/dashboard/consultations?filter=draft" },
+    { label: "Not billed", href: "/dashboard/consultations?filter=unbilled" },
+    { label: "Archived", href: "/dashboard/consultations?filter=archived" },
+  ],
+
+  medicines: [
+    { label: "All Medicines", href: "/dashboard/medicines" },
+    { label: "Low stock", href: "/dashboard/medicines?filter=low" },
+    { label: "Expiring", href: "/dashboard/medicines?filter=expiring" },
+    { label: "Services", href: "/dashboard/clinic-services" },
+  ],
+
+  clinicServices: [
+    { label: "Services", href: "/dashboard/clinic-services" },
+    { label: "Add Service", href: "/dashboard/clinic-services?create=1" },
+    { label: "Medicines", href: "/dashboard/medicines" },
+  ],
+
   platform: [
     { label: "Tenant licences", href: "/dashboard/platform/licenses" },
   ],
@@ -158,6 +200,12 @@ export function getCurrentModule(pathname: string): keyof typeof moduleMenus {
   if (pathname.startsWith("/dashboard/employees")) return "employees";
   if (pathname.startsWith("/dashboard/payroll")) return "payroll";
   if (pathname.startsWith("/dashboard/subscription")) return "subscription";
+  if (pathname.startsWith("/dashboard/clinic-services")) return "clinicServices";
+  if (pathname.startsWith("/dashboard/clinic")) return "clinic";
+  if (pathname.startsWith("/dashboard/patients")) return "patients";
+  if (pathname.startsWith("/dashboard/appointments")) return "appointments";
+  if (pathname.startsWith("/dashboard/consultations")) return "consultations";
+  if (pathname.startsWith("/dashboard/medicines")) return "medicines";
   if (pathname.startsWith("/dashboard/platform")) return "platform";
 
   return "dashboard";
